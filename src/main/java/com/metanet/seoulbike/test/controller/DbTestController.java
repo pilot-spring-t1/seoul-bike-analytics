@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.controller;
+package com.metanet.seoulbike.test.controller;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.metanet.seoulbike.dto.UserDto;
-import com.metanet.seoulbike.mapper.UserMapper;
+import com.metanet.seoulbike.test.dto.UserDto;
+import com.metanet.seoulbike.test.mapper.UserMapper;
 
 @RestController
 @RequestMapping("/test")

@@ -1,7 +1,9 @@
-package com.metanet.seoulbike.mapper;
+package com.metanet.seoulbike.test.mapper;
 
-import com.metanet.seoulbike.dto.FileDto;
 import org.apache.ibatis.annotations.Mapper;
+
+import com.metanet.seoulbike.test.dto.FileDto;
+
 import java.util.List;
 
 @Mapper

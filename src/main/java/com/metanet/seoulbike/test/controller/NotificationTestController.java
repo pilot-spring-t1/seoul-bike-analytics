@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.controller;
+package com.metanet.seoulbike.test.controller;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.metanet.seoulbike.dto.NotificationDto;
-import com.metanet.seoulbike.mapper.NotificationMapper;
+import com.metanet.seoulbike.test.dto.NotificationDto;
+import com.metanet.seoulbike.test.mapper.NotificationMapper;
 
 @RestController
 @RequestMapping("/test/noti")
