@@ -12,8 +12,6 @@
 </head>
 <body class="bg-dark-green">
 
-<h1 th:text="#{home.message}">기본값</h1>
-
 <form method="get" style="display:inline;">
     <select name="lang" onchange="this.form.submit()">
         <option value="ko" th:selected="${#locale.language == 'ko'}" th:text="#{language.korean}">KR</option>

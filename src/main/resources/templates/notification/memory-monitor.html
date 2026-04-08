@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Memory Monitor</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script th:src="@{/js/highcharts/highcharts.js}"></script>
+    <script th:src="@{/js/highcharts/exporting.js}"></script>
+
+    <script defer>
+        let heapMemoryChart;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            heapMemoryChart = new Highcharts.Chart({
+                chart: {
+                    renderTo: 'memoryMonitorContainer',
+                    defaultSeriesType: 'spline'
+                },
+                title: {
+                    text: 'Memory Monitor'
+                },
+                xAxis: {
+                    type: 'datetime',
+                    tickPixelInterval: 100,
+                    maxZoom: 20 * 1000,
+                    title: {
+                        text: 'Date'
+                    }
+                },
+                yAxis: {
+                    minPadding: 0.2,
+                    maxPadding: 0.2,
+                    title: {
+                        text: '힙 메모리',
+                        margin: 30
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<b>{series.name}</b><br>',
+                    pointFormat: '{point.x:%H:%M:%S} - {point.y:.0f}MB'
+                },
+                plotOptions: {
+                    spline: {
+                        marker: {
+                            enabled: true
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: 'used',
+                        data: []
+                    },
+                    {
+                        name: 'max',
+                        data: []
+                    },
+                    {
+                        name: 'committed',
+                        data: []
+                    }
+                ]
+            });
+
+            const source = new EventSource("/sse/memory");
+
+            source.addEventListener("memory", function (event) {
+                const data = JSON.parse(event.data);
+
+                const shift = heapMemoryChart.series[0].data.length > 20;
+
+                const time = parseInt(data.time, 10);
+                const used = parseInt(data.used, 10);
+                const max = parseInt(data.max, 10);
+                const committed = parseInt(data.committed, 10);
+
+                heapMemoryChart.series[0].addPoint([time, used], true, shift);
+                heapMemoryChart.series[1].addPoint([time, max], true, shift);
+                heapMemoryChart.series[2].addPoint([time, committed], true, shift);
+            });
+
+            source.onerror = function (error) {
+                console.error("SSE 연결 오류:", error);
+            };
+        });
+    </script>
+</head>
+<body>
+    <div id="memoryMonitorContainer"></div>
+</body>
+</html>
