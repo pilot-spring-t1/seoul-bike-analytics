@@ -1,13 +1,12 @@
 package com.metanet.seoulbike.auth;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,7 +21,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,16 +36,17 @@ public class JwtTokenProvider {
 	private long tokenValidTime = 30 * 60 * 1000L;
 	
 	@Autowired
+	@Lazy
 	UserDetailsService userDetailsService;
 	
 	public String generateToken(Member member) {
 		long now = System.currentTimeMillis();
 		Claims claims = Jwts.claims()
 				.subject(member.getUserId()) 
-				.issuer("seoul-bike-analytics") // 토큰 발급자
-				.issuedAt(new Date(now)) //발급일
-				.expiration(new Date(now + tokenValidTime)) // 만료
-				.add("roles", member.getUserRole()) // 역할
+				.issuer("seoul-bike-analytics") 
+				.issuedAt(new Date(now))
+				.expiration(new Date(now + tokenValidTime))
+				.add("roles", member.getUserRole())
 				.build();
 		return Jwts.builder()
 				.claims(claims)
