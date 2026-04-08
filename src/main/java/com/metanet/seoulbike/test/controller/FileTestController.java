@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.metanet.seoulbike.mapper.SeoulBikeMapper;
 import com.metanet.seoulbike.test.dto.FileDto;
 import com.metanet.seoulbike.test.dto.SeoulBikeDto;
 import com.metanet.seoulbike.test.mapper.FileMapper;
-import com.metanet.seoulbike.test.mapper.SeoulBikeMapper;
 
 @RestController
 @RequestMapping("/test/file")
