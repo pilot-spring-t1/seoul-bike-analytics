@@ -1,11 +1,13 @@
 package com.metanet.seoulbike.config;
 
-import com.metanet.seoulbike.websocket.handler.MyWebSocketHandler;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
+
+import com.metanet.seoulbike.websocket.MyWebSocketHandler;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSocket
@@ -16,7 +18,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(myWebSocketHandler, "/ws/lotto")
+        registry.addHandler(myWebSocketHandler, "/websocket/lotto")
                 .setAllowedOriginPatterns("*");
     }
 }

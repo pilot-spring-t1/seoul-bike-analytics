@@ -1,6 +1,5 @@
-package com.metanet.seoulbike.websocket.handler;
+package com.metanet.seoulbike.websocket;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,7 +20,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
     private final Set<WebSocketSession> sessionSet = ConcurrentHashMap.newKeySet();
 
     public MyWebSocketHandler() {
-        log.info("웹소켓 핸들러 인스턴스 생성");
+        log.info("웹소켓 핸들러 생성");
     }
 
     @Override
@@ -43,18 +42,19 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
-        log.error("웹소켓 에러! session={}", session.getId(), exception);
+        log.error("웹소켓 에러 발생: {}", session.getId(), exception);
     }
 
     @PostConstruct
-    public void startDummyPush() {
+    public void startMessageSender() {
         Thread t = new Thread(() -> {
             while (true) {
                 try {
                     long time = System.currentTimeMillis();
                     int lottoNum = (int) (Math.random() * 45 + 1);
-                    TextMessage message =
-                        new TextMessage("{\"time\":" + time + ",\"lotto\":" + lottoNum + "}");
+
+                    String json = "{\"time\":" + time + ",\"lotto\":" + lottoNum + "}";
+                    TextMessage message = new TextMessage(json);
 
                     for (WebSocketSession session : sessionSet) {
                         if (session.isOpen()) {
@@ -67,7 +67,7 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
                     log.error("스레드 중단", e);
                     Thread.currentThread().interrupt();
                     break;
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.error("메시지 전송 실패", e);
                 }
             }
