@@ -1,4 +1,4 @@
-GetMapping
+@GetMapping
 /                         -> login
 /signup                   -> signup
 
