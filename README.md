@@ -1,4 +1,4 @@
-컨트롤러 추가
+컨트롤러 추가<br>
 @GetMapping  <br>
 /                         -> login  <br>
 /signup                   -> signup <br>
@@ -17,6 +17,10 @@
 /error/404                -> error/404<br>
 
 
-국제화 적용
-src/main/resources/i18n 폴더 추가 message_en.properties와 message_ko.properties 파일 추가
-application.properties에 국제화 관련 설정 코드 추가(7,8줄), WebMvcConfig.java 코드 추가(seoulbike/config)
+국제화 적용<br>
+src/main/resources/i18n 폴더 추가 message_en.properties와 message_ko.properties 파일 추가<br>
+application.properties에 국제화 관련 설정 코드 추가(7,8줄), WebMvcConfig.java 코드 추가(seoulbike/config)<br>
+
+웹소켓<br>
+MyWebeSocketHandler.java(웹소켓 서버)를 seoulbike.websocket.handler에 추가<br>
+WebSocketConfig.java(웹소켓 설정) 추가 seoulbike.config에 추가<br>
