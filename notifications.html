@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>알림 센터 | 따릉이 분석 서비스</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .noti-item { display: flex; padding: 20px; border-bottom: 1px solid #eee; transition: 0.2s; }
+        .noti-item:hover { background: #f9f9f9; }
+        .noti-icon { width: 40px; height: 40px; border-radius: 50%; background: #1abc9c; color: white; 
+                     display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0; }
+        .noti-content { flex-grow: 1; }
+        .noti-time { font-size: 0.8rem; color: #999; margin-top: 5px; }
+        .unread { border-left: 4px solid #1abc9c; background: #f0fdfa; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a href="dashboard-main.html">📊 종합 분석</a></li>
+            <li><a href="notifications.html" style="background:#34495e; color:#1abc9c;">🔔 알림 내역</a></li>
+            <li><hr></li>
+            <li><a href="login.html">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header><b>시스템 알림 센터</b></header>
+        <main class="container">
+            <div class="card" style="padding:0;">
+                <div class="noti-item unread">
+                    <div class="noti-icon">!]</div>
+                    <div class="noti-content">
+                        <strong>데이터 업데이트 완료</strong>
+                        <p>2025년 5월 10일자 따릉이 이용정보 데이터가 성공적으로 적재되었습니다.</p>
+                        <div class="noti-time">방금 전</div>
+                    </div>
+                </div>
+                <div class="noti-item">
+                    <div class="noti-icon">i</div>
+                    <div class="noti-content">
+                        <strong>시스템 정기 점검 안내</strong>
+                        <p>금일 자정부터 02시까지 서버 점검이 예정되어 있습니다.</p>
+                        <div class="noti-time">2시간 전</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

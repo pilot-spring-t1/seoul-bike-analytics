@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>지역별 지도 | 따릉이 분석 서비스</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .map-container { display: flex; gap: 20px; height: calc(100vh - 150px); }
+        #map-area { flex: 2; background: #e3e3e3; border-radius: 10px; position: relative; 
+                    display: flex; align-items: center; justify-content: center; color: #777; }
+        .map-info-panel { flex: 1; display: flex; flex-direction: column; gap: 15px; }
+        .stat-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a href="dashboard-main.html">📊 종합 분석</a></li>
+            <li><a href="dashboard-detail.html">🔍 상세 분석</a></li>
+            <li><a href="dashboard-map.html" style="background:#34495e; color:#1abc9c;">🗺️ 지역별 지도</a></li>
+            <li><a href="data-center.html">📂 데이터 센터</a></li>
+            <li><hr></li>
+            <li><a href="login.html">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header><b>따릉이 대여소 위치 분석 (GIS)</b></header>
+        <main class="container">
+            <div class="map-container">
+                <div id="map-area" class="card">
+                    <div style="text-align: center;">
+                        <p style="font-size: 3rem;">🗺️</p>
+                        <p>Map API (Kakao/Google)가 들어갈 자리입니다.</p>
+                        <button class="btn btn-primary" style="margin-top:10px;">현재 위치로 이동</button>
+                    </div>
+                </div>
+
+                <div class="map-info-panel">
+                    <div class="card">
+                        <h3>선택 지역 정보</h3>
+                        <p style="font-size: 1.2rem; color: #1abc9c; font-weight: bold; margin: 10px 0;">서울특별시 마포구</p>
+                        <div class="stat-item"><span>총 대여소 수</span> <span>105 개</span></div>
+                        <div class="stat-item"><span>실시간 대여 가능</span> <span style="color:#2ecc71;">1,240 대</span></div>
+                        <div class="stat-item"><span>이용 혼잡도</span> <span style="color:#e67e22;">보통</span></div>
+                    </div>
+                    <div class="card" style="flex-grow: 1;">
+                        <h3>주요 거점 리스트</h3>
+                        <ul style="list-style: none; padding-top: 10px;">
+                            <li style="margin-bottom: 10px;">📍 합정역 7번출구 앞</li>
+                            <li style="margin-bottom: 10px;">📍 망원역 1번출구 앞</li>
+                            <li style="margin-bottom: 10px;">📍 홍대입구역 2번출구</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

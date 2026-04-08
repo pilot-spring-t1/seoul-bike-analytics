@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>상세 분석 | 따릉이 분석 서비스</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        /* 상세 페이지 전용 추가 스타일 */
+        .filter-section { display: flex; gap: 15px; align-items: flex-end; margin-bottom: 20px; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group select, .filter-group input { padding: 8px; border-radius: 5px; border: 1px solid #ddd; }
+        
+        /* 버튼식 차트 선택 UI */
+        .chart-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+        .selector-btn { 
+            padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer;
+            background: #fff; color: #7f8c8d; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.3s;
+        }
+        .selector-btn.active { background: #1abc9c; color: #fff; font-weight: bold; }
+        
+        .main-chart-area { min-height: 400px; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a href="dashboard-main.html">📊 종합 분석</a></li>
+            <li><a href="dashboard-detail.html" style="background:#34495e; color:#1abc9c;">🔍 상세 분석</a></li>
+            <li><a href="dashboard-map.html">🗺️ 지역별 지도</a></li>
+            <li><a href="data-center.html">📂 데이터 센터</a></li>
+            <li><hr style="opacity: 0.1; margin: 10px 20px;"></li>
+            <li><a href="login.html">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span style="margin-right: 20px;"><b>따릉이 심층 분석 모드</b></span>
+        </header>
+
+        <main class="container">
+            <div class="card filter-section">
+                <div class="filter-group">
+                    <label>자치구 선택</label>
+                    <select id="region-select">
+                        <option>전체 자치구</option>
+                        <option>마포구</option>
+                        <option>강남구</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="updateData()">필터 적용</button>
+            </div>
+
+            <section class="summary-grid">
+                <div class="card"><h3>평균 이동거리</h3><p><b id="avg-dist">3.2</b> km</p></div>
+                <div class="card"><h3>평균 이용시간</h3><p><b id="avg-time">24</b> 분</p></div>
+                <div class="card"><h3>탄소 절감량</h3><p><b id="total-carbon" style="color:#2ecc71;">450</b> kg</p></div>
+            </section>
+
+            <div class="chart-selector">
+                <button class="selector-btn active" onclick="switchChart('time', this)">🕒 시간대별</button>
+                <button class="selector-btn" onclick="switchChart('age', this)">👥 연령대별</button>
+                <button class="selector-btn" onclick="switchChart('gender', this)">🚻 성별/목적별</button>
+            </div>
+
+            <div class="card main-chart-area">
+                <h3 id="chart-title">시간대별 이용 분포</h3>
+                <div class="chart-container">
+                    <canvas id="detailChart"></canvas>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/dashboard-detail.js"></script>
+</body>
+</html>

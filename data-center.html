@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>데이터 센터 | 따릉이 분석 서비스</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .data-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
+        .data-table th, .data-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .data-table th { background-color: #f8f9fa; font-weight: bold; }
+        .action-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; background: #e0f2f1; color: #00796b; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a href="dashboard-main.html">📊 종합 분석</a></li>
+            <li><a href="dashboard-detail.html">🔍 상세 분석</a></li>
+            <li><a href="dashboard-map.html">🗺️ 지역별 지도</a></li>
+            <li><a href="data-center.html" style="background:#34495e; color:#1abc9c;">📂 데이터 센터</a></li>
+            <li><hr></li>
+            <li><a href="login.html">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span><b>Raw Data & Report Management</b></span>
+        </header>
+
+        <main class="container">
+            <div class="action-bar">
+                <h3>따릉이 이용정보 원본 데이터</h3>
+                <div>
+                    <button class="btn btn-primary" onclick="downloadReport('excel')">Excel 다운로드</button>
+                    <button class="btn" style="background:#34495e; color:white;" onclick="downloadReport('csv')">CSV 내보내기</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>대여일자</th>
+                            <th>대여소번호</th>
+                            <th>대여소명</th>
+                            <th>대여건수</th>
+                            <th>이용거리(m)</th>
+                            <th>상태</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-list">
+                        </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/data-center.js"></script>
+</body>
+</html>

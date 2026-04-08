@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>고객 지원 | 따릉이 분석 서비스</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .faq-item { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; cursor: pointer; }
+        .faq-item h4 { color: #2c3e50; margin-bottom: 5px; }
+        .faq-answer { display: none; color: #666; font-size: 0.9rem; padding: 5px 0; }
+        .active .faq-answer { display: block; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a href="dashboard-main.html">📊 종합 분석</a></li>
+            <li><a href="support.html" style="background:#34495e; color:#1abc9c;">❓ 고객 지원</a></li>
+            <li><hr></li>
+            <li><a href="login.html">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span id="header-title"><b>Help & Internationalization</b></span>
+        </header>
+        <main class="container">
+            <div class="card">
+                <h2 id="page-title">자주 묻는 질문 (FAQ)</h2>
+                <div style="margin: 20px 0;">
+                    <div class="faq-item" onclick="this.classList.toggle('active')">
+                        <h4>Q: 데이터는 언제 업데이트되나요?</h4>
+                        <div class="faq-answer">매일 새벽 02:00에 서울시 공공데이터 서버와 동기화됩니다.</div>
+                    </div>
+                    <div class="faq-item" onclick="this.classList.toggle('active')">
+                        <h4>Q: 분석 결과 리포트 저장은 어떻게 하나요?</h4>
+                        <div class="faq-answer">'데이터 센터' 메뉴에서 Excel 또는 CSV 파일로 내려받으실 수 있습니다.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>시스템 언어 설정 (i18n Test)</h3>
+                <p>브라우저 설정에 따라 자동으로 변경되거나 사용자가 수동으로 선택할 수 있습니다.</p>
+                <div style="margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="changeLang('ko')">한국어 (Korean)</button>
+                    <button class="btn" style="background:#3498db; color:white;" onclick="changeLang('en')">English</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function changeLang(lang) {
+            if(lang === 'en') {
+                document.getElementById('header-title').innerText = "Help Center";
+                document.getElementById('page-title').innerText = "Frequently Asked Questions";
+                alert("Language changed to English (Mock)");
+            } else {
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
