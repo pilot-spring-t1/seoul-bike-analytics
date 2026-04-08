@@ -24,7 +24,8 @@
 <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
     <div class="card p-4 shadow rounded-3" style="width: 350px;">
 
-        <h3 class="text-center mb-3" th:text="#{login.heading}">로그인</h3>
+        <h3 class="logo-font text-center">SEOUL BIKE</h3>
+        <h5 class="subtitle-gray-font text-center mb-4">데이터 분석 시스템에 로그인하세요</h5>
 
         <!-- 로그인 실패 메시지 -->
         <div th:if="${param.error}" class="alert alert-danger" th:text="#{login.error}">
@@ -33,16 +34,16 @@
 
         <form th:action="@{/login}" method="post">
             <div class="mb-3">
-                <label class="form-label" th:text="#{login.username}">아이디</label>
+                <label class="subtitle-dark-blue-font">아이디</label>
                 <input type="text" name="username" class="form-control" th:placeholder="#{login.username.placeholder}" placeholder="아이디 입력">
             </div>
 
             <div class="mb-3">
-                <label class="form-label" th:text="#{login.password}">비밀번호</label>
+                <label class="subtitle-dark-blue-font">비밀번호</label>
                 <input type="password" name="password" class="form-control" th:placeholder="#{login.password.placeholder}" placeholder="비밀번호 입력">
             </div>
 
-            <button type="submit" class="btn btn-primary w-100" th:text="#{login.button}">
+            <button type="submit" class="ok-button">로그인</button>
                 로그인
             </button>
         </form>
