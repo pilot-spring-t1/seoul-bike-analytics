@@ -93,7 +93,7 @@ public class FileTestController {
 		String fullPath = fileInfo.getFilePath() + fileInfo.getFileUuid() + "_" + fileInfo.getFileName();
 		File csvFile = new File(fullPath);
 		if (!csvFile.exists())
-			return "서비에 물리 파일이 존재하지 않습니다.";
+			return "서버에 물리 파일이 존재하지 않습니다.";
 
 		// 3. 파싱 및 Batch Insert 실행
 		try {
@@ -108,44 +108,64 @@ public class FileTestController {
 	}
 	
 	private int parseAndInsertCsv(File file) throws Exception {
-        int count = 0;
-        // 공공데이터 CSV는 보통 EUC-KR이 많으므로 인코딩 주의
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "EUC-KR"))) {
-            List<SeoulBikeDto> batchList = new ArrayList<>();
-            String line;
-            br.readLine(); // 헤더(컬럼명) 한 줄 건너뛰기
+	    int count = 0;
+	    // 공공데이터 특성상 EUC-KR 인코딩 사용
+	    try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "EUC-KR"))) {
+	        List<SeoulBikeDto> batchList = new ArrayList<>();
+	        String line;
+	        br.readLine(); // CSV 헤더 스킵
 
-            while ((line = br.readLine()) != null) {
-                String[] t = line.split(",");
-                if (t.length < 11) continue; // 데이터가 온전하지 않으면 스킵
+	        while ((line = br.readLine()) != null) {
+	            // 1. 단순 split 대신, 따옴표 안의 쉼표는 무시하는 정규식 사용 (인덱스 밀림 방지)
+	            String[] t = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
+	            
+	            // 데이터가 부족한 행은 스킵
+	            if (t.length < 11) continue; 
+	            
+	            // 2. 모든 요소의 쌍따옴표 및 앞뒤 공백 일괄 제거
+	            for (int i = 0; i < t.length; i++) {
+	                if (t[i] != null) {
+	                    t[i] = t[i].replace("\"", "").trim();
+	                }
+	            }
 
-                SeoulBikeDto dto = new SeoulBikeDto();
-                dto.setRentalDate(t[0].trim());
-                dto.setRentalOfficeNo(t[1].trim());
-                dto.setRentalOfficeName(t[2].trim());
-                dto.setRentalCode(t[3].trim());
-                dto.setGender(t[4].trim());
-                dto.setAgeGroup(t[5].trim());
-                dto.setNumOfUses(Integer.parseInt(t[6].trim()));
-                dto.setExerciseAmount(Double.parseDouble(t[7].trim()));
-                dto.setCarbonAmount(Double.parseDouble(t[8].trim()));
-                dto.setDistance(Double.parseDouble(t[9].trim()));
-                dto.setUsageMinute(Integer.parseInt(t[10].trim()));
+	            try {
+	                SeoulBikeDto dto = new SeoulBikeDto();
+	                // 문자열 데이터 세팅 (t[0]~t[5])
+	                dto.setRentalDate(t[0]);
+	                dto.setRentalOfficeNo(t[1]);
+	                dto.setRentalOfficeName(t[2]);
+	                dto.setRentalCode(t[3]);
+	                dto.setGender(t[4]);
+	                dto.setAgeGroup(t[5]); // 여기서 "20대"가 정상 저장됨
 
-                batchList.add(dto);
-                count++;
+	                // 3. 숫자 데이터 파싱 (인덱스 t[6]~t[10])
+	                // 데이터가 비어있거나(\N 등) 형식이 다를 경우를 위해 trim() 필수
+	                dto.setNumOfUses(Integer.parseInt(t[6].isEmpty() ? "0" : t[6]));
+	                dto.setExerciseAmount(Double.parseDouble(t[7].isEmpty() ? "0" : t[7]));
+	                dto.setCarbonAmount(Double.parseDouble(t[8].isEmpty() ? "0" : t[8]));
+	                dto.setDistance(Double.parseDouble(t[9].isEmpty() ? "0" : t[9]));
+	                dto.setUsageMinute(Integer.parseInt(t[10].isEmpty() ? "0" : t[10]));
 
-                // 1,000건 단위로 묶어서 DB 전송 (성능 최적화)
-                if (batchList.size() >= 1000) {
-                    seoulBikeMapper.insertBikeBatch(batchList);
-                    batchList.clear();
-                }
-            }
-            // 남은 데이터 최종 삽입
-            if (!batchList.isEmpty()) {
-            	seoulBikeMapper.insertBikeBatch(batchList);
-            }
-        }
-        return count;
-    }
+	                batchList.add(dto);
+	                count++;
+	            } catch (NumberFormatException e) {
+	                // 특정 행의 숫자 파싱 에러 시 해당 행만 스킵하고 로그 출력 (전체 중단 방지)
+	                System.err.println("[Row " + count + "] 파싱 실패: " + e.getMessage());
+	                continue;
+	            }
+
+	            // 4. 1,000건 단위 Batch Insert (성능 최적화)
+	            if (batchList.size() >= 1000) {
+	                seoulBikeMapper.insertBikeBatch(batchList);
+	                batchList.clear();
+	            }
+	        }
+	        // 남은 잔여 데이터 처리
+	        if (!batchList.isEmpty()) {
+	            seoulBikeMapper.insertBikeBatch(batchList);
+	        }
+	    }
+	    return count;
+	}
 }
