@@ -1,10 +1,10 @@
-package com.metanet.seoulbike.mapper;
+package com.metanet.seoulbike.test.mapper;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.metanet.seoulbike.dto.NotificationDto;
+import com.metanet.seoulbike.test.dto.NotificationDto;
 
 @Mapper
 public interface NotificationMapper {

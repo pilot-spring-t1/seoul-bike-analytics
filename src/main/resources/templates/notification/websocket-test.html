@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Example</title>
+</head>
+<body>
+    <h1>웹소켓 메시지 처리</h1>
+    <p>서버에서 5초마다 전송된 메시지를 출력합니다.</p>
+
+    <ul id="result"></ul>
+
+    <script>
+        const ul = document.querySelector("#result");
+        const ws = new WebSocket("ws://" + location.host + "/websocket/lotto");
+
+        ws.onopen = function () {
+            console.log("웹소켓 연결 성공");
+        };
+
+        ws.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            console.log(data);
+
+            const dateTime = new Date(data.time);
+            const li = document.createElement("li");
+            li.textContent = dateTime.toLocaleString() + ", Lotto: " + data.lotto;
+            ul.appendChild(li);
+        };
+
+        ws.onclose = function () {
+            console.log("웹소켓 연결 종료");
+        };
+
+        ws.onerror = function (error) {
+            console.error("웹소켓 에러:", error);
+        };
+    </script>
+</body>
+</html>

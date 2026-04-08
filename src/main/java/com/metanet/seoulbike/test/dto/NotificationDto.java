@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.dto;
+package com.metanet.seoulbike.test.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;

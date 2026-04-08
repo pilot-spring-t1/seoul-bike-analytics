@@ -55,4 +55,18 @@ public class PageController {
     public String error404Page() {
         return "error/404";
     }
+    
+    @GetMapping("/websocket-test")
+    public String websocketTestPage() {
+        return "notification/websocket-test";
+    }
+    
+    @GetMapping("/memory-monitor")
+    public String memoryMonitorPage() {
+        return "notification/memory-monitor";
+    }
+    @GetMapping("/monthly-usage")
+    public String monthlyUsagePage() {
+        return "monthly-usage";
+    }
 }

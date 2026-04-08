@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.controller;
+package com.metanet.seoulbike.test.controller;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.metanet.seoulbike.dto.FileDto;
-import com.metanet.seoulbike.dto.SeoulBikeDto;
-import com.metanet.seoulbike.mapper.FileMapper;
 import com.metanet.seoulbike.mapper.SeoulBikeMapper;
+import com.metanet.seoulbike.test.dto.FileDto;
+import com.metanet.seoulbike.test.dto.SeoulBikeDto;
+import com.metanet.seoulbike.test.mapper.FileMapper;
 
 @RestController
 @RequestMapping("/test/file")
