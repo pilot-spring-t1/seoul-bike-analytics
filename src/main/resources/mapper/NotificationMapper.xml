@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.metanet.seoulbike.mapper.NotificationMapper">
+
+    <insert id="insertNotification" parameterType="NotificationDto">
+        INSERT INTO NOTIFICATION (USER_NO, NOTI_TYPE, MESSAGE)
+        VALUES (#{userNo}, #{notiType}, #{message})
+    </insert>
+
+    <select id="findByUserNo" resultType="NotificationDto">
+        SELECT * FROM NOTIFICATION 
+        WHERE USER_NO = #{userNo} 
+        ORDER BY CREATE_DATE DESC
+    </select>
+
+    <update id="markAsRead">
+        UPDATE NOTIFICATION SET IS_READ = 'Y' WHERE NOTI_ID = #{notiId}
+    </update>
+
+</mapper>
