@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.metanet.seoulbike.mapper.UserMapper">
+<mapper namespace="com.metanet.seoulbike.test.mapper.UserMapper">
 
     <select id="checkDbConnection" resultType="int">
         SELECT COUNT(*) FROM USER_INFO
