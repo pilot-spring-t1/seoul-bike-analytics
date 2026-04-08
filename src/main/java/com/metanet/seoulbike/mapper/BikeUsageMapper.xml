@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.metanet.seoulbike.mapper.BikeUsageMapper">
+
+    <select id="getMonthlyUsage" resultType="com.metanet.seoulbike.dto.MonthlyUsageDto">
+        SELECT 
+            TO_NUMBER(TO_CHAR(RENTAL_DATE, 'MM')) AS month,
+            SUM(NUM_OF_USES) AS totalUses
+        FROM seoul_bike
+        WHERE TO_CHAR(RENTAL_DATE, 'YYYY') = #{year}
+        GROUP BY TO_CHAR(RENTAL_DATE, 'MM')
+        ORDER BY month
+    </select>
+
+</mapper>
