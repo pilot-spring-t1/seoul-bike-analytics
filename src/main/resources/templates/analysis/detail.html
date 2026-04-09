@@ -127,9 +127,8 @@ body {
 	font-weight: 700;
 }
 
-.filter-group select,
-.filter-group input[type="date"],
-.filter-group input[type="text"] {
+.filter-group select, .filter-group input[type="date"], .filter-group input[type="text"]
+	{
 	height: 36px;
 	border: 1px solid #d8dddd;
 	border-radius: 6px;
@@ -285,11 +284,11 @@ body {
 	margin-top: 8px;
 	border-radius: 12px;
 	overflow: hidden;
-	background:
-		linear-gradient(to right, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
-		linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
-		#fcfcfc;
-	background-size: calc(100% / 24) calc(100% / 8), calc(100% / 24) calc(100% / 8), auto;
+	background: linear-gradient(to right, rgba(0, 0, 0, 0.06) 1px,
+		transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 1px,
+		transparent 1px), #fcfcfc;
+	background-size: calc(100%/ 24) calc(100%/ 8), calc(100%/ 24)
+		calc(100%/ 8), auto;
 	height: 330px;
 	position: relative;
 	border: 1px solid #ececec;
@@ -315,7 +314,7 @@ body {
 	z-index: 5;
 }
 
-@media (max-width: 1200px) {
+@media ( max-width : 1200px) {
 	.summary-row {
 		grid-template-columns: 1fr;
 	}
@@ -351,26 +350,24 @@ body {
 				<section class="panel filter-panel">
 					<div class="filter-left">
 						<div class="filter-group office-search-group">
-							<label>대여소 선택</label>
-							<input type="text" id="officeKeyword"
-								placeholder="전체 대여소 또는 대여소명 검색" autocomplete="off" />
-							<input type="hidden" id="officeSelected" value="" />
+							<label>대여소 선택</label> <input type="text" id="officeKeyword"
+								placeholder="전체 대여소 또는 대여소명 검색" autocomplete="off" /> <input
+								type="hidden" id="officeSelected" value="" />
 							<div id="officeSuggestionList" class="office-suggestion-list"></div>
 						</div>
 
 						<div class="filter-group">
-							<label>시작일</label>
-							<input type="date" id="startDate"
+							<label>시작일</label> <input type="date" id="startDate"
 								value="2025-01-01" min="2025-01-01" max="2025-12-31" />
 						</div>
 
 						<div class="filter-group">
-							<label>종료일</label>
-							<input type="date" id="endDate"
+							<label>종료일</label> <input type="date" id="endDate"
 								value="2025-12-31" min="2025-01-01" max="2025-12-31" />
 						</div>
 
-						<button class="apply-btn" id="applyFilterBtn" type="button">필터 적용</button>
+						<button class="apply-btn" id="applyFilterBtn" type="button">필터
+							적용</button>
 					</div>
 				</section>
 
@@ -414,7 +411,7 @@ body {
 		</main>
 	</div>
 
-<script>
+	<script>
 $(function () {
 	const ageCategories = ['~10대', '20대', '30대', '40대', '50대', '60대', '70대이상', '기타'];
 	const genderCategories = ['여성', '남성', '기타/미지정'];
@@ -841,30 +838,28 @@ $(function () {
 	}
 
 	$('#officeKeyword').on('input', function () {
-		const keyword = $(this).val().trim();
-		$('#officeSelected').val('');
+    const keyword = $(this).val().trim();
+    $('#officeSelected').val('');
 
-		clearTimeout(officeSearchTimer);
+    clearTimeout(officeSearchTimer);
 
-		if (officeSearchXhr) {
-			officeSearchXhr.abort();
-			officeSearchXhr = null;
-		}
+    if (officeSearchXhr) {
+        officeSearchXhr.abort();
+        officeSearchXhr = null;
+    }
 
-		if (keyword === '') {
-			hideOfficeSuggestions();
-			return;
-		}
+    if (keyword === '') {
+        hideOfficeSuggestions();
+        return;
+    }
 
-		if (keyword.length < 2) {
-			hideOfficeSuggestions();
-			return;
-		}
+    // 1글자일 때는 조금 더 기다렸다가 요청
+    const delay = keyword.length === 1 ? 450 : 250;
 
-		officeSearchTimer = setTimeout(function () {
-			requestOfficeSuggestions(keyword);
-		}, 300);
-	});
+    officeSearchTimer = setTimeout(function () {
+        requestOfficeSuggestions(keyword);
+    }, delay);
+});
 
 	$(document).on('click', '.office-suggestion-item', function () {
 		const officeName = $(this).data('name');
