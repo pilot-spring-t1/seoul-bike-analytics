@@ -40,6 +40,11 @@ public class PageController {
     public String dataManagePage() {
         return "admin/data-manage";
     }
+    
+    @GetMapping("/data-center")
+    public String dataSharePage() {
+    	return "shared/data-center";
+    }
 
     @GetMapping("/notifications")
     public String notificationPage() {
