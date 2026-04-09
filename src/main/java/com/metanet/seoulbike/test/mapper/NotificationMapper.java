@@ -11,9 +11,9 @@ public interface NotificationMapper {
 	// 알림 발송 (저장)
 	int insertNotification(NotificationDto notiDto);
 
-	// 특정 유저의 알림 목록 조회 (최신순)
-	List<NotificationDto> findByUserNo(int userNo);
+	// 특정 멤버의 알림 목록 조회
+	List<NotificationDto> findByMemberId(Long memberId);
 
 	// 알림 읽음 처리
-	int markAsRead(int notiId);
+	int markAsRead(Long notiId);
 }

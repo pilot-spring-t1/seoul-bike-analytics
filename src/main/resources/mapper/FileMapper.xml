@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.metanet.seoulbike.test.mapper.FileMapper">
 
-    <insert id="insertFile" parameterType="FileDto" useGeneratedKeys="true" keyProperty="fileId" keyColumn="FILE_ID">
+    <insert id="insertFile" 
+            parameterType="com.metanet.seoulbike.test.dto.FileDto" 
+            useGeneratedKeys="true" 
+            keyProperty="fileId" 
+            keyColumn="FILE_ID">
         INSERT INTO FILE_ATTACHMENT (
             FILE_UUID, 
             FILE_NAME, 
@@ -20,11 +23,11 @@
         )
     </insert>
 
-    <select id="findAllFiles" resultType="FileDto">
+    <select id="findAllFiles" resultType="com.metanet.seoulbike.test.dto.FileDto">
         SELECT * FROM FILE_ATTACHMENT ORDER BY UPLOAD_DATE DESC
     </select>
 
-    <select id="findFileById" resultType="FileDto">
+    <select id="findFileById" resultType="com.metanet.seoulbike.test.dto.FileDto">
         SELECT * FROM FILE_ATTACHMENT WHERE FILE_ID = #{fileId}
     </select>
 

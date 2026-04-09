@@ -1,21 +1,22 @@
 package com.metanet.seoulbike.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.metanet.seoulbike.dto.BikeMonthlyUsageDto;
+import com.metanet.seoulbike.dto.BikeAnalysisDto;
 import com.metanet.seoulbike.mapper.SeoulBikeMapper;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class BikeUsageService {
+public class BikeAnalysisService {
 
     private final SeoulBikeMapper seoulBikeMapper;
-
-    public List<BikeMonthlyUsageDto> getMonthlyUsage(int year) {
-        return seoulBikeMapper.getMonthlyUsage(year);
+    
+    public List<Map<String, Object>> getAgeGroupUsage(BikeAnalysisDto analysisDto) {
+        return seoulBikeMapper.getAgeGroupUsage(analysisDto);
     }
 }

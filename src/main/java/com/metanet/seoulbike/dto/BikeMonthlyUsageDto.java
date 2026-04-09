@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MonthlyUsageDto {
+public class BikeMonthlyUsageDto {
     private int month;
     private int totalUses;
 }
