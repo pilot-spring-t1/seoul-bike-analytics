@@ -36,24 +36,11 @@
 		SELECT * FROM DUAL
 	</insert>
 
-	<select id="findAllBikeData"
-		resultType="com.metanet.seoulbike.dto.SeoulBikeDto">
-		SELECT * FROM SEOUL_BIKE
-		ORDER BY RENTAL_DATE DESC
-	</select>
+    <select id="findAllBikeData" resultType="com.metanet.seoulbike.dto.SeoulBikeDto">
+        SELECT * FROM SEOUL_BIKE
+        ORDER BY RENTAL_DATE DESC
+    </select>
 
-	<select id="getMonthlyUsage"
-		resultType="com.metanet.seoulbike.dto.BikeMonthlyUsageDto">
-		SELECT
-		TO_NUMBER(TO_CHAR(RENTAL_DATE, 'MM')) AS month,
-		SUM(NUM_OF_USES) AS totalUses
-		FROM seoul_bike
-		WHERE TO_CHAR(RENTAL_DATE,
-		'YYYY') =
-		#{year}
-		GROUP BY TO_CHAR(RENTAL_DATE, 'MM')
-		ORDER BY month
-	</select>
 
 	<!-- 사용자 대시보드 상세 분석 페이지 -->
 	<select id="getDashboardSummary"
@@ -138,18 +125,16 @@
 		ORDER BY RENTAL_DATE ASC
 	</select>
 
-	<select id="getDayUsage"
-		resultType="com.metanet.seoulbike.dto.BikeDayUsageDto">
-		SELECT
-		TO_CHAR(RENTAL_DATE, 'DY') AS dayOfWeek,
-		SUM(NUM_OF_USES) AS totalUsage
-		FROM SEOUL_BIKE
-		GROUP BY
-		TO_CHAR(RENTAL_DATE, 'DY'), TO_CHAR(RENTAL_DATE, 'D')
-		ORDER BY
-		TO_CHAR(RENTAL_DATE, 'D')
-	</select>
 
+    <select id="getMonthlyUsage" resultType="com.metanet.seoulbike.dto.BikeMonthlyUsageDto">
+        SELECT
+            TO_NUMBER(TO_CHAR(RENTAL_DATE, 'MM')) AS month,
+            SUM(NUM_OF_USES) AS totalUses
+        FROM SEOUL_BIKE
+        WHERE TO_CHAR(RENTAL_DATE, 'YYYY') = #{year}
+        GROUP BY TO_CHAR(RENTAL_DATE, 'MM')
+        ORDER BY month
+    </select>
 
 	<select id="getCustomAnalysis"
 		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
@@ -326,6 +311,15 @@
 		GROUP BY NVL(RENTAL_CODE, '미지정')
 		ORDER BY value DESC
 	</select>
+
+    <select id="getDayUsage" resultType="com.metanet.seoulbike.dto.BikeDayUsageDto">
+        SELECT
+            TO_CHAR(RENTAL_DATE, 'DY') AS dayOfWeek,
+            SUM(NUM_OF_USES) AS totalUsage
+        FROM SEOUL_BIKE
+        GROUP BY TO_CHAR(RENTAL_DATE, 'DY'), TO_CHAR(RENTAL_DATE, 'D')
+        ORDER BY TO_CHAR(RENTAL_DATE, 'D')
+    </select>
 
 
 </mapper>
