@@ -1,7 +1,6 @@
 package com.metanet.seoulbike.member.model;
 
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,12 +10,14 @@ import lombok.ToString;
 @Setter
 @ToString
 public class Member {
-	private String userId;
-	private String userPw;
+	private Long memberId;
+	private String loginId;
+	private String password;
+	private String name;
 	private String gender;
 	private Integer age;
-	private String userRole;
-	private Date joinDate;
-	private Timestamp lastLogin;
+	private String role;
+	private LocalDate createdAt;
+	private LocalDate lastLoginAt;
 	
 }

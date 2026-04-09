@@ -1,10 +1,13 @@
-package com.metanet.seoulbike.member.repository;
+package com.metanet.seoulbike.member.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Mapper;
+
 import com.metanet.seoulbike.member.model.Member;
 
-public interface MemberRepository {
+@Mapper
+public interface MemberMapper {
 	void insertMember(Member member);
 	Member selectMember(String userId);
 	List<Member> selectAllMembers();

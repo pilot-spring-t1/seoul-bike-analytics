@@ -1,5 +1,7 @@
 package com.metanet.seoulbike.auth;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
@@ -42,11 +46,11 @@ public class JwtTokenProvider {
 	public String generateToken(Member member) {
 		long now = System.currentTimeMillis();
 		Claims claims = Jwts.claims()
-				.subject(member.getUserId()) 
+				.subject(member.getLoginId()) 
 				.issuer("seoul-bike-analytics") 
 				.issuedAt(new Date(now))
 				.expiration(new Date(now + tokenValidTime))
-				.add("roles", member.getUserRole())
+				.add("role", member.getRole())
 				.build();
 		return Jwts.builder()
 				.claims(claims)
@@ -72,9 +76,21 @@ public class JwtTokenProvider {
 	}
 	
 	public Authentication getAuthentication(String token) {
-		UserDetails userDetails = userDetailsService.loadUserByUsername(getUserId(token));
-		log.info(userDetails.getUsername());
-		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+		Claims claims = parseClaims(token);
+		String role = claims.get("role", String.class);
+	    if (role == null) {
+	        throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+	    }
+
+	    Collection<? extends GrantedAuthority> authorities = 
+	        Collections.singletonList(new SimpleGrantedAuthority(role));
+
+	    UserDetails userDetails = org.springframework.security.core.userdetails.User
+	            .withUsername(claims.getSubject())
+	            .password("")
+	            .authorities(authorities)
+	            .build();
+		return new UsernamePasswordAuthenticationToken(userDetails, "", authorities);
 	}
 	
 	public boolean validateToken(String token) {
