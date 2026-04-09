@@ -1,6 +1,7 @@
 package com.metanet.seoulbike.member.service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.metanet.seoulbike.auth.JwtTokenProvider;
+import com.metanet.seoulbike.member.dto.MemberSearchDto;
 import com.metanet.seoulbike.member.mapper.MemberMapper;
 import com.metanet.seoulbike.member.model.Member;
 
@@ -23,7 +25,7 @@ public class MemberService {
 	private PasswordEncoder passwordEncoder;
 	
 	public void signUp(Member member) {
-		if (memberMapper.selectMember(member.getLoginId()) != null) {
+		if (memberMapper.selectMemberByLoginId(member.getLoginId()) != null) {
 			throw new RuntimeException("이미 존재하는 아이디입니다");
 		}
 		String encodedPassword = passwordEncoder.encode(member.getPassword());
@@ -33,7 +35,7 @@ public class MemberService {
 	}
 	
 	public String login(Map<String, String> user) {
-		Member member = memberMapper.selectMember(user.get("loginId"));
+		Member member = memberMapper.selectMemberByLoginId(user.get("loginId"));
 		
 		if (member == null) {
 			throw new RuntimeException("아이디 또는 비밀번호가 일치하지 않습니다");
@@ -47,20 +49,33 @@ public class MemberService {
 		return jwtTokenProvider.generateToken(member);
 	}
 	
-	public Member selectMember(String userId) {
-		return memberMapper.selectMember(userId);
+	public Member selectMember(String loginId) {
+		return memberMapper.selectMemberByLoginId(loginId);
 	}
 	
-	public List<Member> selectAllMembers() {
-		return memberMapper.selectAllMembers();
+	public Map<String, Object> selectAllMembersByPage(MemberSearchDto dto) {
+		int offset = (dto.getPage() - 1) * dto.getSize();
+	    
+	    List<Member> list = memberMapper.selectAllMembersByPage(dto, offset);
+	    int total = memberMapper.selectMemberCountBySearch(dto);
+
+	    int totalPages = (int) Math.ceil((double) total / dto.getSize());
+
+	    Map<String, Object> result = new HashMap<>();
+	    result.put("list", list);        
+	    result.put("total", total);      
+	    result.put("totalPages", totalPages);
+	    result.put("currentPage", dto.getPage());
+
+	    return result;
 	}
 	
 	public void updateMember(Member member) {
 		memberMapper.updateMember(member);
 	}
 	
-	public void deleteMember(Member member) {
-		memberMapper.deleteMember(member);
+	public void deleteMember(Long memberId) {
+		memberMapper.deleteMember(memberId);
 	}
 	
 	

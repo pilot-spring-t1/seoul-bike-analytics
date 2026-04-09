@@ -1,32 +1,34 @@
 package com.metanet.seoulbike.page;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.metanet.seoulbike.stats.dto.DashboardSummaryDto;
+import com.metanet.seoulbike.stats.service.BikeAnalysisService;
+
 
 @Controller
 public class PageController {
-
-    @GetMapping("/")
-    public String loginPage() {
-        return "login";
-    }
-
-    @GetMapping("/signup")
-    public String signupPage() {
-        return "signup";
-    }
+	
+	@Autowired
+	private BikeAnalysisService bikeAnalysisService;
 
     @GetMapping("/dashboard")
-    public String userDashboardPage() {
+    public String dashboardPage(Model model) {
+        DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
+        model.addAttribute("summary", summary);
+        model.addAttribute("userName", "관리자");
         return "dashboard/user-dashboard";
     }
 
-    @GetMapping("/analysis/summary")
+    @GetMapping("/summary")
     public String summaryAnalysisPage() {
         return "analysis/summary";
     }
 
-    @GetMapping("/analysis/detail")
+    @GetMapping("/detail")
     public String detailAnalysisPage() {
         return "analysis/detail";
     }
@@ -39,6 +41,11 @@ public class PageController {
     @GetMapping("/admin/data")
     public String dataManagePage() {
         return "admin/data-manage";
+    }
+    
+    @GetMapping("/data-center")
+    public String dataSharePage() {
+    	return "shared/data-center";
     }
 
     @GetMapping("/notifications")
@@ -56,6 +63,7 @@ public class PageController {
         return "error/404";
     }
     
+    // 사용자 dashboard
     @GetMapping("/websocket-test")
     public String websocketTestPage() {
         return "notification/websocket-test";
@@ -69,4 +77,6 @@ public class PageController {
     public String monthlyUsagePage() {
         return "monthly-usage";
     }
+    
+
 }

@@ -3,28 +3,25 @@ package com.metanet.seoulbike.member.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.RequestParam;
 import com.metanet.seoulbike.auth.JwtTokenProvider;
-import com.metanet.seoulbike.common.ApiResponse;
+import com.metanet.seoulbike.member.dto.MemberSearchDto;
 import com.metanet.seoulbike.member.model.Member;
 import com.metanet.seoulbike.member.service.MemberService;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RestController
-@RequestMapping("/api/member")
+@Controller
 public class MemberController {
 	
 	@Autowired
@@ -36,27 +33,47 @@ public class MemberController {
 	@Autowired
 	PasswordEncoder passwordEncoder;
 	
+	@GetMapping("/signup")
+    public String signupForm() {
+        return "signup";
+    }
+	
 	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse<String>> signUp(@RequestBody Member member) {
-		memberService.signUp(member);
-		return ResponseEntity.ok(ApiResponse.success("회원가입 성공"));
+	public String signUp(@ModelAttribute Member member) {
+		try {
+            memberService.signUp(member);
+            log.info("회원가입 성공 - ID: {}", member.getMemberId());
+            return "redirect:/login";
+        } catch (Exception e) {
+            log.error("회원가입 실패 - ID: {}, 사유: {}", member.getMemberId(), e.getMessage());
+            return "signup"; // 실패 시 다시 가입 페이지로
+        }
 	}
 	
+	@GetMapping("/login")
+    public String loginForm() {
+        return "login"; 
+    }
+	
 	@PostMapping("/login")
-	public ResponseEntity<ApiResponse<String>> login(@RequestBody Map<String, String> user, HttpServletResponse response) {
-		String jwt = memberService.login(user);
-		
-		Cookie cookie = new Cookie("JWT", jwt);
-		cookie.setHttpOnly(true);
-		cookie.setPath("/");
-		
-		response.addCookie(cookie);
-        
-		return ResponseEntity.ok(ApiResponse.success("로그인 성공"));
+	public String login(@RequestParam Map<String, String> user, HttpServletResponse response) {
+		try {
+            String jwt = memberService.login(user);
+            
+            Cookie cookie = new Cookie("JWT", jwt);
+            cookie.setHttpOnly(true);
+            cookie.setPath("/");
+            response.addCookie(cookie);
+            log.info("로그인 성공 - ID: {}, JWT 쿠키 발급 완료", user.get("loginId"));
+            return "redirect:/login"; // 로그인 성공 시 화면
+        } catch (Exception e) {
+        	log.warn("로그인 실패 - ID: {}, 사유: {}", user.get("loginId"), e.getMessage());
+            return "redirect:/login?error=true";
+        }
 	}
 	
 	@GetMapping("/logout")
-	public ResponseEntity<ApiResponse<String>> logout(HttpServletResponse response) {
+	public String logout(HttpServletResponse response) {
 		Cookie cookie = new Cookie("JWT", null);
 		
 		cookie.setMaxAge(0);
@@ -65,16 +82,33 @@ public class MemberController {
 		
 		response.addCookie(cookie);
 		
-		return ResponseEntity.ok(ApiResponse.success("로그아웃 성공"));
+		return "redirect:/login";
 	}
 	
-	@GetMapping("/test")
-	public String test(HttpServletRequest request) {
-		String token = jwtTokenProvider.resolveToken(request);
-		log.info("token {}", token);
-		Authentication auth = jwtTokenProvider.getAuthentication(token);
-		log.info("principal {}, jwtTokenProvider {}, authorities {}", auth.getPrincipal(), auth.getName(), auth.getAuthorities());
-		log.info("isValid {}", jwtTokenProvider.validateToken(token));
-		return jwtTokenProvider.getUserId(token);
+	@PostMapping("/update")
+	public String updateMember(@ModelAttribute Member member) {
+		memberService.updateMember(member);
+		return "/"; // 수정 후 화면
+	}
+
+	@GetMapping("/delete/{memberId}")
+	public String deleteMember(@PathVariable("memberId") Long memberId) {
+	    memberService.deleteMember(memberId);
+	    return "/"; // 삭제 후 화면
+	}
+	
+	@GetMapping("/list")
+	public String getAllMembersByPage(@ModelAttribute("searchDto") MemberSearchDto dto, Model model) {
+		Map<String, Object> result = memberService.selectAllMembersByPage(dto);
+	    
+	    int total = (int) result.get("total");
+	    int totalPages = (int) Math.ceil((double) total / dto.getSize());
+	    
+	    model.addAttribute("list", result.get("list"));
+	    model.addAttribute("total", total);
+	    model.addAttribute("totalPages", totalPages);
+	    model.addAttribute("searchDto", dto); 
+	    
+		return "admin-users";
 	}
 }

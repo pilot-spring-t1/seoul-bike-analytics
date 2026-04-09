@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 전용 | 회원 관리 시스템</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/color.css}">
+    <link rel="stylesheet" th:href="@{/css/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/button.css}">
+    
+    <style>
+        /* 레이아웃 및 테이블 스타일 (기존과 동일) */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+        #sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #sidebar ul { list-style: none; padding: 20px 0; }
+        #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
+        #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .container { flex: 1; padding: 30px; overflow-y: auto; }
+        .user-mgmt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .search-bar { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .search-bar select, .search-bar input { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; outline: none; }
+        .card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+        .user-table { width: 100%; border-collapse: collapse; }
+        .user-table th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 0.85rem; }
+        .user-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; vertical-align: middle; }
+        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        .badge-admin { background: #fee2e2; color: #ef4444; }
+        .badge-user { background: #dcfce7; color: #16a34a; }
+        .table-action-btn { padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+        .table-btn-delete { color: #ef4444; border-color: #fee2e2; }
+        .pagination-container { display: flex; justify-content: center; margin-top: 30px; gap: 5px; }
+        .page-btn { padding: 8px 14px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; text-decoration: none; color: #475569; }
+        .page-btn.active { background: #1abc9c; color: white; border-color: #1abc9c; font-weight: bold; }
+    </style>
+</head>
+<body class="bg">
+    <nav id="sidebar" class="menu-color">
+        <h2 class="logo-font">SEOUL BIKE</h2>
+        <ul>
+            <li><a href="#">📊 종합 분석</a></li>
+            <li class="active"><a th:href="@{/admin/members/search}">👤 회원 관리</a></li>
+            <li><a th:href="@{/logout}">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span class="subtitle-dark-blue-font"> 마스터 권한: <b th:text="${session.adminName ?: '슈퍼관리자'}"></b></span>
+        </header>
+
+        <main class="container">
+            <div class="user-mgmt-header">
+                <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;">
+                    회원 목록 관리 
+                    <span class="subtitle-gray-font" th:text="'(검색 결과: ' + ${total} + '명)'"></span>
+                </h3>
+                
+                <form th:action="@{/admin/members/search}" th:object="${searchDto}" method="post" class="search-bar">
+                    <input type="hidden" name="page" th:value="1"> 
+                    <select th:field="*{searchType}">
+                        <option value="loginId">아이디</option>
+                        <option value="name">이름</option>
+                    </select>
+                    <input type="text" th:field="*{keyword}" placeholder="검색어 입력...">
+                    <select th:field="*{gender}">
+                        <option value="">성별 전체</option>
+                        <option value="M">남성</option>
+                        <option value="F">여성</option>
+                    </select>
+                    <button type="submit" class="ok-button" style="width: 80px; height: 38px; cursor: pointer;">조회</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>번호</th><th>아이디</th><th>이름</th><th>성별</th><th>연령</th><th>권한</th><th>가입일</th><th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="member, stat : ${list}">
+                            <td th:text="${total - (searchDto.page - 1) * searchDto.size - stat.index}"></td>
+                            <td><b th:text="${member.loginId}"></b></td>
+                            <td th:text="${member.name}"></td>
+                            <td th:text="${member.gender == 'M' ? '남' : '여'}"></td>
+                            <td th:text="${member.age} + '세'"></td>
+                            <td>
+                                <span th:classappend="${member.role == 'ROLE_ADMIN' ? 'badge badge-admin' : 'badge badge-user'}" 
+                                      th:text="${member.role == 'ROLE_ADMIN' ? '관리자' : '일반'}"></span>
+                            </td>
+                            <td th:text="${member.createdAt != null ? #temporals.format(member.createdAt, 'yyyy-MM-dd') : '-'}"></td>
+                            <td>
+                                <button class="table-action-btn" 
+                                        th:onclick="|location.href='@{/admin/members/edit/{id}(id=${member.memberId})}'|">수정</button>
+                                
+                                <button class="table-action-btn table-btn-delete" 
+                                        th:onclick="|if(confirm('정말 삭제하시겠습니까?')) location.href='@{/admin/members/delete/{id}(id=${member.memberId})}'|">
+                                    삭제
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container" th:if="${total > 0}">
+                <a th:if="${searchDto.page > 1}" 
+                   th:href="@{/admin/members/search(page=${searchDto.page - 1}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
+                   class="page-btn">이전</a>
+
+                <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages ?: 1)}">
+                    <a th:href="@{/admin/members/search(page=${pageNum}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
+                       th:text="${pageNum}" 
+                       th:classappend="${pageNum == searchDto.page ? 'page-btn active' : 'page-btn'}"></a>
+                </th:block>
+
+                <a th:if="${searchDto.page < (totalPages ?: 0)}" 
+                   th:href="@{/admin/members/search(page=${searchDto.page + 1}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
+                   class="page-btn">다음</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

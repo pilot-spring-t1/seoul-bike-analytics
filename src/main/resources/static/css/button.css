@@ -1,14 +1,35 @@
 .ok-button {
-	background-color: #24726F;
+	background-color: #1BB597;
 	color: white;
 	border: none;
 	border-radius: 12px;
 	width: 100%;
 	height: 50px;
 }
+.ok-button:hover {
+	background: #24726F;
+}
 .account-set-button {
 	font-size: 12px;
     border-radius: 8px;
     padding: 8px 0;
     text-align: center;
+}
+.white-button {
+	background: #FFFFFF;
+	border: 1px solid #8D8D8D;
+	font-size: 14px;
+	color: #333333;
+	height: 32px;
+	padding: 0 10px;
+	cursor: pointer;
+}
+.dark-button {
+	background: #38516D;
+	border-color: #38516D;
+	font-size: 14px;
+	color: #FFFFFF;
+	height: 32px;
+	padding: 0 10px;
+	cursor: pointer;
 }
