@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.metanet.seoulbike.dto.MonthlyUsageDto;
+import com.metanet.seoulbike.dto.BikeMonthlyUsageDto;
 import com.metanet.seoulbike.mapper.SeoulBikeMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ public class BikeUsageService {
 
     private final SeoulBikeMapper bikeUsageMapper;
 
-    public List<MonthlyUsageDto> getMonthlyUsage(int year) {
+    public List<BikeMonthlyUsageDto> getMonthlyUsage(int year) {
         return bikeUsageMapper.getMonthlyUsage(year);
     }
 }
