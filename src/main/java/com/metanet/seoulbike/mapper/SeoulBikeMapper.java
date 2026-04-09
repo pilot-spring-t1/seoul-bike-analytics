@@ -35,5 +35,4 @@ public interface SeoulBikeMapper {
 	
 	List<Map<String, Object>> getAgeGroupUsage(BikeAnalysisDto analysisDto);
 
-
 }
