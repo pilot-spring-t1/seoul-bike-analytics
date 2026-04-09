@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>따릉이 심층 분석 모드</title>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="/js/highcharts/highcharts.js"></script>
+  <script src="/js/highcharts/exporting.js"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -197,6 +202,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
     }
 
     .tab.active {
@@ -207,7 +215,7 @@
 
     .chart-panel {
       position: relative;
-      padding: 18px 18px 12px;
+      padding: 18px 18px 18px;
       overflow: hidden;
     }
 
@@ -224,44 +232,6 @@
       color: #2d4258;
     }
 
-    .chart-title-right {
-      font-size: 22px;
-      font-weight: 800;
-      color: #2d2d2d;
-      margin-right: 340px;
-    }
-
-    .stat-box {
-      position: absolute;
-      top: -24px;
-      right: 12px;
-      background: #f7f7f7;
-      border: 2px solid rgba(0,0,0,0.15);
-      border-radius: 20px;
-      padding: 18px 20px;
-      display: flex;
-      gap: 10px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
-    }
-
-    .stat-btn {
-      min-width: 64px;
-      height: 38px;
-      border-radius: 10px;
-      border: none;
-      background: #ececec;
-      color: #6e7880;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .stat-btn.active {
-      background: #ffffff;
-      color: #23bea9;
-      box-shadow: inset 0 0 0 2px #e7e7e7;
-    }
-
     .fake-chart-wrap {
       margin-top: 8px;
       border-radius: 12px;
@@ -276,42 +246,24 @@
       border: 1px solid #ececec;
     }
 
-    .fake-chart-wrap svg {
+    #analysisChart {
       width: 100%;
       height: 100%;
-      display: block;
+      position: relative;
     }
 
-    .x-labels {
-      display: grid;
-      grid-template-columns: repeat(24, 1fr);
-      gap: 0;
-      margin-top: 8px;
-      padding: 0 6px;
-      font-size: 12px;
+    .chart-empty-message {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #7d878f;
-    }
-
-    .x-labels span {
-      text-align: center;
-    }
-
-    .legend {
-      text-align: center;
-      margin-top: 8px;
-      font-size: 13px;
-      color: #6f7a83;
+      font-size: 14px;
       font-weight: 700;
-    }
-
-    .legend .line-box {
-      display: inline-block;
-      width: 34px;
-      height: 12px;
-      border: 3px solid #25bea9;
-      background: rgba(37, 190, 169, 0.15);
-      margin-right: 6px;
-      vertical-align: middle;
+      pointer-events: none;
+      background: transparent;
+      z-index: 5;
     }
 
     @media (max-width: 1200px) {
@@ -328,17 +280,6 @@
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
-      }
-
-      .chart-title-right {
-        margin-right: 0;
-        font-size: 18px;
-      }
-
-      .stat-box {
-        position: static;
-        margin-bottom: 12px;
-        width: fit-content;
       }
     }
   </style>
@@ -371,7 +312,7 @@
                 <option>송파구</option>
               </select>
             </div>
-            <button class="apply-btn">필터 적용</button>
+            <button class="apply-btn" type="button">필터 적용</button>
           </div>
         </section>
 
@@ -392,132 +333,208 @@
 
         <div class="chart-topline">
           <div class="tabs">
-            <div class="tab active">◔ 시간대별</div>
-            <div class="tab">👤 연령대별</div>
-            <div class="tab">🚻 성별/목적별</div>
+            <div class="tab" data-type="hour">◔ 시간대별</div>
+            <div class="tab active" data-type="age">👤 연령대별</div>
+            <div class="tab" data-type="genderCode">🚻 성별/목적별</div>
           </div>
         </div>
 
         <section class="panel chart-panel">
-          <!-- <div class="stat-box">
-            <button class="stat-btn">평균치</button>
-            <button class="stat-btn">누적 합계</button>
-            <button class="stat-btn active">최고점</button>
-          </div> -->
-
           <div class="chart-title-row">
-            <div class="chart-title-left">◷ 시간대별 이용량 추이</div>
+            <div class="chart-title-left">👤 연령대별 이용량 추이</div>
           </div>
 
           <div class="fake-chart-wrap">
-            <svg viewBox="0 0 1200 330" preserveAspectRatio="none" aria-label="시간대별 이용량 차트">
-              <path
-                d="M 0 300
-                   L 0 285
-                   L 52 292
-                   L 104 294
-                   L 156 295
-                   L 208 292
-                   L 260 270
-                   L 312 220
-                   L 364 110
-                   L 416 145
-                   L 468 220
-                   L 520 245
-                   L 572 235
-                   L 624 228
-                   L 676 210
-                   L 728 195
-                   L 780 160
-                   L 832 85
-                   L 884 35
-                   L 936 120
-                   L 988 195
-                   L 1040 230
-                   L 1092 265
-                   L 1144 285
-                   L 1200 295
-                   L 1200 330
-                   L 0 330 Z"
-                fill="rgba(37, 190, 169, 0.14)">
-              </path>
-
-              <path
-                d="M 0 285
-                   L 52 292
-                   L 104 294
-                   L 156 295
-                   L 208 292
-                   L 260 270
-                   L 312 220
-                   L 364 110
-                   L 416 145
-                   L 468 220
-                   L 520 245
-                   L 572 235
-                   L 624 228
-                   L 676 210
-                   L 728 195
-                   L 780 160
-                   L 832 85
-                   L 884 35
-                   L 936 120
-                   L 988 195
-                   L 1040 230
-                   L 1092 265
-                   L 1144 285
-                   L 1200 295"
-                fill="none"
-                stroke="#25bea9"
-                stroke-width="3"
-                stroke-linecap="round"
-                stroke-linejoin="round">
-              </path>
-
-              <g fill="#25bea9">
-                <circle cx="0" cy="285" r="3"></circle>
-                <circle cx="52" cy="292" r="3"></circle>
-                <circle cx="104" cy="294" r="3"></circle>
-                <circle cx="156" cy="295" r="3"></circle>
-                <circle cx="208" cy="292" r="3"></circle>
-                <circle cx="260" cy="270" r="3"></circle>
-                <circle cx="312" cy="220" r="3"></circle>
-                <circle cx="364" cy="110" r="3"></circle>
-                <circle cx="416" cy="145" r="3"></circle>
-                <circle cx="468" cy="220" r="3"></circle>
-                <circle cx="520" cy="245" r="3"></circle>
-                <circle cx="572" cy="235" r="3"></circle>
-                <circle cx="624" cy="228" r="3"></circle>
-                <circle cx="676" cy="210" r="3"></circle>
-                <circle cx="728" cy="195" r="3"></circle>
-                <circle cx="780" cy="160" r="3"></circle>
-                <circle cx="832" cy="85" r="3"></circle>
-                <circle cx="884" cy="35" r="4"></circle>
-                <circle cx="936" cy="120" r="3"></circle>
-                <circle cx="988" cy="195" r="3"></circle>
-                <circle cx="1040" cy="230" r="3"></circle>
-                <circle cx="1092" cy="265" r="3"></circle>
-                <circle cx="1144" cy="285" r="3"></circle>
-                <circle cx="1200" cy="295" r="3"></circle>
-              </g>
-            </svg>
-          </div>
-
-          <div class="x-labels">
-            <span>0시</span><span>1시</span><span>2시</span><span>3시</span>
-            <span>4시</span><span>5시</span><span>6시</span><span>7시</span>
-            <span>8시</span><span>9시</span><span>10시</span><span>11시</span>
-            <span>12시</span><span>13시</span><span>14시</span><span>15시</span>
-            <span>16시</span><span>17시</span><span>18시</span><span>19시</span>
-            <span>20시</span><span>21시</span><span>22시</span><span>23시</span>
-          </div>
-
-          <div class="legend">
-            <span class="line-box"></span>대여 건수
+            <div id="analysisChart"></div>
           </div>
         </section>
       </div>
     </main>
   </div>
+
+  <script>
+    $(function () {
+      const ageCategories = ['~10대', '20대', '30대', '40대', '50대', '60대', '70대이상', '기타'];
+
+      function clearOverlayMessage() {
+        $('#analysisChart').find('.chart-empty-message').remove();
+      }
+
+      function showOverlayMessage(message) {
+        clearOverlayMessage();
+        $('#analysisChart').append(
+          '<div class="chart-empty-message">' + message + '</div>'
+        );
+      }
+
+      function setActiveTab(type) {
+        $('.tab').removeClass('active');
+        $('.tab[data-type="' + type + '"]').addClass('active');
+      }
+
+      function renderAgeChart(response) {
+        clearOverlayMessage();
+
+        const ageData = new Array(8).fill(0);
+
+        response.forEach(item => {
+        const label = item.label ?? item.LABEL;
+  		const value = item.value ?? item.VALUE;
+          const index = ageCategories.indexOf(label);
+          if (index !== -1) {
+            ageData[index] = Number(value);
+          }
+        });
+
+        Highcharts.chart('analysisChart', {
+          accessibility: {
+            enabled: false
+          },
+          chart: {
+            type: 'column',
+            backgroundColor: '#fcfcfc',
+            spacingTop: 20,
+            spacingRight: 20,
+            spacingBottom: 20,
+            spacingLeft: 20
+          },
+          title: {
+            text: null
+          },
+          credits: {
+            enabled: false
+          },
+          exporting: {
+            enabled: false
+          },
+          legend: {
+            enabled: false
+          },
+          xAxis: {
+            categories: ageCategories,
+            title: {
+              text: null
+            },
+            lineColor: '#dfe4e4',
+            tickColor: '#dfe4e4',
+            labels: {
+              style: {
+                color: '#7d878f',
+                fontSize: '12px'
+              }
+            }
+          },
+          yAxis: {
+            title: {
+              text: '대여 건수'
+            },
+            gridLineColor: '#e9eeee',
+            labels: {
+              style: {
+                color: '#7d878f',
+                fontSize: '12px'
+              }
+            }
+          },
+          tooltip: {
+            valueSuffix: '건'
+          },
+          plotOptions: {
+            column: {
+              borderRadius: 6,
+              pointPadding: 0.08,
+              groupPadding: 0.1
+            }
+          },
+          series: [{
+            name: '대여 건수',
+            data: ageData,
+            color: '#25bea9'
+          }]
+        });
+
+        $('.chart-title-left').text('👤 연령대별 이용량 추이');
+      }
+
+      function renderEmptyChart(titleText, message) {
+        clearOverlayMessage();
+
+        Highcharts.chart('analysisChart', {
+          accessibility: {
+            enabled: false
+          },
+          chart: {
+            type: 'line',
+            backgroundColor: '#fcfcfc',
+            spacingTop: 20,
+            spacingRight: 20,
+            spacingBottom: 20,
+            spacingLeft: 20
+          },
+          title: {
+            text: null
+          },
+          credits: {
+            enabled: false
+          },
+          exporting: {
+            enabled: false
+          },
+          legend: {
+            enabled: false
+          },
+          xAxis: {
+            categories: []
+          },
+          yAxis: {
+            title: {
+              text: null
+            }
+          },
+          series: []
+        });
+
+        $('.chart-title-left').text(titleText);
+        showOverlayMessage(message);
+      }
+
+      function loadAgeChart() {
+        $.ajax({
+          url: '/api/analysis/age',
+          method: 'GET',
+          data: {
+            startDate: '2025-01-01',
+            endDate: '2025-12-31',
+            targetCol: 'USES',
+            calcType: 'SUM'
+          },
+          success: function (response) {
+            console.log('연령대별 응답 데이터:', response);
+            renderAgeChart(response);
+          },
+          error: function (xhr, status, error) {
+            console.error('연령대별 데이터 조회 실패:', error);
+            console.log(xhr.responseText);
+            renderEmptyChart('👤 연령대별 이용량 추이', '연령대별 데이터를 불러오지 못했습니다.');
+          }
+        });
+      }
+
+      $('.tab').on('click', function () {
+        const type = $(this).data('type');
+        setActiveTab(type);
+
+        if (type === 'age') {
+          loadAgeChart();
+        } else if (type === 'hour') {
+          renderEmptyChart('◷ 시간대별 이용량 추이', '현재 데이터에는 시간 정보가 없어 시간대별 분석을 지원하지 않습니다.');
+        } else if (type === 'genderCode') {
+          renderEmptyChart('🚻 성별/목적별 이용량 추이', '성별/목적별 분석 기능은 준비 중입니다.');
+        }
+      });
+
+      loadAgeChart();
+    });
+  </script>
 </body>
 </html>
