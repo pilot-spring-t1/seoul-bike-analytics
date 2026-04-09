@@ -10,6 +10,7 @@ import com.metanet.seoulbike.dto.BikeDayUsageDto;
 import com.metanet.seoulbike.dto.BikeMonthlyUsageDto;
 import com.metanet.seoulbike.dto.BikePeriodSearchDto;
 import com.metanet.seoulbike.dto.DashboardSummaryDto;
+import com.metanet.seoulbike.dto.DetailSummaryDto;
 import com.metanet.seoulbike.dto.SeoulBikeDto;
 
 @Mapper
@@ -38,5 +39,13 @@ public interface SeoulBikeMapper {
 	// 사용자 대시보드 상세 분석 페이지
 	
 	List<Map<String, Object>> getAgeGroupUsage(BikeAnalysisDto analysisDto);
+	
+	List<String> searchOfficeNames(String keyword);  // 대여소 목록
+	
+	DetailSummaryDto getDetailSummary(BikeAnalysisDto analysisDto); // summary card
+	
+	List<Map<String, Object>> getGenderUsage(BikeAnalysisDto analysisDto); // 성별 차트
+	
+	List<Map<String, Object>> getRentalCodeUsage(BikeAnalysisDto analysisDto); // 이용권별 차트
 
 }
