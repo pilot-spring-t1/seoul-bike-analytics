@@ -56,43 +56,53 @@
 	</select>
 
 	<!-- 사용자 대시보드 상세 분석 페이지 -->
+	<select id="getDashboardSummary"
+		resultType="com.metanet.seoulbike.dto.DashboardSummaryDto">
+		SELECT
+		NVL(SUM(NUM_OF_USES), 0) AS totalUses,
+		NVL(SUM(DISTANCE), 0) AS totalDistance,
+		NVL(SUM(USAGE_MINUTE), 0) AS totalUsageMinute
+		FROM SEOUL_BIKE
+	</select>
+
+	<!-- 사용자 대시보드 상세 분석 페이지 -->
 	<select id="getAgeGroupUsage"
-        parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
-        resultType="map">
-    SELECT
-        AGE_GROUP AS label,
-        SUM(NUM_OF_USES) AS value
-    FROM SEOUL_BIKE
-    <where>
-        <if test="startDate != null and startDate != ''">
-            AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
-        </if>
-        <if test="endDate != null and endDate != ''">
-            AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
-        </if>
-        <if test="gender != null and gender != ''">
-            AND UPPER(GENDER) = UPPER(#{gender})
-        </if>
-        <if test="rentalCode != null and rentalCode != ''">
-            AND RENTAL_CODE = #{rentalCode}
-        </if>
-        <if test="keyword != null and keyword != ''">
-            AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
-        </if>
-    </where>
-    GROUP BY AGE_GROUP
-    ORDER BY CASE AGE_GROUP
-        WHEN '~10대' THEN 1
-        WHEN '20대' THEN 2
-        WHEN '30대' THEN 3
-        WHEN '40대' THEN 4
-        WHEN '50대' THEN 5
-        WHEN '60대' THEN 6
-        WHEN '70대이상' THEN 7
-        WHEN '기타' THEN 8
-        ELSE 99
-    END
-</select>
+		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
+		resultType="map">
+		SELECT
+		AGE_GROUP AS label,
+		SUM(NUM_OF_USES) AS value
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+			</if>
+			<if test="gender != null and gender != ''">
+				AND UPPER(GENDER) = UPPER(#{gender})
+			</if>
+			<if test="rentalCode != null and rentalCode != ''">
+				AND RENTAL_CODE = #{rentalCode}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
+			</if>
+		</where>
+		GROUP BY AGE_GROUP
+		ORDER BY CASE AGE_GROUP
+		WHEN '~10대' THEN 1
+		WHEN '20대' THEN 2
+		WHEN '30대' THEN 3
+		WHEN '40대' THEN 4
+		WHEN '50대' THEN 5
+		WHEN '60대' THEN 6
+		WHEN '70대이상' THEN 7
+		WHEN '기타' THEN 8
+		ELSE 99
+		END
+	</select>
 
 
 
