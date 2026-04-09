@@ -61,11 +61,11 @@
 		SELECT
 		NVL(SUM(NUM_OF_USES), 0) AS totalUses,
 		NVL(SUM(DISTANCE), 0) AS totalDistance,
-		NVL(SUM(USAGE_MINUTE), 0) AS totalUsageMinute
+		NVL(SUM(USAGE_MINUTE), 0) AS
+		totalUsageMinute
 		FROM SEOUL_BIKE
 	</select>
 
-	<!-- 사용자 대시보드 상세 분석 페이지 -->
 	<select id="getAgeGroupUsage"
 		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
 		resultType="map">
@@ -78,7 +78,8 @@
 				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
 			</if>
 			<if test="endDate != null and endDate != ''">
-				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') +
+				1
 			</if>
 			<if test="gender != null and gender != ''">
 				AND UPPER(GENDER) = UPPER(#{gender})
@@ -87,23 +88,38 @@
 				AND RENTAL_CODE = #{rentalCode}
 			</if>
 			<if test="keyword != null and keyword != ''">
-				AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
+				AND RENTAL_OFFICE_NAME = #{keyword}
 			</if>
 		</where>
 		GROUP BY AGE_GROUP
 		ORDER BY CASE AGE_GROUP
 		WHEN '~10대' THEN 1
-		WHEN '20대' THEN 2
+		WHEN '20대'
+		THEN 2
 		WHEN '30대' THEN 3
 		WHEN '40대' THEN 4
 		WHEN '50대' THEN 5
-		WHEN '60대' THEN 6
+		WHEN '60대'
+		THEN 6
 		WHEN '70대이상' THEN 7
 		WHEN '기타' THEN 8
 		ELSE 99
 		END
 	</select>
 
+	<select id="searchOfficeNames" parameterType="string"
+		resultType="string">
+		SELECT RENTAL_OFFICE_NAME
+		FROM (
+		SELECT DISTINCT
+		RENTAL_OFFICE_NAME
+		FROM SEOUL_BIKE
+		WHERE RENTAL_OFFICE_NAME LIKE '%' ||
+		#{value} || '%'
+		ORDER BY RENTAL_OFFICE_NAME
+		)
+		WHERE ROWNUM &lt;= 5
+	</select>
 
 
 	<select id="findByPeriod"
@@ -212,6 +228,103 @@
 		<if test="limit != null and limit > 0">
 			OFFSET 0 ROWS FETCH NEXT #{limit} ROWS ONLY
 		</if>
+	</select>
+
+	<select id="getDetailSummary"
+		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
+		resultType="com.metanet.seoulbike.dto.DetailSummaryDto">
+		SELECT
+		ROUND(NVL(AVG(DISTANCE) / 1000, 0), 2) AS avgDistance,
+		ROUND(NVL(AVG(USAGE_MINUTE), 0), 2) AS avgUsageMinute,
+		ROUND(NVL(SUM(NUM_OF_USES) / NULLIF(COUNT(DISTINCT RENTAL_DATE), 0),
+		0), 2) AS avgDailyUses,
+		ROUND(
+		NVL(
+		((SUM(DISTANCE) / 1000) /
+		NULLIF(SUM(USAGE_MINUTE), 0)) * 60,
+		0
+		),
+		2
+		) AS avgSpeed
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') +
+				1
+			</if>
+			<if test="gender != null and gender != ''">
+				AND UPPER(GENDER) = UPPER(#{gender})
+			</if>
+			<if test="rentalCode != null and rentalCode != ''">
+				AND RENTAL_CODE = #{rentalCode}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME = #{keyword}
+			</if>
+		</where>
+	</select>
+
+	<select id="getGenderUsage"
+		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
+		resultType="map">
+
+		SELECT
+		CASE
+		WHEN UPPER(GENDER) = 'F' THEN '여성'
+		WHEN UPPER(GENDER) = 'M'
+		THEN '남성'
+		ELSE '기타/미지정'
+		END AS label,
+		SUM(NUM_OF_USES) AS value
+		FROM
+		SEOUL_BIKE
+
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') +
+				1
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME = #{keyword}
+			</if>
+		</where>
+
+		GROUP BY
+		CASE
+		WHEN UPPER(GENDER) = 'F' THEN '여성'
+		WHEN UPPER(GENDER) = 'M'
+		THEN '남성'
+		ELSE '기타/미지정'
+		END
+
+	</select>
+
+	<select id="getRentalCodeUsage"
+		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
+		resultType="map">
+		SELECT
+		NVL(RENTAL_CODE, '미지정') AS label,
+		SUM(NUM_OF_USES) AS value
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME = #{keyword}
+			</if>
+		</where>
+		GROUP BY NVL(RENTAL_CODE, '미지정')
+		ORDER BY value DESC
 	</select>
 
 
