@@ -1,557 +1,458 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>따릉이 심층 분석 모드</title>
-  
-  <link rel="stylesheet" th:href="@{/css/color.css}">
-  <link rel="stylesheet" th:href="@{/css/fonts.css}">
-  <link rel="stylesheet" th:href="@{/css/card.css}">
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>따릉이 심층 분석 모드</title>
+	
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+	<link rel="stylesheet" th:href="@{/css/color.css}">
+	<link rel="stylesheet" th:href="@{/css/fonts.css}">
+	<link rel="stylesheet" th:href="@{/css/card.css}">
+	
+	<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+	<script src="/js/highcharts/highcharts.js"></script>
+	<script src="/js/highcharts/exporting.js"></script>
+	
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+	    body { display: flex; height: 100vh; overflow: hidden; }
+		#sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
+	    #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+	    #sidebar ul { list-style: none; padding: 20px 0; }
+	    #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
+	    #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
+		#main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+		header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+		.container { flex: 1; padding: 30px; overflow-y: auto; }
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="/js/highcharts/highcharts.js"></script>
-  <script src="/js/highcharts/exporting.js"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-      background: #eef1ef;
-      color: #24364a;
-    }
-
-    .layout {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 206px;
-      background: #2d4258;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-    }
-
-    .logo {
-      padding: 28px 18px 26px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 3px;
-      color: #17d1b2;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .menu {
-      list-style: none;
-      margin: 0;
-      padding: 18px 0 0;
-    }
-
-    .menu li {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      height: 38px;
-      padding: 0 18px;
-      color: #d7e0e8;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .menu li.active {
-      background: #37506a;
-      color: #19c8af;
-    }
-
-    .menu li.logout {
-      margin-top: 8px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-      padding-top: 18px;
-      height: 56px;
-    }
-
-    .main {
-      flex: 1;
-      padding: 0;
-      background: #edf0ef;
-    }
-
-    .topbar {
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding: 0 26px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #30465b;
-      background: #ffffff;
-      border-bottom: 1px solid #e3e6e5;
-    }
-
-    .container {
-      padding: 22px;
-    }
-
-    .panel {
-      background: #f9f9f9;
-      border-radius: 16px;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
-    }
-
-    .filter-panel {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-      padding: 20px;
-      margin-bottom: 18px;
-      min-height: 90px;
-    }
-
-    .filter-left {
-      display: flex;
-      align-items: end;
-      gap: 10px;
-      min-width: 230px;
-    }
-
-    .filter-group label {
-      display: block;
-      font-size: 13px;
-      color: #61707d;
-      margin-bottom: 8px;
-      font-weight: 700;
-    }
-
-    .filter-group select {
-      height: 36px;
-      border: 1px solid #d8dddd;
-      border-radius: 6px;
-      padding: 0 10px;
-      font-size: 13px;
-      background: #fff;
-      color: #2a3d51;
-    }
-
-    .apply-btn {
-      height: 36px;
-      padding: 0 18px;
-      border: none;
-      border-radius: 7px;
-      background: #22bda9;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .summary-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
-    .summary-card {
-      padding: 18px 20px;
-      min-height: 94px;
-    }
-
-    .summary-card .label {
-      font-size: 13px;
-      color: #8a959d;
-      margin-bottom: 8px;
-      font-weight: 700;
-    }
-
-    .summary-card .value {
-      font-size: 25px;
-      font-weight: 800;
-      color: #2d4258;
-    }
-
-    .summary-card .value.green {
-      color: #2ec86e;
-    }
-
-    .chart-topline {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      margin: 10px 0 14px;
-    }
-
-    .tabs {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .tab {
-      border: 1px solid #dfe4e4;
-      background: #f5f5f5;
-      color: #75808a;
-      border-radius: 999px;
-      height: 32px;
-      padding: 0 16px;
-      font-size: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.15s ease;
-    }
-
-    .tab.active {
-      background: #23bea9;
-      color: #fff;
-      border-color: #23bea9;
-    }
-
-    .chart-panel {
-      position: relative;
-      padding: 18px 18px 18px;
-      overflow: hidden;
-    }
-
-    .chart-title-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .chart-title-left {
-      font-size: 16px;
-      font-weight: 800;
-      color: #2d4258;
-    }
-
-    .fake-chart-wrap {
-      margin-top: 8px;
-      border-radius: 12px;
-      overflow: hidden;
-      background:
-        linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px),
-        #fcfcfc;
-      background-size: calc(100% / 24) calc(100% / 8), calc(100% / 24) calc(100% / 8), auto;
-      height: 330px;
-      position: relative;
-      border: 1px solid #ececec;
-    }
-
-    #analysisChart {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-
-    .chart-empty-message {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #7d878f;
-      font-size: 14px;
-      font-weight: 700;
-      pointer-events: none;
-      background: transparent;
-      z-index: 5;
-    }
-
-    @media (max-width: 1200px) {
-      .summary-row {
-        grid-template-columns: 1fr;
-      }
-
-      .filter-panel {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .chart-topline {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-    }
-  </style>
+		.notice {
+			border-top: 2px solid rgba(255,255,255,0.12);
+			margin-top: 4px;
+		}	
+	    .panel {
+			background: #f9f9f9;
+			border-radius: 16px;
+			box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
+	    }
+	    .filter-panel {
+			display: flex;
+			align-items: center;
+			gap: 20px;
+			padding: 20px;
+			margin-bottom: 18px;
+			min-height: 90px;
+	    }
+	    .filter-left {
+			display: flex;
+			align-items: end;
+			gap: 10px;
+			min-width: 230px;
+	    }
+	    .filter-group label {
+			display: block;
+			font-size: 13px;
+			color: #61707d;
+			margin-bottom: 8px;
+			font-weight: 700;
+	    }
+	    .filter-group select {
+			height: 36px;
+			border: 1px solid #d8dddd;
+			border-radius: 6px;
+			padding: 0 10px;
+			font-size: 13px;
+			background: #fff;
+			color: #2a3d51;
+	    }
+	    .apply-btn {
+			height: 36px;
+			padding: 0 18px;
+			border: none;
+			border-radius: 7px;
+			background: #22bda9;
+			color: #fff;
+			font-size: 13px;
+			font-weight: 700;
+			cursor: pointer;
+	    }
+	    .summary-row {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 14px;
+			margin-bottom: 20px;
+	    }
+	    .summary-card {
+			padding: 18px 20px;
+			min-height: 94px;
+	    }
+	    .summary-card .label {
+			font-size: 13px;
+			color: #8a959d;
+			margin-bottom: 8px;
+			font-weight: 700;
+	    }
+	    .summary-card .value {
+			font-size: 25px;
+			font-weight: 800;
+			color: #2d4258;
+	    }
+	    .summary-card .value.green {
+			color: #2ec86e;
+	    }
+	    .chart-topline {
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			margin: 10px 0 14px;
+	    }
+	    .tabs {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+	    }
+	    .tab {
+			border: 1px solid #dfe4e4;
+			background: #f5f5f5;
+			color: #75808a;
+			border-radius: 999px;
+			height: 32px;
+			padding: 0 16px;
+			font-size: 12px;
+			font-weight: 700;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			user-select: none;
+			transition: all 0.15s ease;
+	    }
+	    .tab.active {
+			background: #23bea9;
+			color: #fff;
+			border-color: #23bea9;
+	    }
+	    .chart-panel {
+			position: relative;
+			padding: 18px 18px 18px;
+			overflow: hidden;
+	    }
+	    .chart-title-row {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 8px;
+	    }
+	    .chart-title-left {
+			font-size: 16px;
+			font-weight: 800;
+			color: #2d4258;
+	    }
+	    .fake-chart-wrap {
+			margin-top: 8px;
+			border-radius: 12px;
+			overflow: hidden;
+			background:
+				linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+				linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px),
+				#fcfcfc;
+			background-size: calc(100% / 24) calc(100% / 8), calc(100% / 24) calc(100% / 8), auto;
+			height: 330px;
+			position: relative;
+			border: 1px solid #ececec;
+	    }
+	    #analysisChart {
+			width: 100%;
+			height: 100%;
+			position: relative;
+	    }
+	    .chart-empty-message {
+			position: absolute;
+			inset: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			color: #7d878f;
+			font-size: 14px;
+			font-weight: 700;
+			pointer-events: none;
+			background: transparent;
+			z-index: 5;
+	    }
+	    @media (max-width: 1200px) {
+			.summary-row {
+				grid-template-columns: 1fr;
+			}
+			.filter-panel {
+				flex-direction: column;
+				align-items: stretch;
+			}
+			.chart-topline {
+				flex-direction: column;
+				align-items: stretch;
+				gap: 10px;
+			}
+	    }
+	</style>
 </head>
-<body>
-  <div class="layout">
-    <aside class="sidebar">
-      <div class="logo">SEOUL BIKE</div>
-      <ul class="menu">
-        <li>
-       		<a href="/dashboard" class="menu-font" style="text-decoration: none;"><span class="icon">📊</span>종합 분석</a>
-       	</li>
-		<li class="active">
-			<a href="/analysis/detail" class="menu-font-selected" style="text-decoration: none;"><span class="icon">🔍</span>상세 분석</a>
-		</li>
-		<li>
-			<a href="dashboard-map.html" class="menu-font" style="text-decoration: none;"><span class="icon">🗺️</span>지역별 지도</a>
-		</li>
-		<li>
-			<a href="/data-center" class="menu-font" style="text-decoration: none;"><span class="icon">📁</span>데이터 센터</a>
-		</li>
-		<li class="notice">
-			<a href="/notifications" class="menu-font" style="text-decoration: none;"><span class="icon">🔔</span>알림 내역</a>
-		</li>
-		<li>
-			<a href="/" class="menu-font" style="text-decoration: none;"><span class="icon">🔒</span>로그아웃</a>
-		</li>
-      </ul>
-    </aside>
+<body class="bg">
+	<nav id="sidebar" class=menu-color>
+	    <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
+	    <ul>
+		    <li><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
+		    <li class="active"><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+		    <li><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">데이터 센터</span></a></li>
+		    <li class="notice"><a th:href="@{/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
+		    <li><a th:href="@{/}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+	    </ul>
+    </nav>
+	<div id="main-content">
+	<header>
+		<span style="margin-right: 20px;" class="subtitle-dark-blue-font"><b>[따릉이 심층 분석 모드]</b></span>
+		<form method="get" style="margin: 0; margin-right: 10px;">
+			<select name="lang" onchange="this.form.submit()">
+				<option value="ko" th:selected="${#locale.language == 'ko'}"
+					th:text="#{language.korean}">KR</option>
+				<option value="en" th:selected="${#locale.language == 'en'}"
+					th:text="#{language.english}">EN</option>
+			</select>
+		</form>
+	</header>
+		<main class="container">
+		    <section class="panel filter-panel">
+				<div class="filter-left">
+					<div class="filter-group">
+					<label>자치구 선택</label>
+					<select>
+						<option>전체 자치구</option>
+						<option>마포구</option>
+						<option>영등포구</option>
+						<option>송파구</option>
+					</select>
+					</div>
+					<button class="apply-btn" type="button">필터 적용</button>
+				</div>
+		    </section>
+		
+		    <section class="summary-row">
+				<div class="panel summary-card">
+					<div class="label">평균 이동거리</div>
+					<div class="value">3.2 km</div>
+				</div>
+				<div class="panel summary-card">
+					<div class="label">평균 이용시간</div>
+					<div class="value">24 분</div>
+				</div>
+				<div class="panel summary-card">
+					<div class="label">탄소 절감량</div>
+					<div class="value green">450 kg</div>
+				</div>
+		    </section>
+		
+		    <div class="chart-topline">
+				<div class="tabs">
+					<div class="tab" data-type="hour">◔ 시간대별</div>
+					<div class="tab active" data-type="age">👤 연령대별</div>
+					<div class="tab" data-type="genderCode">🚻 성별/목적별</div>
+				</div>
+		    </div>
+		
+		    <section class="panel chart-panel">
+				<div class="chart-title-row">
+					<div class="chart-title-left">👤 연령대별 이용량 추이</div>
+				</div>
+				
+				<div class="fake-chart-wrap">
+					<div id="analysisChart"></div>
+				</div>
+		    </section>
+		</main>
+	</div>
 
-    <main class="main">
-      <div class="topbar">[따릉이 심층 분석 모드]</div>
-
-      <div class="container">
-        <section class="panel filter-panel">
-          <div class="filter-left">
-            <div class="filter-group">
-              <label>자치구 선택</label>
-              <select>
-                <option>전체 자치구</option>
-                <option>마포구</option>
-                <option>영등포구</option>
-                <option>송파구</option>
-              </select>
-            </div>
-            <button class="apply-btn" type="button">필터 적용</button>
-          </div>
-        </section>
-
-        <section class="summary-row">
-          <div class="panel summary-card">
-            <div class="label">평균 이동거리</div>
-            <div class="value">3.2 km</div>
-          </div>
-          <div class="panel summary-card">
-            <div class="label">평균 이용시간</div>
-            <div class="value">24 분</div>
-          </div>
-          <div class="panel summary-card">
-            <div class="label">탄소 절감량</div>
-            <div class="value green">450 kg</div>
-          </div>
-        </section>
-
-        <div class="chart-topline">
-          <div class="tabs">
-            <div class="tab" data-type="hour">◔ 시간대별</div>
-            <div class="tab active" data-type="age">👤 연령대별</div>
-            <div class="tab" data-type="genderCode">🚻 성별/목적별</div>
-          </div>
-        </div>
-
-        <section class="panel chart-panel">
-          <div class="chart-title-row">
-            <div class="chart-title-left">👤 연령대별 이용량 추이</div>
-          </div>
-
-          <div class="fake-chart-wrap">
-            <div id="analysisChart"></div>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    $(function () {
-      const ageCategories = ['~10대', '20대', '30대', '40대', '50대', '60대', '70대이상', '기타'];
-
-      function clearOverlayMessage() {
-        $('#analysisChart').find('.chart-empty-message').remove();
-      }
-
-      function showOverlayMessage(message) {
-        clearOverlayMessage();
-        $('#analysisChart').append(
-          '<div class="chart-empty-message">' + message + '</div>'
-        );
-      }
-
-      function setActiveTab(type) {
-        $('.tab').removeClass('active');
-        $('.tab[data-type="' + type + '"]').addClass('active');
-      }
-
-      function renderAgeChart(response) {
-        clearOverlayMessage();
-
-        const ageData = new Array(8).fill(0);
-
-        response.forEach(item => {
-        const label = item.label ?? item.LABEL;
-  		const value = item.value ?? item.VALUE;
-          const index = ageCategories.indexOf(label);
-          if (index !== -1) {
-            ageData[index] = Number(value);
-          }
-        });
-
-        Highcharts.chart('analysisChart', {
-          accessibility: {
-            enabled: false
-          },
-          chart: {
-            type: 'column',
-            backgroundColor: '#fcfcfc',
-            spacingTop: 20,
-            spacingRight: 20,
-            spacingBottom: 20,
-            spacingLeft: 20
-          },
-          title: {
-            text: null
-          },
-          credits: {
-            enabled: false
-          },
-          exporting: {
-            enabled: false
-          },
-          legend: {
-            enabled: false
-          },
-          xAxis: {
-            categories: ageCategories,
-            title: {
-              text: null
-            },
-            lineColor: '#dfe4e4',
-            tickColor: '#dfe4e4',
-            labels: {
-              style: {
-                color: '#7d878f',
-                fontSize: '12px'
-              }
-            }
-          },
-          yAxis: {
-            title: {
-              text: '대여 건수'
-            },
-            gridLineColor: '#e9eeee',
-            labels: {
-              style: {
-                color: '#7d878f',
-                fontSize: '12px'
-              }
-            }
-          },
-          tooltip: {
-            valueSuffix: '건'
-          },
-          plotOptions: {
-            column: {
-              borderRadius: 6,
-              pointPadding: 0.08,
-              groupPadding: 0.1
-            }
-          },
-          series: [{
-            name: '대여 건수',
-            data: ageData,
-            color: '#25bea9'
-          }]
-        });
-
-        $('.chart-title-left').text('👤 연령대별 이용량 추이');
-      }
-
-      function renderEmptyChart(titleText, message) {
-        clearOverlayMessage();
-
-        Highcharts.chart('analysisChart', {
-          accessibility: {
-            enabled: false
-          },
-          chart: {
-            type: 'line',
-            backgroundColor: '#fcfcfc',
-            spacingTop: 20,
-            spacingRight: 20,
-            spacingBottom: 20,
-            spacingLeft: 20
-          },
-          title: {
-            text: null
-          },
-          credits: {
-            enabled: false
-          },
-          exporting: {
-            enabled: false
-          },
-          legend: {
-            enabled: false
-          },
-          xAxis: {
-            categories: []
-          },
-          yAxis: {
-            title: {
-              text: null
-            }
-          },
-          series: []
-        });
-
-        $('.chart-title-left').text(titleText);
-        showOverlayMessage(message);
-      }
-
-      function loadAgeChart() {
-        $.ajax({
-          url: '/api/analysis/age',
-          method: 'GET',
-          data: {
-            startDate: '2025-01-01',
-            endDate: '2025-12-31',
-            targetCol: 'USES',
-            calcType: 'SUM'
-          },
-          success: function (response) {
-            console.log('연령대별 응답 데이터:', response);
-            renderAgeChart(response);
-          },
-          error: function (xhr, status, error) {
-            console.error('연령대별 데이터 조회 실패:', error);
-            console.log(xhr.responseText);
-            renderEmptyChart('👤 연령대별 이용량 추이', '연령대별 데이터를 불러오지 못했습니다.');
-          }
-        });
-      }
-
-      $('.tab').on('click', function () {
-        const type = $(this).data('type');
-        setActiveTab(type);
-
-        if (type === 'age') {
-          loadAgeChart();
-        } else if (type === 'hour') {
-          renderEmptyChart('◷ 시간대별 이용량 추이', '현재 데이터에는 시간 정보가 없어 시간대별 분석을 지원하지 않습니다.');
-        } else if (type === 'genderCode') {
-          renderEmptyChart('🚻 성별/목적별 이용량 추이', '성별/목적별 분석 기능은 준비 중입니다.');
-        }
-      });
-
-      loadAgeChart();
-    });
-  </script>
+	<script>
+	  $(function () {
+	    const ageCategories = ['~10대', '20대', '30대', '40대', '50대', '60대', '70대이상', '기타'];
+	
+	    function clearOverlayMessage() {
+	      $('#analysisChart').find('.chart-empty-message').remove();
+	    }
+	
+	    function showOverlayMessage(message) {
+	      clearOverlayMessage();
+	      $('#analysisChart').append(
+	        '<div class="chart-empty-message">' + message + '</div>'
+	      );
+	    }
+	
+	    function setActiveTab(type) {
+	      $('.tab').removeClass('active');
+	      $('.tab[data-type="' + type + '"]').addClass('active');
+	    }
+	
+	    function renderAgeChart(response) {
+	      clearOverlayMessage();
+	
+	      const ageData = new Array(8).fill(0);
+	
+	      response.forEach(item => {
+	      const label = item.label ?? item.LABEL;
+			const value = item.value ?? item.VALUE;
+	        const index = ageCategories.indexOf(label);
+	        if (index !== -1) {
+	          ageData[index] = Number(value);
+	        }
+	      });
+	
+	      Highcharts.chart('analysisChart', {
+	        accessibility: {
+	          enabled: false
+	        },
+	        chart: {
+	          type: 'column',
+	          backgroundColor: '#fcfcfc',
+	          spacingTop: 20,
+	          spacingRight: 20,
+	          spacingBottom: 20,
+	          spacingLeft: 20
+	        },
+	        title: {
+	          text: null
+	        },
+	        credits: {
+	          enabled: false
+	        },
+	        exporting: {
+	          enabled: false
+	        },
+	        legend: {
+	          enabled: false
+	        },
+	        xAxis: {
+	          categories: ageCategories,
+	          title: {
+	            text: null
+	          },
+	          lineColor: '#dfe4e4',
+	          tickColor: '#dfe4e4',
+	          labels: {
+	            style: {
+	              color: '#7d878f',
+	              fontSize: '12px'
+	            }
+	          }
+	        },
+	        yAxis: {
+	          title: {
+	            text: '대여 건수'
+	          },
+	          gridLineColor: '#e9eeee',
+	          labels: {
+	            style: {
+	              color: '#7d878f',
+	              fontSize: '12px'
+	            }
+	          }
+	        },
+	        tooltip: {
+	          valueSuffix: '건'
+	        },
+	        plotOptions: {
+	          column: {
+	            borderRadius: 6,
+	            pointPadding: 0.08,
+	            groupPadding: 0.1
+	          }
+	        },
+	        series: [{
+	          name: '대여 건수',
+	          data: ageData,
+	          color: '#25bea9'
+	        }]
+	      });
+	
+	      $('.chart-title-left').text('👤 연령대별 이용량 추이');
+	    }
+	
+	    function renderEmptyChart(titleText, message) {
+	      clearOverlayMessage();
+	
+	      Highcharts.chart('analysisChart', {
+	        accessibility: {
+	          enabled: false
+	        },
+	        chart: {
+	          type: 'line',
+	          backgroundColor: '#fcfcfc',
+	          spacingTop: 20,
+	          spacingRight: 20,
+	          spacingBottom: 20,
+	          spacingLeft: 20
+	        },
+	        title: {
+	          text: null
+	        },
+	        credits: {
+	          enabled: false
+	        },
+	        exporting: {
+	          enabled: false
+	        },
+	        legend: {
+	          enabled: false
+	        },
+	        xAxis: {
+	          categories: []
+	        },
+	        yAxis: {
+	          title: {
+	            text: null
+	          }
+	        },
+	        series: []
+	      });
+	
+	      $('.chart-title-left').text(titleText);
+	      showOverlayMessage(message);
+	    }
+	
+	    function loadAgeChart() {
+	      $.ajax({
+	        url: '/api/analysis/age',
+	        method: 'GET',
+	        data: {
+	          startDate: '2025-01-01',
+	          endDate: '2025-12-31',
+	          targetCol: 'USES',
+	          calcType: 'SUM'
+	        },
+	        success: function (response) {
+	          console.log('연령대별 응답 데이터:', response);
+	          renderAgeChart(response);
+	        },
+	        error: function (xhr, status, error) {
+	          console.error('연령대별 데이터 조회 실패:', error);
+	          console.log(xhr.responseText);
+	          renderEmptyChart('👤 연령대별 이용량 추이', '연령대별 데이터를 불러오지 못했습니다.');
+	        }
+	      });
+	    }
+	
+	    $('.tab').on('click', function () {
+	      const type = $(this).data('type');
+	      setActiveTab(type);
+	
+	      if (type === 'age') {
+	        loadAgeChart();
+	      } else if (type === 'hour') {
+	        renderEmptyChart('◷ 시간대별 이용량 추이', '현재 데이터에는 시간 정보가 없어 시간대별 분석을 지원하지 않습니다.');
+	      } else if (type === 'genderCode') {
+	        renderEmptyChart('🚻 성별/목적별 이용량 추이', '성별/목적별 분석 기능은 준비 중입니다.');
+	      }
+	    });
+	
+	    loadAgeChart();
+	  });
+	</script>
 </body>
 </html>

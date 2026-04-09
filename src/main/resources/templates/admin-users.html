@@ -23,6 +23,11 @@
         header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .container { flex: 1; padding: 30px; overflow-y: auto; }
         .user-mgmt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .notice {
+			border-top: 2px solid rgba(255,255,255,0.12);
+			margin-top: 4px;
+		}
+        
         .search-bar { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .search-bar select, .search-bar input { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; outline: none; }
         .card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
@@ -39,11 +44,15 @@
         .page-btn.active { background: #1abc9c; color: white; border-color: #1abc9c; font-weight: bold; }
     </style>
 </head>
-<body class="bg">
+<body class="bg-admin">
     <nav id="sidebar" class="menu-color">
         <h2 class="logo-font">SEOUL BIKE</h2>
         <ul>
             <li><a href="#">📊 종합 분석</a></li>
+            <li><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+		    <li><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">데이터 센터</span></a></li>
+		    <li class="notice"><a th:href="@{/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
             <li class="active"><a th:href="@{/admin/members/search}">👤 회원 관리</a></li>
             <li><a th:href="@{/logout}">🔒 로그아웃</a></li>
         </ul>
@@ -51,7 +60,17 @@
 
     <div id="main-content">
         <header>
-            <span class="subtitle-dark-blue-font"> 마스터 권한: <b th:text="${session.adminName ?: '슈퍼관리자'}"></b></span>
+            <span style="margin-right: 20px;" class="subtitle-dark-blue-font">
+            마스터 권한: <b th:text="${session.adminName ?: '슈퍼관리자'}"></b></span>
+            
+            <form method="get" style="margin: 0; margin-right: 10px;">
+				<select name="lang" onchange="this.form.submit()">
+					<option value="ko" th:selected="${#locale.language == 'ko'}"
+						th:text="#{language.korean}">KR</option>
+					<option value="en" th:selected="${#locale.language == 'en'}"
+						th:text="#{language.english}">EN</option>
+				</select>
+			</form>
         </header>
 
         <main class="container">

@@ -4,38 +4,24 @@
     <meta charset="UTF-8">
     <title>알림 센터 | 따릉이 분석 서비스</title>
     
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/color.css}">
     <link rel="stylesheet" th:href="@{/css/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/card.css}">
     
     <style>
-    	.menu {
-			list-style: none;
-			padding-top: 18px;
-			margin: 0;
-			padding: 0;
-		}
-		.menu li {
-			height: 60px;
-			display: flex;
-			align-items: center;
-			padding: 0 26px;
-			font-size: 18px;
-			color: #f5f7fa;
-			cursor: pointer;
-		}
-		.menu li span.icon {
-			width: 28px;
-			display: inline-block;
-			margin-right: 12px;
-			font-size: 22px;
-		}
-		.menu li.active {
-			background-color: #37506a;
-			color: #19c8af;
-		}
-		.menu li.notice {
-			border-top: 1px solid rgba(255,255,255,0.12);
+    	* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+	    body { display: flex; height: 100vh; overflow: hidden; }
+		#sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
+	    #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+	    #sidebar ul { list-style: none; padding: 20px 0; }
+	    #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
+	    #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
+		#main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+		header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+		.container { flex: 1; padding: 30px; overflow-y: auto; }
+		.notice {
+			border-top: 2px solid rgba(255,255,255,0.12);
 			margin-top: 4px;
 		}
     
@@ -48,58 +34,33 @@
         .unread { border-left: 4px solid #1abc9c; background: #f0fdfa; }
     </style>
 </head>
-<body class="bg" style="margin:0; padding:0">
-    <nav style="
-    	position: fixed;
-    	width: 300px;
-    	height: 100%;
-    	background-color: #2C3E50;
-    	color: white;
-    	padding-top: 20px;
-    	box-sizing: border-box;">
-        <h2 class="logo-font text-center" style="padding: 0 0 0 30px">SEOUL BIKE</h2>
-        <ul class="menu" style="margin: 0; padding: 0;">
-            <li>
-        		<a href="/dashboard" style="color: white; text-decoration: none;"><span class="icon">📊</span>종합 분석</a>
-        	</li>
-			<li>
-				<a href="/analysis/detail" style="color: white; text-decoration: none;"><span class="icon">🔍</span>상세 분석</a>
-			</li>
-			<li>
-				<a href="dashboard-map.html" style="color: white; text-decoration: none;"><span class="icon">🗺️</span>지역별 지도</a>
-			</li>
-			<li>
-				<a href="/data-center" style="color: white; text-decoration: none;"><span class="icon">📁</span>데이터 센터</a>
-			</li>
-			<li class="notice active">
-				<a href="/notifications" style="color: white; text-decoration: none;"><span class="icon">🔔</span>알림 내역</a>
-			</li>
-			<li>
-				<a href="/" style="color: white; text-decoration: none;"><span class="icon">🔒</span>로그아웃</a>
-			</li>
-        </ul>
+<body class="bg">
+    <nav id="sidebar" class=menu-color>
+        <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
+        <ul>
+		    <li><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
+		    <li><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+		    <li><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">데이터 센터</span></a></li>
+		    <li class="notice active"><a th:href="@{/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
+		    <li><a th:href="@{/}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+	    </ul>
     </nav>
 
-    <div style="margin-left: 300px; padding: 0; box-sizing: border-box;">
-        <div style="
-	        width: 100%;
-	        height: 30px;
-	        padding: 20px 0 20px 0;
-	        margin: 0 0 20px 0;
-	        box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.3);
-	        background-color: white;
-	        display: flex;
-	        align-items: center;
-	        justify-content: flex-end;
-	    ">
-	    	<span style="margin-right: 20px;"><b>시스템 알림 센터</b></span>
-	    	<select id="lang-select" style="margin-right: 20px;">
-                <option value="ko">KR</option>
-                <option value="en">EN</option>
-            </select>
-	    </div>
+    <div id="main-content">
+	    <header>
+			<span style="margin-right: 20px;" class="subtitle-dark-blue-font"><b>시스템 알림 센터</b></span>
+			<form method="get" style="margin: 0; margin-right: 10px;">
+				<select name="lang" onchange="this.form.submit()">
+					<option value="ko" th:selected="${#locale.language == 'ko'}"
+						th:text="#{language.korean}">KR</option>
+					<option value="en" th:selected="${#locale.language == 'en'}"
+						th:text="#{language.english}">EN</option>
+				</select>
+			</form>
+		</header>
 
-        <section style="margin:0 20px">
+		<main class="container">
             <div>
                 <div class="noti-item unread">
                     <div class="noti-icon">!]</div>
@@ -118,7 +79,7 @@
                     </div>
                 </div>
             </div>
-        </section>
+        </main>
     </div>
 </body>
 </html>
