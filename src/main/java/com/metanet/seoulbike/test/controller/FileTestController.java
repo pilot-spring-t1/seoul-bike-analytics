@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.metanet.seoulbike.dto.SeoulBikeDto;
 import com.metanet.seoulbike.mapper.SeoulBikeMapper;
 import com.metanet.seoulbike.test.dto.FileDto;
-import com.metanet.seoulbike.test.dto.SeoulBikeDto;
 import com.metanet.seoulbike.test.mapper.FileMapper;
 
 @RestController
@@ -140,7 +140,7 @@ public class FileTestController {
 	                dto.setAgeGroup(t[5]); // 여기서 "20대"가 정상 저장됨
 
 	                // 3. 숫자 데이터 파싱 (인덱스 t[6]~t[10])
-	                // 데이터가 비어있거나(\N 등) 형식이 다를 경우를 위해 trim() 필수
+	                // 데이터가 비어있거나(\N 등) 형식이 다를 경우를 위해 trim()
 	                dto.setNumOfUses(Integer.parseInt(t[6].isEmpty() ? "0" : t[6]));
 	                dto.setExerciseAmount(Double.parseDouble(t[7].isEmpty() ? "0" : t[7]));
 	                dto.setCarbonAmount(Double.parseDouble(t[8].isEmpty() ? "0" : t[8]));

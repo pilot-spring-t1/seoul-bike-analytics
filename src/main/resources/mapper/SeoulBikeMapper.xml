@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper
-	namespace="com.metanet.seoulbike.mapper.SeoulBikeMapper">
+<mapper namespace="com.metanet.seoulbike.mapper.SeoulBikeMapper">
 
 	<insert id="insertBikeBatch" parameterType="java.util.List">
 		INSERT ALL
 		<foreach collection="list" item="item">
-			INTO SEOUL_BIKE_TEST (
+			INTO SEOUL_BIKE (
 			RENTAL_DATE,
 			RENTAL_OFFICE_NO,
 			RENTAL_OFFICE_NAME,
@@ -20,7 +19,8 @@
 			DISTANCE,
 			USAGE_MINUTE
 			) VALUES (
-			TO_DATE(#{item.rentalDate}, 'YYYY-MM-DD'), #{item.rentalOfficeNo},
+			TO_DATE(#{item.rentalDate}, 'YYYY-MM-DD'),
+			#{item.rentalOfficeNo},
 			#{item.rentalOfficeName},
 			#{item.rentalCode},
 			#{item.gender},
@@ -35,22 +35,129 @@
 		SELECT * FROM DUAL
 	</insert>
 
-	<select id="findAllBikeData" resultType="SeoulBikeDto">
-		SELECT * FROM SEOUL_BIKE_TEST ORDER BY RENTAL_DATE DESC
+	<select id="findAllBikeData"
+		resultType="com.metanet.seoulbike.dto.SeoulBikeDto">
+		SELECT * FROM SEOUL_BIKE
+		ORDER BY RENTAL_DATE DESC
 	</select>
 
-	<select id="getMonthlyUsage" resultType="com.metanet.seoulbike.dto.MonthlyUsageDto">
-        SELECT 
-            TO_NUMBER(TO_CHAR(RENTAL_DATE, 'MM')) AS month,
-            SUM(NUM_OF_USES) AS totalUses
-        FROM seoul_bike
-        WHERE TO_CHAR(RENTAL_DATE, 'YYYY') = #{year}
-        GROUP BY TO_CHAR(RENTAL_DATE, 'MM')
-        ORDER BY month
-    </select>
+	<select id="getMonthlyUsage"
+		resultType="com.metanet.seoulbike.dto.BikeMonthlyUsageDto">
+		SELECT
+		TO_NUMBER(TO_CHAR(RENTAL_DATE, 'MM')) AS month,
+		SUM(NUM_OF_USES) AS totalUses
+		FROM seoul_bike
+		WHERE TO_CHAR(RENTAL_DATE,
+		'YYYY') =
+		#{year}
+		GROUP BY TO_CHAR(RENTAL_DATE, 'MM')
+		ORDER BY month
+	</select>
 
-	<delete id="truncateTestTable">
-		TRUNCATE TABLE SEOUL_BIKE_TEST
-	</delete>
+	<select id="findByPeriod"
+		parameterType="com.metanet.seoulbike.dto.BikePeriodSearchDto"
+		resultType="com.metanet.seoulbike.dto.SeoulBikeDto">
+		SELECT *
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+			</if>
+		</where>
+		ORDER BY RENTAL_DATE ASC
+	</select>
+
+	<select id="getDayUsage"
+		resultType="com.metanet.seoulbike.dto.BikeDayUsageDto">
+		SELECT
+		TO_CHAR(RENTAL_DATE, 'DY') AS dayOfWeek,
+		SUM(NUM_OF_USES) AS totalUsage
+		FROM SEOUL_BIKE
+		GROUP BY
+		TO_CHAR(RENTAL_DATE, 'DY'), TO_CHAR(RENTAL_DATE, 'D')
+		ORDER BY
+		TO_CHAR(RENTAL_DATE, 'D')
+	</select>
+
+
+	<select id="getCustomAnalysis" parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto" resultType="map">
+    SELECT label, value FROM (
+        SELECT
+            <choose>
+                <when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
+                <when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
+                <when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
+                <when test="groupBy == 'AGE'">AGE_GROUP</when>
+                <when test="groupBy == 'CODE'">RENTAL_CODE</when>
+                <otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
+            </choose> AS label,
+            NVL(
+                <choose>
+                    <when test="calcType == 'SUM'">SUM</when>
+                    <when test="calcType == 'AVG'">ROUND(AVG</when>
+                    <when test="calcType == 'COUNT'">COUNT</when>
+                    <otherwise>SUM</otherwise>
+                </choose>
+                (
+                    <choose>
+                        <when test="targetCol == 'USES'">NUM_OF_USES</when>
+                        <when test="targetCol == 'DISTANCE'">DISTANCE</when>
+                        <when test="targetCol == 'CARBON'">CARBON_AMOUNT</when>
+                        <when test="targetCol == 'EXERCISE'">EXERCISE_AMOUNT</when>
+                        <when test="targetCol == 'MINUTE'">USAGE_MINUTE</when>
+                        <otherwise>NUM_OF_USES</otherwise>
+                    </choose>
+                )
+                <if test="calcType == 'AVG'">, 2)</if>
+            , 0) AS value
+        FROM SEOUL_BIKE
+        <where>
+            <if test="startDate != null and startDate != ''">
+                AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND RENTAL_DATE &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+            </if>
+            /* [수정] 필터링 시에도 DB 값을 UPPER로 변환하여 파라미터(F/M)와 비교 */
+            <if test="gender != null and gender != ''">
+                AND UPPER(GENDER) = UPPER(#{gender})
+            </if>
+            <if test="ageGroup != null and ageGroup != ''">
+                AND AGE_GROUP = #{ageGroup}
+            </if>
+            <if test="rentalCode != null and rentalCode != ''">
+                AND RENTAL_CODE = #{rentalCode}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
+            </if>
+        </where>
+        GROUP BY
+            <choose>
+                <when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
+                <when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
+                <when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
+                <when test="groupBy == 'AGE'">AGE_GROUP</when>
+                <when test="groupBy == 'CODE'">RENTAL_CODE</when>
+                <otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
+            </choose>
+	    )
+	    ORDER BY 
+	    <choose>
+	        <when test="sortBy == 'VALUE'">value</when>
+	        <otherwise>label</otherwise>
+	    </choose>
+	    <choose>
+	        <when test="sortOrder == 'DESC'">DESC</when>
+	        <otherwise>ASC</otherwise>
+	    </choose>
+	    <if test="limit != null and limit > 0">
+	        OFFSET 0 ROWS FETCH NEXT #{limit} ROWS ONLY
+	    </if>
+	</select>
+
 
 </mapper>
