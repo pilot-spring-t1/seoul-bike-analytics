@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BikeUsageService {
 
-    private final SeoulBikeMapper seoulBikeMapper;
+    private final SeoulBikeMapper bikeUsageMapper;
 
     public List<BikeMonthlyUsageDto> getMonthlyUsage(int year) {
-        return seoulBikeMapper.getMonthlyUsage(year);
+        return bikeUsageMapper.getMonthlyUsage(year);
     }
 }
