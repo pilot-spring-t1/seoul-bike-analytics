@@ -35,7 +35,7 @@
 </head>
 <body class="bg-dark-green">
 
-<form method="get" style="display:inline;">
+<form method="get" style="position:fixed; top:20px; right:20px; margin:0;">
     <select name="lang" onchange="this.form.submit()">
         <option value="ko" th:selected="${#locale.language == 'ko'}" th:text="#{language.korean}">KR</option>
         <option value="en" th:selected="${#locale.language == 'en'}" th:text="#{language.english}">EN</option>
