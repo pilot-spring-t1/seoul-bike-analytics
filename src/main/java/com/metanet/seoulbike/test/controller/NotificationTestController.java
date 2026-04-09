@@ -23,19 +23,21 @@ public class NotificationTestController {
 	// 1. 알림 발송 테스트 (POST)
 	@PostMapping("/send")
 	public String sendNoti(@RequestBody NotificationDto notiDto) {
+		// DB 컬럼이 MEMBER_ID로 바뀌었으므로, JSON 요청 시에도 memberId를 담아 보내야 합니다.
 		int result = notiMapper.insertNotification(notiDto);
 		return result > 0 ? "알림 발송 성공" : "발송 실패";
 	}
 
-	// 2. 내 알림 확인 (GET)
-	@GetMapping("/list/{userNo}")
-	public List<NotificationDto> getMyNoti(@PathVariable int userNo) {
-		return notiMapper.findByUserNo(userNo);
+	// 2. 특정 회원 알림 확인 (GET)
+	// 경로 변수를 userNo에서 memberId로 변경
+	@GetMapping("/list/{memberId}")
+	public List<NotificationDto> getMyNoti(@PathVariable Long memberId) {
+		return notiMapper.findByMemberId(memberId);
 	}
 
-	// 3. 알림 읽음 처리 (PATCH/POST)
+	// 3. 알림 읽음 처리 (POST)
 	@PostMapping("/read/{notiId}")
-	public String readNoti(@PathVariable int notiId) {
+	public String readNoti(@PathVariable Long notiId) {
 		int result = notiMapper.markAsRead(notiId);
 		return result > 0 ? "읽음 처리 완료" : "처리 실패";
 	}
