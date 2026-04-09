@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>따릉이 심층 분석 모드</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+      background: #eef1ef;
+      color: #24364a;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 206px;
+      background: #2d4258;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      padding: 28px 18px 26px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      color: #17d1b2;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .menu {
+      list-style: none;
+      margin: 0;
+      padding: 18px 0 0;
+    }
+
+    .menu li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 38px;
+      padding: 0 18px;
+      color: #d7e0e8;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .menu li.active {
+      background: #37506a;
+      color: #19c8af;
+    }
+
+    .menu li.logout {
+      margin-top: 8px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 18px;
+      height: 56px;
+    }
+
+    .main {
+      flex: 1;
+      padding: 0;
+      background: #edf0ef;
+    }
+
+    .topbar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 26px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #30465b;
+      background: #ffffff;
+      border-bottom: 1px solid #e3e6e5;
+    }
+
+    .container {
+      padding: 22px;
+    }
+
+    .panel {
+      background: #f9f9f9;
+      border-radius: 16px;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
+    }
+
+    .filter-panel {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 20px;
+      margin-bottom: 18px;
+      min-height: 90px;
+    }
+
+    .filter-left {
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      min-width: 230px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 13px;
+      color: #61707d;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .filter-group select {
+      height: 36px;
+      border: 1px solid #d8dddd;
+      border-radius: 6px;
+      padding: 0 10px;
+      font-size: 13px;
+      background: #fff;
+      color: #2a3d51;
+    }
+
+    .apply-btn {
+      height: 36px;
+      padding: 0 18px;
+      border: none;
+      border-radius: 7px;
+      background: #22bda9;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      padding: 18px 20px;
+      min-height: 94px;
+    }
+
+    .summary-card .label {
+      font-size: 13px;
+      color: #8a959d;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .summary-card .value {
+      font-size: 25px;
+      font-weight: 800;
+      color: #2d4258;
+    }
+
+    .summary-card .value.green {
+      color: #2ec86e;
+    }
+
+    .chart-topline {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin: 10px 0 14px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .tab {
+      border: 1px solid #dfe4e4;
+      background: #f5f5f5;
+      color: #75808a;
+      border-radius: 999px;
+      height: 32px;
+      padding: 0 16px;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tab.active {
+      background: #23bea9;
+      color: #fff;
+      border-color: #23bea9;
+    }
+
+    .chart-panel {
+      position: relative;
+      padding: 18px 18px 12px;
+      overflow: hidden;
+    }
+
+    .chart-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .chart-title-left {
+      font-size: 16px;
+      font-weight: 800;
+      color: #2d4258;
+    }
+
+    .chart-title-right {
+      font-size: 22px;
+      font-weight: 800;
+      color: #2d2d2d;
+      margin-right: 340px;
+    }
+
+    .stat-box {
+      position: absolute;
+      top: -24px;
+      right: 12px;
+      background: #f7f7f7;
+      border: 2px solid rgba(0,0,0,0.15);
+      border-radius: 20px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 10px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    }
+
+    .stat-btn {
+      min-width: 64px;
+      height: 38px;
+      border-radius: 10px;
+      border: none;
+      background: #ececec;
+      color: #6e7880;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .stat-btn.active {
+      background: #ffffff;
+      color: #23bea9;
+      box-shadow: inset 0 0 0 2px #e7e7e7;
+    }
+
+    .fake-chart-wrap {
+      margin-top: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      background:
+        linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0,0,0,0.06) 1px, transparent 1px),
+        #fcfcfc;
+      background-size: calc(100% / 24) calc(100% / 8), calc(100% / 24) calc(100% / 8), auto;
+      height: 330px;
+      position: relative;
+      border: 1px solid #ececec;
+    }
+
+    .fake-chart-wrap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .x-labels {
+      display: grid;
+      grid-template-columns: repeat(24, 1fr);
+      gap: 0;
+      margin-top: 8px;
+      padding: 0 6px;
+      font-size: 12px;
+      color: #7d878f;
+    }
+
+    .x-labels span {
+      text-align: center;
+    }
+
+    .legend {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #6f7a83;
+      font-weight: 700;
+    }
+
+    .legend .line-box {
+      display: inline-block;
+      width: 34px;
+      height: 12px;
+      border: 3px solid #25bea9;
+      background: rgba(37, 190, 169, 0.15);
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 1200px) {
+      .summary-row {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-panel {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .chart-topline {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .chart-title-right {
+        margin-right: 0;
+        font-size: 18px;
+      }
+
+      .stat-box {
+        position: static;
+        margin-bottom: 12px;
+        width: fit-content;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">SEOUL BIKE</div>
+      <ul class="menu">
+        <li>📊 종합 분석</li>
+        <li class="active">🔍 상세 분석</li>
+        <li>🗺️ 지역별 지도</li>
+        <li>📁 데이터 센터</li>
+        <li class="logout">🔒 로그아웃</li>
+      </ul>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">[따릉이 심층 분석 모드]</div>
+
+      <div class="container">
+        <section class="panel filter-panel">
+          <div class="filter-left">
+            <div class="filter-group">
+              <label>자치구 선택</label>
+              <select>
+                <option>전체 자치구</option>
+                <option>마포구</option>
+                <option>영등포구</option>
+                <option>송파구</option>
+              </select>
+            </div>
+            <button class="apply-btn">필터 적용</button>
+          </div>
+        </section>
+
+        <section class="summary-row">
+          <div class="panel summary-card">
+            <div class="label">평균 이동거리</div>
+            <div class="value">3.2 km</div>
+          </div>
+          <div class="panel summary-card">
+            <div class="label">평균 이용시간</div>
+            <div class="value">24 분</div>
+          </div>
+          <div class="panel summary-card">
+            <div class="label">탄소 절감량</div>
+            <div class="value green">450 kg</div>
+          </div>
+        </section>
+
+        <div class="chart-topline">
+          <div class="tabs">
+            <div class="tab active">◔ 시간대별</div>
+            <div class="tab">👤 연령대별</div>
+            <div class="tab">🚻 성별/목적별</div>
+          </div>
+        </div>
+
+        <section class="panel chart-panel">
+          <!-- <div class="stat-box">
+            <button class="stat-btn">평균치</button>
+            <button class="stat-btn">누적 합계</button>
+            <button class="stat-btn active">최고점</button>
+          </div> -->
+
+          <div class="chart-title-row">
+            <div class="chart-title-left">◷ 시간대별 이용량 추이</div>
+          </div>
+
+          <div class="fake-chart-wrap">
+            <svg viewBox="0 0 1200 330" preserveAspectRatio="none" aria-label="시간대별 이용량 차트">
+              <path
+                d="M 0 300
+                   L 0 285
+                   L 52 292
+                   L 104 294
+                   L 156 295
+                   L 208 292
+                   L 260 270
+                   L 312 220
+                   L 364 110
+                   L 416 145
+                   L 468 220
+                   L 520 245
+                   L 572 235
+                   L 624 228
+                   L 676 210
+                   L 728 195
+                   L 780 160
+                   L 832 85
+                   L 884 35
+                   L 936 120
+                   L 988 195
+                   L 1040 230
+                   L 1092 265
+                   L 1144 285
+                   L 1200 295
+                   L 1200 330
+                   L 0 330 Z"
+                fill="rgba(37, 190, 169, 0.14)">
+              </path>
+
+              <path
+                d="M 0 285
+                   L 52 292
+                   L 104 294
+                   L 156 295
+                   L 208 292
+                   L 260 270
+                   L 312 220
+                   L 364 110
+                   L 416 145
+                   L 468 220
+                   L 520 245
+                   L 572 235
+                   L 624 228
+                   L 676 210
+                   L 728 195
+                   L 780 160
+                   L 832 85
+                   L 884 35
+                   L 936 120
+                   L 988 195
+                   L 1040 230
+                   L 1092 265
+                   L 1144 285
+                   L 1200 295"
+                fill="none"
+                stroke="#25bea9"
+                stroke-width="3"
+                stroke-linecap="round"
+                stroke-linejoin="round">
+              </path>
+
+              <g fill="#25bea9">
+                <circle cx="0" cy="285" r="3"></circle>
+                <circle cx="52" cy="292" r="3"></circle>
+                <circle cx="104" cy="294" r="3"></circle>
+                <circle cx="156" cy="295" r="3"></circle>
+                <circle cx="208" cy="292" r="3"></circle>
+                <circle cx="260" cy="270" r="3"></circle>
+                <circle cx="312" cy="220" r="3"></circle>
+                <circle cx="364" cy="110" r="3"></circle>
+                <circle cx="416" cy="145" r="3"></circle>
+                <circle cx="468" cy="220" r="3"></circle>
+                <circle cx="520" cy="245" r="3"></circle>
+                <circle cx="572" cy="235" r="3"></circle>
+                <circle cx="624" cy="228" r="3"></circle>
+                <circle cx="676" cy="210" r="3"></circle>
+                <circle cx="728" cy="195" r="3"></circle>
+                <circle cx="780" cy="160" r="3"></circle>
+                <circle cx="832" cy="85" r="3"></circle>
+                <circle cx="884" cy="35" r="4"></circle>
+                <circle cx="936" cy="120" r="3"></circle>
+                <circle cx="988" cy="195" r="3"></circle>
+                <circle cx="1040" cy="230" r="3"></circle>
+                <circle cx="1092" cy="265" r="3"></circle>
+                <circle cx="1144" cy="285" r="3"></circle>
+                <circle cx="1200" cy="295" r="3"></circle>
+              </g>
+            </svg>
+          </div>
+
+          <div class="x-labels">
+            <span>0시</span><span>1시</span><span>2시</span><span>3시</span>
+            <span>4시</span><span>5시</span><span>6시</span><span>7시</span>
+            <span>8시</span><span>9시</span><span>10시</span><span>11시</span>
+            <span>12시</span><span>13시</span><span>14시</span><span>15시</span>
+            <span>16시</span><span>17시</span><span>18시</span><span>19시</span>
+            <span>20시</span><span>21시</span><span>22시</span><span>23시</span>
+          </div>
+
+          <div class="legend">
+            <span class="line-box"></span>대여 건수
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

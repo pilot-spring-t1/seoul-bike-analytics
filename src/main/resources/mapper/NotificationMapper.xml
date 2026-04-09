@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.metanet.seoulbike.test.mapper.NotificationMapper">
 
-    <insert id="insertNotification" parameterType="NotificationDto">
-        INSERT INTO NOTIFICATION (USER_NO, NOTI_TYPE, MESSAGE)
-        VALUES (#{userNo}, #{notiType}, #{message})
+    <insert id="insertNotification" parameterType="com.metanet.seoulbike.test.dto.NotificationDto">
+        INSERT INTO NOTIFICATION (MEMBER_ID, NOTI_TYPE, MESSAGE)
+        VALUES (#{memberId}, #{notiType}, #{message})
     </insert>
 
-    <select id="findByUserNo" resultType="NotificationDto">
-        SELECT * FROM NOTIFICATION 
-        WHERE USER_NO = #{userNo} 
-        ORDER BY CREATE_DATE DESC
+    <select id="findByMemberId" resultType="com.metanet.seoulbike.test.dto.NotificationDto">
+        SELECT 
+            n.NOTI_ID as "notiId",
+            n.MEMBER_ID as "memberId",
+            n.NOTI_TYPE as "notiType",
+            n.MESSAGE as "message",
+            n.IS_READ as "isRead",
+            n.CREATED_AT as "createdAt",
+            m.NAME as "name"
+        FROM NOTIFICATION n
+        JOIN MEMBER m ON n.MEMBER_ID = m.MEMBER_ID
+        WHERE n.MEMBER_ID = #{memberId} 
+        ORDER BY n.CREATED_AT DESC
     </select>
 
     <update id="markAsRead">
-        UPDATE NOTIFICATION SET IS_READ = 'Y' WHERE NOTI_ID = #{notiId}
+        UPDATE NOTIFICATION 
+        SET IS_READ = 'Y' 
+        WHERE NOTI_ID = #{notiId}
     </update>
 
 </mapper>
