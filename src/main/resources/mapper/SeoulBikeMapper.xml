@@ -18,7 +18,8 @@
 			CARBON_AMOUNT,
 			DISTANCE,
 			USAGE_MINUTE
-			) VALUES (
+			)
+			VALUES (
 			TO_DATE(#{item.rentalDate}, 'YYYY-MM-DD'),
 			#{item.rentalOfficeNo},
 			#{item.rentalOfficeName},
@@ -54,6 +55,46 @@
 		ORDER BY month
 	</select>
 
+	<!-- 사용자 대시보드 상세 분석 페이지 -->
+	<select id="getAgeGroupUsage"
+		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
+		resultType="map">
+		SELECT
+		AGE_GROUP AS label,
+		SUM(NUM_OF_USES) AS value
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+			</if>
+			<if test="gender != null and gender != ''">
+				AND UPPER(GENDER) = UPPER(#{gender})
+			</if>
+			<if test="rentalCode != null and rentalCode != ''">
+				AND RENTAL_CODE = #{rentalCode}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
+			</if>
+		</where>
+		GROUP BY AGE_GROUP
+		ORDER BY CASE AGE_GROUP
+		WHEN '~10대' THEN 1
+		WHEN '20대' THEN 2
+		WHEN '30대' THEN 3
+		WHEN '40대' THEN 4
+		WHEN '50대' THEN 5
+		WHEN '60대' THEN 6
+		WHEN '70대이상' THEN 7
+		WHEN '기타' THEN 8
+		ELSE 99
+		END
+	</select>
+
+
 	<select id="findByPeriod"
 		parameterType="com.metanet.seoulbike.dto.BikePeriodSearchDto"
 		resultType="com.metanet.seoulbike.dto.SeoulBikeDto">
@@ -83,80 +124,83 @@
 	</select>
 
 
-	<select id="getCustomAnalysis" parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto" resultType="map">
-    SELECT label, value FROM (
-        SELECT
-            <choose>
-                <when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
-                <when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
-                <when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
-                <when test="groupBy == 'AGE'">AGE_GROUP</when>
-                <when test="groupBy == 'CODE'">RENTAL_CODE</when>
-                <otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
-            </choose> AS label,
-            NVL(
-                <choose>
-                    <when test="calcType == 'SUM'">SUM</when>
-                    <when test="calcType == 'AVG'">ROUND(AVG</when>
-                    <when test="calcType == 'COUNT'">COUNT</when>
-                    <otherwise>SUM</otherwise>
-                </choose>
-                (
-                    <choose>
-                        <when test="targetCol == 'USES'">NUM_OF_USES</when>
-                        <when test="targetCol == 'DISTANCE'">DISTANCE</when>
-                        <when test="targetCol == 'CARBON'">CARBON_AMOUNT</when>
-                        <when test="targetCol == 'EXERCISE'">EXERCISE_AMOUNT</when>
-                        <when test="targetCol == 'MINUTE'">USAGE_MINUTE</when>
-                        <otherwise>NUM_OF_USES</otherwise>
-                    </choose>
-                )
-                <if test="calcType == 'AVG'">, 2)</if>
-            , 0) AS value
-        FROM SEOUL_BIKE
-        <where>
-            <if test="startDate != null and startDate != ''">
-                AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
-            </if>
-            <if test="endDate != null and endDate != ''">
-                AND RENTAL_DATE &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
-            </if>
-            /* [수정] 필터링 시에도 DB 값을 UPPER로 변환하여 파라미터(F/M)와 비교 */
-            <if test="gender != null and gender != ''">
-                AND UPPER(GENDER) = UPPER(#{gender})
-            </if>
-            <if test="ageGroup != null and ageGroup != ''">
-                AND AGE_GROUP = #{ageGroup}
-            </if>
-            <if test="rentalCode != null and rentalCode != ''">
-                AND RENTAL_CODE = #{rentalCode}
-            </if>
-            <if test="keyword != null and keyword != ''">
-                AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
-            </if>
-        </where>
-        GROUP BY
-            <choose>
-                <when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
-                <when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
-                <when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
-                <when test="groupBy == 'AGE'">AGE_GROUP</when>
-                <when test="groupBy == 'CODE'">RENTAL_CODE</when>
-                <otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
-            </choose>
-	    )
-	    ORDER BY 
-	    <choose>
-	        <when test="sortBy == 'VALUE'">value</when>
-	        <otherwise>label</otherwise>
-	    </choose>
-	    <choose>
-	        <when test="sortOrder == 'DESC'">DESC</when>
-	        <otherwise>ASC</otherwise>
-	    </choose>
-	    <if test="limit != null and limit > 0">
-	        OFFSET 0 ROWS FETCH NEXT #{limit} ROWS ONLY
-	    </if>
+	<select id="getCustomAnalysis"
+		parameterType="com.metanet.seoulbike.dto.BikeAnalysisDto"
+		resultType="map">
+		SELECT label, value FROM (
+		SELECT
+		<choose>
+			<when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
+			<when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
+			<when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
+			<when test="groupBy == 'AGE'">AGE_GROUP</when>
+			<when test="groupBy == 'CODE'">RENTAL_CODE</when>
+			<otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
+		</choose>
+		AS label,
+		NVL(
+		<choose>
+			<when test="calcType == 'SUM'">SUM</when>
+			<when test="calcType == 'AVG'">ROUND(AVG</when>
+			<when test="calcType == 'COUNT'">COUNT</when>
+			<otherwise>SUM</otherwise>
+		</choose>
+		(
+		<choose>
+			<when test="targetCol == 'USES'">NUM_OF_USES</when>
+			<when test="targetCol == 'DISTANCE'">DISTANCE</when>
+			<when test="targetCol == 'CARBON'">CARBON_AMOUNT</when>
+			<when test="targetCol == 'EXERCISE'">EXERCISE_AMOUNT</when>
+			<when test="targetCol == 'MINUTE'">USAGE_MINUTE</when>
+			<otherwise>NUM_OF_USES</otherwise>
+		</choose>
+		)
+		<if test="calcType == 'AVG'">, 2)</if>
+		, 0) AS value
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+			</if>
+			/* [수정] 필터링 시에도 DB 값을 UPPER로 변환하여 파라미터(F/M)와 비교 */
+			<if test="gender != null and gender != ''">
+				AND UPPER(GENDER) = UPPER(#{gender})
+			</if>
+			<if test="ageGroup != null and ageGroup != ''">
+				AND AGE_GROUP = #{ageGroup}
+			</if>
+			<if test="rentalCode != null and rentalCode != ''">
+				AND RENTAL_CODE = #{rentalCode}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
+			</if>
+		</where>
+		GROUP BY
+		<choose>
+			<when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
+			<when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
+			<when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
+			<when test="groupBy == 'AGE'">AGE_GROUP</when>
+			<when test="groupBy == 'CODE'">RENTAL_CODE</when>
+			<otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
+		</choose>
+		)
+		ORDER BY
+		<choose>
+			<when test="sortBy == 'VALUE'">value</when>
+			<otherwise>label</otherwise>
+		</choose>
+		<choose>
+			<when test="sortOrder == 'DESC'">DESC</when>
+			<otherwise>ASC</otherwise>
+		</choose>
+		<if test="limit != null and limit > 0">
+			OFFSET 0 ROWS FETCH NEXT #{limit} ROWS ONLY
+		</if>
 	</select>
 
 
