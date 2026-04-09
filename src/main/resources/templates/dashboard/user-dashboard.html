@@ -22,8 +22,6 @@
 			display: flex;
 			align-items: center;
 			padding: 0 26px;
-			font-size: 18px;
-			color: #f5f7fa;
 			cursor: pointer;
 		}
 		
@@ -39,7 +37,7 @@
 			color: #19c8af;
 		}
 		
-		.menu li.logout {
+		.menu li.notice {
 			border-top: 1px solid rgba(255,255,255,0.12);
 			margin-top: 4px;
 		}
@@ -57,19 +55,22 @@
         <h2 class="logo-font text-center" style="padding: 0 0 0 30px">SEOUL BIKE</h2>
         <ul class="menu" style="margin: 0; padding: 0;">
         	<li class="active">
-        		<a href="/dashboard" style="color: white; text-decoration: none;"><span class="icon">📊</span>종합 분석</a>
+        		<a href="/dashboard" class="menu-font-selected" style="text-decoration: none;"><span class="icon">📊</span>종합 분석</a>
         	</li>
 			<li>
-				<a href="/analysis/detail" style="color: white; text-decoration: none;"><span class="icon">🔍</span>상세 분석</a>
+				<a href="/analysis/detail" class="menu-font" style="text-decoration: none;"><span class="icon">🔍</span>상세 분석</a>
 			</li>
 			<li>
-				<a href="dashboard-map.html" style="color: white; text-decoration: none;"><span class="icon">🗺️</span>지역별 지도</a>
+				<a href="dashboard-map.html" class="menu-font" style="text-decoration: none;"><span class="icon">🗺️</span>지역별 지도</a>
 			</li>
 			<li>
-				<a href="/data-center" style="color: white; text-decoration: none;"><span class="icon">📁</span>데이터 센터</a>
+				<a href="/data-center" class="menu-font" style="text-decoration: none;"><span class="icon">📁</span>데이터 센터</a>
 			</li>
-			<li class="logout">
-				<a href="login.html" style="color: white; text-decoration: none;"><span class="icon">🔒</span>로그아웃</a>
+			<li class="notice">
+				<a href="/notifications" class="menu-font" style="text-decoration: none;"><span class="icon">🔔</span>알림 내역</a>
+			</li>
+			<li>
+				<a href="/" style="color: white; text-decoration: none;"><span class="icon">🔒</span>로그아웃</a>
 			</li>
         </ul>
     </nav>

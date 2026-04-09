@@ -1,9 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>따릉이 심층 분석 모드</title>
+  
+  <link rel="stylesheet" th:href="@{/css/color.css}">
+  <link rel="stylesheet" th:href="@{/css/fonts.css}">
+  <link rel="stylesheet" th:href="@{/css/card.css}">
 
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="/js/highcharts/highcharts.js"></script>
@@ -289,11 +293,24 @@
     <aside class="sidebar">
       <div class="logo">SEOUL BIKE</div>
       <ul class="menu">
-        <li>📊 종합 분석</li>
-        <li class="active">🔍 상세 분석</li>
-        <li>🗺️ 지역별 지도</li>
-        <li>📁 데이터 센터</li>
-        <li class="logout">🔒 로그아웃</li>
+        <li>
+       		<a href="/dashboard" class="menu-font" style="text-decoration: none;"><span class="icon">📊</span>종합 분석</a>
+       	</li>
+		<li class="active">
+			<a href="/analysis/detail" class="menu-font-selected" style="text-decoration: none;"><span class="icon">🔍</span>상세 분석</a>
+		</li>
+		<li>
+			<a href="dashboard-map.html" class="menu-font" style="text-decoration: none;"><span class="icon">🗺️</span>지역별 지도</a>
+		</li>
+		<li>
+			<a href="/data-center" class="menu-font" style="text-decoration: none;"><span class="icon">📁</span>데이터 센터</a>
+		</li>
+		<li class="notice">
+			<a href="/notifications" class="menu-font" style="text-decoration: none;"><span class="icon">🔔</span>알림 내역</a>
+		</li>
+		<li>
+			<a href="/" class="menu-font" style="text-decoration: none;"><span class="icon">🔒</span>로그아웃</a>
+		</li>
       </ul>
     </aside>
 
