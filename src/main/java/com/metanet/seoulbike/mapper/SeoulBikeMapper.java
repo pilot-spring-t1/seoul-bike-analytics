@@ -9,6 +9,7 @@ import com.metanet.seoulbike.dto.BikeAnalysisDto;
 import com.metanet.seoulbike.dto.BikeDayUsageDto;
 import com.metanet.seoulbike.dto.BikeMonthlyUsageDto;
 import com.metanet.seoulbike.dto.BikePeriodSearchDto;
+import com.metanet.seoulbike.dto.DashboardSummaryDto;
 import com.metanet.seoulbike.dto.SeoulBikeDto;
 
 @Mapper
@@ -30,6 +31,9 @@ public interface SeoulBikeMapper {
 	List<BikeDayUsageDto> getDayUsage();
 
 	List<Map<String, Object>> getCustomAnalysis(BikeAnalysisDto analysisDto);
+	
+	// 사용자 대시보드 종합 분석 페이지
+	DashboardSummaryDto getDashboardSummary();
 	
 	// 사용자 대시보드 상세 분석 페이지
 	
