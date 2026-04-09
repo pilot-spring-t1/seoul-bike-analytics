@@ -39,6 +39,7 @@
 			border-radius: 15px;
 			padding: 20px;
 			box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+			border-top: 5px solid transparent;
 		}
 		.stat-card h4 {
 			font-size: 0.9rem;
@@ -93,14 +94,16 @@
 		}
 		.table th {
 			background: #f8fafc;
-			padding: 12px;
+			padding: 20px;
 			font-size: 0.85rem;
 			color: #64748b;
+			text-align: left;
 		}
 		.table td {
-			padding: 14px;
+			padding: 20px;
 			border-bottom: 1px solid #f1f5f9;
 			font-size: 0.9rem;
+			text-align: left;
 		}
 		.badge {
 			padding: 5px 10px;
@@ -148,30 +151,37 @@
         </ul>
     </nav>
 
-	<!-- 메인 -->
 	<div id="main-content">
 
 		<header>
-			현재 서버 상태: <b style="color: #22c55e; margin-left: 5px;">Stable</b>
+			<span style="margin-right: 20px;" class="subtitle-dark-blue-font">
+            현재 서버 상태: <b style="color: #22c55e; margin-left: 5px;">Stable</b></span>
+		
+			<form method="get" style="margin: 0; margin-right: 10px;">
+				<select name="lang" onchange="this.form.submit()">
+					<option value="ko" th:selected="${#locale.language == 'ko'}"
+						th:text="#{language.korean}">KR</option>
+					<option value="en" th:selected="${#locale.language == 'en'}"
+						th:text="#{language.english}">EN</option>
+				</select>
+			</form>
 		</header>
 
 		<div class="container">
-
-			<!-- 카드 -->
 			<div class="card-row">
-				<div class="stat-card">
+				<div class="stat-card" style="border-top-color: #22c55e">
 					<h4>📢 공지사항</h4>
-					<div class="card-value-black-font" th:text="${noticeCount}">24</div>
+					<div class="count">24 건</div>
 				</div>
 
-				<div class="stat-card">
+				<div class="stat-card" style="border-top-color: #3B82F6">
 					<h4>❓ 미답변 문의</h4>
-					<div class="count" th:text="${qnaCount}">8</div>
+					<div class="count">8 건</div>
 				</div>
 
-				<div class="stat-card">
+				<div class="stat-card" style="border-top-color: #F59E0B">
 					<h4>✨ 이용 후기</h4>
-					<div class="count" th:text="${reviewCount}">1,120</div>
+					<div class="count">1,120 건</div>
 				</div>
 			</div>
 
@@ -203,30 +213,22 @@
 				</thead>
 
 				<tbody>
-					<tr th:each="item : ${list}">
-						<td th:text="${item.id}">1240</td>
-
+					<tr>
+						<td>1240</td>
 						<td>
-							<span class="badge badge-notice"
-								th:if="${item.type == 'NOTICE'}">공지사항</span>
-							<span class="badge badge-qna"
-								th:if="${item.type == 'QNA'}">이용문의</span>
+							<span class="badge badge-notice">공지사항</span>
+							<span class="badge badge-qna">이용문의</span>
 						</td>
-
-						<td th:text="${item.title}">[안내] 점검 예정</td>
-						<td th:text="${item.writer}">관리자</td>
-						<td th:text="${item.date}">2026-04-09</td>
-
+						<td>[안내] 점검 예정</td>
+						<td>관리자</td>
+						<td>2026-04-09</td>
 						<td>
-							<span class="status status-active"
-								th:if="${item.status == 'ACTIVE'}">게시중</span>
-							<span class="status status-wait"
-								th:if="${item.status == 'WAIT'}">답변대기</span>
+							<span class="status status-active">게시중</span>
+							<span class="status status-wait">답변대기</span>
 						</td>
 					</tr>
 				</tbody>
 			</table>
-
 		</div>
 	</div>
 
