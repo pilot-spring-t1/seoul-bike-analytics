@@ -3,14 +3,21 @@ package com.metanet.seoulbike.test.mapper;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.metanet.seoulbike.test.dto.MemberDto;
+import com.metanet.seoulbike.test.dto.MemberSearchDto;
 
 @Mapper
 public interface MemberMapper {
-    List<MemberDto> findAllMembers();       // 전체 회원 조회 (이름 변경)
-    MemberDto findMemberByLoginId(String loginId); // 아이디로 조회
-    int insertMember(MemberDto memberDto);  // 회원 가입
-    int updateMember(MemberDto memberDto);  // 정보 수정
-    int deleteMember(String loginId);       // 회원 탈퇴
+    List<MemberDto> getMemberListByPage(@Param("dto") MemberSearchDto dto, @Param("offset") int offset);
+    int getMemberCountBySearch(@Param("dto") MemberSearchDto dto);
+    
+    MemberDto getMemberById(Long memberId);
+    MemberDto getMemberByLoginId(String loginId);
+
+    int insertMember(MemberDto memberDto);
+    int updateMember(MemberDto memberDto);
+    int deleteMemberById(Long memberId);
+    int deleteMemberByLoginId(String loginId);
 }
