@@ -13,7 +13,7 @@ public class BikeAnalysisDto {
     private String keyword;    // 대여소 이름 검색
 
     // 2. 분석 기준 (GROUP BY)
-    // DATE(일별), OFFICE(대여소별), GENDER(성별), AGE(연령대별), CODE(이용권별)
+    // GENDER(성별), AGE(연령대별), CODE(이용권별)
     private String groupBy;
 
     // 3. 집계 대상 (SELECT 대상)
