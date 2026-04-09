@@ -1,6 +1,9 @@
 .bg {
 	background-color: #F4F7F6
 }
+.bg-admin {
+	background-color: #F1F5F9
+}
 .bg-dark-green {
 	background: linear-gradient(to bottom right, #2B4454, #1BB597);
 	min-height: 100vh; /* 브라우저 화면 높이 */
@@ -11,4 +14,7 @@
 }
 .menu-color {
 	background-color: #2C3E50
+}
+.menu-admin-color {
+	background-color: #0F172A
 }
