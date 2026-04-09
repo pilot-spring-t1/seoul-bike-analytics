@@ -3,6 +3,16 @@
 	color: #1ABC9C;
 	font-weight: 800;
 }
+.menu-font {
+	font-size: 18px;
+	color: #d7e0e8;
+	font-weight: 400;
+}
+.menu-font-selected {
+	font-size: 18px;
+	color: #C8F0EE;
+	font-weight: 500;
+}
 .subtitle-dark-blue-font {
 	font-size: 14px;
 	color: #2C3E50;

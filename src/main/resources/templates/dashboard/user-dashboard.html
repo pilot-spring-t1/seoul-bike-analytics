@@ -12,70 +12,78 @@
 <link rel="stylesheet" th:href="@{/css/fonts.css}">
 <link rel="stylesheet" th:href="@{/css/card.css}">
 
+
 <style>
-.menu {
-	list-style: none;
-	padding-top: 18px;
-	margin: 0;
-	padding: 0;
-}
-
-.menu li {
-	height: 60px;
-	display: flex;
-	align-items: center;
-	padding: 0 26px;
-	font-size: 18px;
-	color: #f5f7fa;
-	cursor: pointer;
-}
-
-.menu li span.icon {
-	width: 28px;
-	display: inline-block;
-	margin-right: 12px;
-	font-size: 22px;
-}
-
-.menu li.active {
-	background-color: #37506a;
-	color: #19c8af;
-}
-
-.menu li.logout {
-	border-top: 1px solid rgba(255, 255, 255, 0.12);
-	margin-top: 4px;
-}
+    .menu {
+			list-style: none;
+			padding-top: 18px;
+			margin: 0;
+			padding: 0;
+		}
+		
+		.menu li {
+			height: 60px;
+			display: flex;
+			align-items: center;
+			padding: 0 26px;
+			cursor: pointer;
+		}
+		
+		.menu li span.icon {
+			width: 28px;
+			display: inline-block;
+			margin-right: 12px;
+			font-size: 22px;
+		}
+		
+		.menu li.active {
+			background-color: #37506a;
+			color: #19c8af;
+		}
+		
+		.menu li.notice {
+			border-top: 1px solid rgba(255,255,255,0.12);
+			margin-top: 4px;
+		}
 </style>
 </head>
 <body class="bg" style="margin: 0; padding: 0;">
-	<nav
-		style="position: fixed; width: 300px; height: 100%; background-color: #2C3E50; color: white; padding-top: 20px; box-sizing: border-box;">
-		<h2 class="logo-font text-center" style="padding: 0 0 0 30px"
-			th:text="#{dashboard.logo}">SEOUL BIKE</h2>
-		<ul class="menu" style="margin: 0; padding: 0;">
-			<li class="active"><a th:href="@{/dashboard}"
-				style="color: white; text-decoration: none;"> <span class="icon">📊</span><span
-					th:text="#{dashboard.menu.overview}">종합 분석</span>
-			</a></li>
-			<li><a th:href="@{/dashboard-detail}"
-				style="color: white; text-decoration: none;"> <span class="icon">🔍</span><span
-					th:text="#{dashboard.menu.detail}">상세 분석</span>
-			</a></li>
-			<li><a th:href="@{/dashboard-map}"
-				style="color: white; text-decoration: none;"> <span class="icon">🗺️</span><span
-					th:text="#{dashboard.menu.map}">지역별 지도</span>
-			</a></li>
-			<li><a th:href="@{/data-center}"
-				style="color: white; text-decoration: none;"> <span class="icon">📁</span><span
-					th:text="#{dashboard.menu.dataCenter}">데이터 센터</span>
-			</a></li>
-			<li class="logout"><a th:href="@{/login}"
-				style="color: white; text-decoration: none;"> <span class="icon">🔒</span><span
-					th:text="#{dashboard.menu.logout}">로그아웃</span>
-			</a></li>
-		</ul>
-	</nav>
+  <nav style="
+    	position: fixed;
+    	width: 300px;
+    	height: 100%;
+    	background-color: #2C3E50;
+    	color: white;
+    	padding-top: 20px;
+    	box-sizing: border-box;">
+      <h2 class="logo-font text-center" style="padding: 0 0 0 30px" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
+      <ul class="menu" style="margin: 0; padding: 0;">
+        <li class="active">
+        	<a th:href="@{/dashboard}" class="menu-font-selected" style="text-decoration: none;"><span class="icon">📊</span><span
+					  th:text="#{dashboard.menu.overview}">종합 분석</span></a>
+        </li>
+        <li>
+          <a th:href="@{/dashboard-detail}" class="menu-font" style="text-decoration: none;"><span class="icon">🔍</span><span
+					th:text="#{dashboard.menu.detail}">상세 분석</span></a>
+        </li>
+        <li>
+          <a th:href="@{/dashboard-map}" class="menu-font" style="text-decoration: none;"><span class="icon">🗺️</span><span
+					th:text="#{dashboard.menu.map}">지역별 지도</span></a>
+        </li>
+        <li>
+          <a th:href="@{/data-center}" class="menu-font" style="text-decoration: none;"><span class="icon">📁</span><span
+					th:text="#{dashboard.menu.dataCenter}">데이터 센터</span></a>
+        </li>
+        <li class="notice">
+          <a th:href="@{/notifications}" class="menu-font" style="text-decoration: none;"><span class="icon">🔔</span><span
+					th:text="#{dashboard.menu.notifications}">알림 내역</span></a>
+        </li>
+        <li>
+          <a th:href="@{/login}" class="menu-font" style="text-decoration: none;"><span class="icon">🔒</span><span
+					th:text="#{dashboard.menu.logout}">로그아웃</span></a>
+        </li>
+      </ul>
+    </nav>
 
 	<div style="margin-left: 300px; padding: 0; box-sizing: border-box;">
 		<div class="card"
