@@ -37,7 +37,7 @@
 			color: #19c8af;
 		}
 		
-		.menu li.logout {
+		.menu li.notice {
 			border-top: 1px solid rgba(255,255,255,0.12);
 			margin-top: 4px;
 		}
@@ -77,16 +77,6 @@
 			font-weight: 800;
 		}
 		
-		.status {
-			display: inline-block;
-			background-color: #dff1ee;
-			color: #2a9d8f;
-			padding: 6px 12px;
-			border-radius: 6px;
-			font-size: 14px;
-			font-weight: 700;
-		}
-		
 		@media (max-width: 1100px) {
 			
 			.menu li {
@@ -122,8 +112,11 @@
 			<li class="active">
 				<a href="/data-center" style="color: white; text-decoration: none;"><span class="icon">📁</span>데이터 센터</a>
 			</li>
-			<li class="logout">
-				<a href="login.html" style="color: white; text-decoration: none;"><span class="icon">🔒</span>로그아웃</a>
+			<li class="notice">
+				<a href="/notifications" style="color: white; text-decoration: none;"><span class="icon">🔔</span>알림 내역</a>
+			</li>
+			<li>
+				<a href="/" style="color: white; text-decoration: none;"><span class="icon">🔒</span>로그아웃</a>
 			</li>
 		</ul>
 	</nav>

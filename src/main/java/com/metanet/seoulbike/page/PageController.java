@@ -59,7 +59,7 @@ public class PageController {
 
     @GetMapping("/notifications")
     public String notificationPage() {
-        return "notification/list";
+        return "notification/notifications";
     }
 
     @GetMapping("/error/403")
