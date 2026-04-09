@@ -30,6 +30,9 @@ public interface SeoulBikeMapper {
 	List<BikeDayUsageDto> getDayUsage();
 
 	List<Map<String, Object>> getCustomAnalysis(BikeAnalysisDto analysisDto);
-
+	
+	// 사용자 대시보드 상세 분석 페이지
+	
+	List<Map<String, Object>> getAgeGroupUsage(BikeAnalysisDto analysisDto);
 
 }
