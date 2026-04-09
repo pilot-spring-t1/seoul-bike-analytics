@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.metanet.seoulbike.test.mapper.MemberMapper">
+
+    <select id="findAllMembers" resultType="com.metanet.seoulbike.test.dto.MemberDto">
+        SELECT 
+            MEMBER_ID as "memberId",
+            LOGIN_ID as "loginId",
+            NAME as "name",
+            GENDER as "gender",
+            AGE as "age",
+            ROLE as "role",
+            CREATED_AT as "createdAt",
+            LAST_LOGIN_AT as "lastLoginAt"
+        FROM MEMBER 
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="findMemberByLoginId" resultType="com.metanet.seoulbike.test.dto.MemberDto">
+        SELECT 
+            MEMBER_ID as "memberId",
+            LOGIN_ID as "loginId",
+            PASSWORD as "password",
+            NAME as "name",
+            GENDER as "gender",
+            AGE as "age",
+            ROLE as "role",
+            CREATED_AT as "createdAt",
+            LAST_LOGIN_AT as "lastLoginAt"
+        FROM MEMBER 
+        WHERE LOGIN_ID = #{loginId}
+    </select>
+
+    <insert id="insertMember"
+        parameterType="com.metanet.seoulbike.test.dto.MemberDto"
+        useGeneratedKeys="true" keyProperty="memberId" keyColumn="MEMBER_ID">
+        INSERT INTO MEMBER (
+            LOGIN_ID, PASSWORD, NAME, GENDER, AGE, ROLE
+        ) VALUES (
+            #{loginId}, #{password}, #{name}, #{gender}, #{age}, #{role}
+        )
+    </insert>
+
+    <update id="updateMember" parameterType="com.metanet.seoulbike.test.dto.MemberDto">
+        UPDATE MEMBER
+        SET NAME = #{name},
+            AGE = #{age},
+            GENDER = #{gender}
+        WHERE LOGIN_ID = #{loginId}
+    </update>
+
+    <delete id="deleteMember">
+        DELETE FROM MEMBER WHERE LOGIN_ID = #{loginId}
+    </delete>
+
+</mapper>
