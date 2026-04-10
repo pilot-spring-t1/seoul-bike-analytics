@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.metanet.seoulbike.auth.JwtTokenProvider;
 import com.metanet.seoulbike.member.dto.MemberSearchDto;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
+@RequestMapping("/members")
 public class MemberController {
 	
 	@Autowired
@@ -35,7 +37,7 @@ public class MemberController {
 	
 	@GetMapping("/signup")
     public String signupForm() {
-        return "signup";
+        return "auth/signup";
     }
 	
 	@PostMapping("/signup")
@@ -43,16 +45,16 @@ public class MemberController {
 		try {
             memberService.signUp(member);
             log.info("회원가입 성공 - ID: {}", member.getMemberId());
-            return "redirect:/login";
+            return "redirect:/members/login";
         } catch (Exception e) {
-            log.error("회원가입 실패 - ID: {}, 사유: {}", member.getMemberId(), e.getMessage());
-            return "signup"; // 실패 시 다시 가입 페이지로
+            log.error("회원가입 실패 - 사유: {}", e.getMessage());
+            return "auth/signup"; // 실패 시 다시 가입 페이지로
         }
 	}
 	
 	@GetMapping("/login")
     public String loginForm() {
-        return "login"; 
+        return "auth/login"; 
     }
 	
 	@PostMapping("/login")
@@ -65,10 +67,10 @@ public class MemberController {
             cookie.setPath("/");
             response.addCookie(cookie);
             log.info("로그인 성공 - ID: {}, JWT 쿠키 발급 완료", user.get("loginId"));
-            return "redirect:/login"; // 로그인 성공 시 화면
+            return "redirect:/members/login"; // 로그인 성공 시 화면
         } catch (Exception e) {
         	log.warn("로그인 실패 - ID: {}, 사유: {}", user.get("loginId"), e.getMessage());
-            return "redirect:/login?error=true";
+            return "redirect:/members/login?error=true";
         }
 	}
 	
@@ -88,13 +90,13 @@ public class MemberController {
 	@PostMapping("/update")
 	public String updateMember(@ModelAttribute Member member) {
 		memberService.updateMember(member);
-		return "/"; // 수정 후 화면
+		return "redirect:/members/list";
 	}
 
 	@GetMapping("/delete/{memberId}")
 	public String deleteMember(@PathVariable("memberId") Long memberId) {
 	    memberService.deleteMember(memberId);
-	    return "/"; // 삭제 후 화면
+	    return "redirect:/members/list";
 	}
 	
 	@GetMapping("/list")
