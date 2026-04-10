@@ -35,7 +35,8 @@ public class PageController {
     }
     
     @GetMapping("/admin/detail")
-    public String AdminDetailAnalysisPage() {
+    public String AdminDetailAnalysisPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/admin-detail";
     }
 
