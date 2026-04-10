@@ -1,11 +1,11 @@
-package com.metanet.seoulbike.service;
+package com.metanet.seoulbike.stats.service;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.metanet.seoulbike.dto.BikeMonthlyUsageDto;
-import com.metanet.seoulbike.mapper.SeoulBikeMapper;
+import com.metanet.seoulbike.stats.dto.BikeMonthlyUsageDto;
+import com.metanet.seoulbike.stats.mapper.SeoulBikeMapper;
 
 import lombok.RequiredArgsConstructor;
 

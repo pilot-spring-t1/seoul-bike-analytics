@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.dto;
+package com.metanet.seoulbike.stats.dto;
 
 import lombok.Data;
 

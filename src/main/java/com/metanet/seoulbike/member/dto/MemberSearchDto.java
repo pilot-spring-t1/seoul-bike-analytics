@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.test.dto;
+package com.metanet.seoulbike.member.dto;
 
 import lombok.Getter;
 import lombok.Setter;
