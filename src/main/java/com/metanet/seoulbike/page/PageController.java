@@ -33,10 +33,18 @@ public class PageController {
     	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/detail";
     }
+    
+    @GetMapping("/admin/detail")
+    public String AdminDetailAnalysisPage() {
+        return "analysis/admin-detail";
+    }
 
     @GetMapping("/admin/dashboard")
-    public String adminDashboardPage() {
-        return "admin/admin-dashboard";
+    public String adminDashboardPage(Model model) {
+    	DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
+        model.addAttribute("summary", summary);
+        model.addAttribute("userName", "관리자");
+        return "dashboard/admin-dashboard";
     }
 
     @GetMapping("/admin/data")
@@ -53,11 +61,21 @@ public class PageController {
     public String dataSharePage() {
     	return "shared/data-center";
     }
+    
+    @GetMapping("admin/data-center")
+    public String adminDataSharePage() {
+    	return "shared/admin-data-center";
+    }
 
     @GetMapping("/notifications")
     public String notificationPage(Model model) {
     	model.addAttribute("memberId", 1L); // 테스트용
         return "notification/notifications";
+    }
+    
+    @GetMapping("/admin/notifications")
+    public String adminNotificationPage() {
+        return "notification/admin-notifications";
     }
 
     @GetMapping("/error/403")
