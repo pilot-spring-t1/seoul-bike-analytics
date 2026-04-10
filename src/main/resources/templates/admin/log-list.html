@@ -81,7 +81,7 @@
     </nav>
 
     <div id="main-content">
-        <header>
+        <!-- <header>
             <span style="margin-right: 20px;" class="subtitle-dark-blue-font">
                 로그 감시 모드: <b th:text="${session.adminName ?: '관리자'}"></b>
             </span>
@@ -94,7 +94,8 @@
 						th:text="#{language.english}">EN</option>
 				</select>
 			</form>
-        </header>
+        </header> -->
+        <div th:replace="fragment/header :: header('dashboard.welcome', ${userName})"></div>
 
         <main class="container">
             <div class="user-mgmt-header">

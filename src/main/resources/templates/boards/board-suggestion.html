@@ -55,9 +55,10 @@
     </nav>
 
     <div id="main-content">
-        <header>
+        <!-- <header>
             <span style="font-size: 0.9rem; color: #64748b;">운영자 계정 접속 중</span>
-        </header>
+        </header> -->
+        <div th:replace="fragment/header :: header('dashboard.welcome', ${userName})"></div>
 
         <main class="container">
             <div class="action-row">

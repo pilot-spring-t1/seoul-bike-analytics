@@ -63,12 +63,12 @@
 
 <div id="main-content">
 
-    <header>
-        <!-- 로그인 사용자 표시 -->
+    <!-- <header>
         <span style="font-size: 0.9rem; color: #64748b;">
             <span sec:authentication="name"></span> 님 접속 중
         </span>
-    </header>
+    </header> -->
+    <div th:replace="fragment/header :: header('dashboard.welcome', ${userName})"></div>
 
     <main class="container">
 
