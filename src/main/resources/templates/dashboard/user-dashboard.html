@@ -52,6 +52,10 @@
 					style="position: absolute; top: 8px; right: 15px; background: #e53935; color: white; border-radius: 50%; min-width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; font-weight: bold; padding: 0 5px; display: none;">
 						0 </span>
 			</a></li>
+			<th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+	            <li><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
+	            <li><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
+            </th:block>
 		    <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
 	    </ul>
     </nav>
