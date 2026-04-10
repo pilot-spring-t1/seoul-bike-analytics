@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<header th:fragment="header(titleKey, userName)">
+    <span style="margin-right: 20px;" class="subtitle-dark-blue-font"
+          th:utext="#{${titleKey}(${userName})}">
+        반갑습니다, <b>USER</b>님
+    </span>
+
+    <form method="get" style="margin: 0; margin-right: 10px;">
+        <select name="lang" onchange="this.form.submit()">
+            <option value="ko" th:selected="${#locale.language == 'ko'}"
+                    th:text="#{language.korean}">KR</option>
+            <option value="en" th:selected="${#locale.language == 'en'}"
+                    th:text="#{language.english}">EN</option>
+        </select>
+    </form>
+</header>
+
+</body>
+</html>
