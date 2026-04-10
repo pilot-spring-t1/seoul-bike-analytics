@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.metanet.seoulbike.admin.dto.MemberSearchDto;
-import com.metanet.seoulbike.test.dto.MemberDto;
-import com.metanet.seoulbike.test.service.MemberService;
+import com.metanet.seoulbike.member.dto.MemberSearchDto;
+import com.metanet.seoulbike.member.service.MemberService;
 
-// 주의점 !!!  TEST의 MemberSearch의 DTO 를 이용!!
 @Controller
 @RequestMapping("/admin/members")
 public class AdminMemberController {

@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.admin.controller;
+package com.metanet.seoulbike.board.controller;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,6 +19,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.metanet.seoulbike.board.dto.BoardDto;
 import com.metanet.seoulbike.board.dto.BoardSearchDto;
 import com.metanet.seoulbike.board.service.BoardService;
+import com.metanet.seoulbike.file.dto.FileDto;
 import com.metanet.seoulbike.file.mapper.FileMapper;
 import com.metanet.seoulbike.file.service.FileService;
 
@@ -127,7 +128,17 @@ public class AdminBoardController {
 	 */
 	@PostMapping("/delete/{id}")
 	public String delete(@PathVariable("id") Long id) {
+		// 1. 해당 게시글에 속한 파일 목록 먼저 조회
+		List<FileDto> files = fileMapper.getFilesByBoardId(id);
+
+		// 2. 파일 서비스에서 실물 파일과 DB 정보 삭제
+		for (FileDto file : files) {
+			fileService.deleteFile((long) file.getFileId());
+		}
+
+		// 3. 마지막으로 게시글 삭제 (DB 외래키 관계가 있다면 순서 주의)
 		boardService.removeBoard(id);
+
 		return "redirect:/admin/boards/list";
 	}
 
