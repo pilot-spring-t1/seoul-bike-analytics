@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.metanet.seoulbike.member.mapper.MemberMapper">
 
-    <select id="selectMemberListByPage" resultType="com.metanet.seoulbike.member.model.Member">
+    <select id="selectAllMembersByPage" resultType="com.metanet.seoulbike.member.model.Member">
         SELECT MEMBER_ID as "memberId", LOGIN_ID as "loginId", NAME as "name", 
                UPPER(GENDER) as "gender", AGE as "age", ROLE as "role", 
                CREATED_AT as "createdAt", LAST_LOGIN_AT as "lastLoginAt"

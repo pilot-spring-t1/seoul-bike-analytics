@@ -80,12 +80,13 @@
 				따릉이 데이터 분석 일원이 되어보세요
 			</h5>
 			
-			<form>
+			<form th:action="@{/members/signup}" method="post">
 				<div class="mb-3">
 					<label class="subtitle-dark-blue-font" th:text="#{signup.userId}">아이디</label>
 					<input
 					  type="text"
-					  id="userId"
+					  id="loginId"
+					  name="loginId"
 					  class="form-control"
 					  th:placeholder="#{signup.userId.placeholder}"
 					  placeholder="4~12자 영문/숫자"
@@ -97,6 +98,7 @@
 					<input
 					  type="password"
 					  id="password"
+					  name="password"
 					  class="form-control"
 					  th:placeholder="#{signup.password.placeholder}"
 					  placeholder="8자 이상 특수문자 포함"
@@ -115,15 +117,36 @@
 				</div>
 				
 				<div class="mb-3">
-					<label class="subtitle-dark-blue-font" th:text="#{signup.email}">이메일</label>
-					<input
-					  type="email"
-					  id="email"
-					  class="form-control"
-					  th:placeholder="#{signup.email.placeholder}"
-					  placeholder="example@email.com"
-					/>
+        			<label class="subtitle-dark-blue-font" th:text="#{signup.name}">이름</label>
+        			<input
+        			  type="text"
+        			  name="name"
+        			  class="form-control"
+        			/>
+    			</div>
+    			
+    			<div class="mb-3">
+    				<label class="subtitle-dark-blue-font" th:text="#{signup.gender}">성별</label>
+    				<div class="d-flex gap-3 mt-2">
+        				<div class="form-check">
+            				<input class="form-check-input" type="radio" name="gender" id="genderM" value="M" checked>
+            				<label class="form-check-label" for="genderM" th:text="#{signup.gender.male}">남성</label>
+        				</div>
+        				<div class="form-check">
+            				<input class="form-check-input" type="radio" name="gender" id="genderF" value="F">
+            				<label class="form-check-label" for="genderF" th:text="#{signup.gender.female}">여성</label>
+        				</div>
+    				</div>
 				</div>
+
+    			<div class="mb-3">
+        			<label class="subtitle-dark-blue-font" th:text="#{signup.age}">나이</label>
+        			<input
+        			  type="number"
+        			  name="age"
+        			  class="form-control"
+        			/>
+    			</div>
 				
 				<label class="subtitle-gray-font text-center mb-4">
 					<input type="checkbox" />
@@ -134,7 +157,7 @@
 				
 				<div class="bottom-text mt-3">
 					<span th:text="#{signup.hasAccount}">이미 계정이 있으신가요?</span>
-					<a th:href="@{/}" th:text="#{signup.loginLink}">로그인</a>
+					<a th:href="@{/members/login}" th:text="#{signup.loginLink}">로그인</a>
 				</div>
 			</form>
 		</div>
