@@ -53,7 +53,7 @@
             아이디 또는 비밀번호가 틀렸습니다.
         </div>
 
-        <form th:action="@{/login}" method="post">
+        <form th:action="@{/members/login}" method="post">
             <div class="mb-3">
                 <label class="subtitle-dark-blue-font" th:text="#{login.username}">아이디</label>
                 <input
@@ -75,16 +75,30 @@
         </form>
 
         <div class="d-flex mt-3 gap-2">
-            <a th:href="@{/signup}" class="btn btn-outline-secondary account-set-button" style="flex: 1;" th:text="#{signup.button}">
+            <a th:href="@{/members/signup}" class="btn btn-outline-secondary account-set-button" style="flex: 1;" th:text="#{signup.button}">
                 회원가입
-            </a>
-            <a th:href="@{/find-account}" class="btn btn-outline-secondary account-set-button" style="flex: 1;" th:text="#{findAccount.button}">
-                아이디/비밀번호 찾기
             </a>
         </div>
 
     </div>
 </div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const message = [[${message}]];
+    const error = [[${error}]];
+    
+    if (message) {
+        alert(message);
+    }
+    
+    if (error) {
+        alert(error);
+    }
+    /*]]>*/
+</script>
+
+<div th:if="${message}" class="alert alert-success mt-3" th:text="${message}"></div>
+<div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
 
 </body>
 </html>

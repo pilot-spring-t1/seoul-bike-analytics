@@ -1,21 +1,22 @@
-package com.metanet.seoulbike.page;
+package com.metanet.seoulbike.dashboard.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.metanet.seoulbike.stats.dto.DashboardSummaryDto;
-import com.metanet.seoulbike.stats.service.BikeAnalysisService;
-
+import com.metanet.seoulbike.dashboard.dto.DashboardSummaryDto;
+import com.metanet.seoulbike.dashboard.service.BikeAnalysisService;
 
 @Controller
-public class PageController {
+@RequestMapping("/dashboard")
+public class DashboardController {
 	
 	@Autowired
 	private BikeAnalysisService bikeAnalysisService;
 
-    @GetMapping("/dashboard")
+    @GetMapping
     public String dashboardPage(Model model) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
         model.addAttribute("summary", summary);
@@ -31,21 +32,6 @@ public class PageController {
     @GetMapping("/detail")
     public String detailAnalysisPage() {
         return "analysis/detail";
-    }
-
-    @GetMapping("/admin/dashboard")
-    public String adminDashboardPage() {
-        return "admin/admin-dashboard";
-    }
-
-    @GetMapping("/admin/data")
-    public String dataManagePage() {
-        return "admin/data-manage";
-    }
-    
-    @GetMapping("/admin/contents")
-    public String adminContentsPage() {
-    	return "admin-contents";
     }
     
     @GetMapping("/data-center")
@@ -82,6 +68,4 @@ public class PageController {
     public String monthlyUsagePage() {
         return "monthly-usage";
     }
-    
-
 }

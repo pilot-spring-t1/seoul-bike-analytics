@@ -1,17 +1,17 @@
-package com.metanet.seoulbike.stats.mapper;
+package com.metanet.seoulbike.dashboard.mapper;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
-import com.metanet.seoulbike.stats.dto.BikeAnalysisDto;
-import com.metanet.seoulbike.stats.dto.BikeDayUsageDto;
-import com.metanet.seoulbike.stats.dto.BikeMonthlyUsageDto;
-import com.metanet.seoulbike.stats.dto.BikePeriodSearchDto;
-import com.metanet.seoulbike.stats.dto.DashboardSummaryDto;
-import com.metanet.seoulbike.stats.dto.DetailSummaryDto;
-import com.metanet.seoulbike.stats.dto.SeoulBikeDto;
+import com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto;
+import com.metanet.seoulbike.dashboard.dto.BikeDayUsageDto;
+import com.metanet.seoulbike.dashboard.dto.BikeMonthlyUsageDto;
+import com.metanet.seoulbike.dashboard.dto.BikePeriodSearchDto;
+import com.metanet.seoulbike.dashboard.dto.DashboardSummaryDto;
+import com.metanet.seoulbike.dashboard.dto.DetailSummaryDto;
+import com.metanet.seoulbike.dashboard.dto.SeoulBikeDto;
 
 @Mapper
 public interface SeoulBikeMapper {
