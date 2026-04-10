@@ -18,6 +18,7 @@ public class PageController {
     @GetMapping("/dashboard")
     public String dashboardPage(Model model) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
+        model.addAttribute("memberId", 1L); // 테스트용
         model.addAttribute("summary", summary);
         model.addAttribute("userName", "관리자");
         return "dashboard/user-dashboard";
