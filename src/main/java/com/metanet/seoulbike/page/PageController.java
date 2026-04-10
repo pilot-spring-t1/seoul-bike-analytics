@@ -29,7 +29,8 @@ public class PageController {
     }
 
     @GetMapping("/detail")
-    public String detailAnalysisPage() {
+    public String detailAnalysisPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/detail";
     }
 
@@ -54,7 +55,8 @@ public class PageController {
     }
 
     @GetMapping("/notifications")
-    public String notificationPage() {
+    public String notificationPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "notification/notifications";
     }
 

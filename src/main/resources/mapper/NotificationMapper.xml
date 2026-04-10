@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="com.metanet.seoulbike.notification.mapper.NotificationMapper">
+
+	<insert id="insertNotification"
+		parameterType="com.metanet.seoulbike.notification.dto.NotificationDto">
+		INSERT INTO NOTIFICATION (
+		NOTI_ID, MEMBER_ID, NOTI_TYPE,
+		MESSAGE, IS_READ, CREATED_AT
+		) VALUES (
+		SEQ_NOTI_ID.NEXTVAL,
+		#{memberId}, #{notiType}, #{message}, 'N', SYSDATE
+		)
+	</insert>
+
+	<select id="selectNotificationsByMemberId"
+		resultType="com.metanet.seoulbike.notification.dto.NotificationDto">
+		SELECT
+		NOTI_ID, MEMBER_ID, NOTI_TYPE, MESSAGE, IS_READ,
+		CREATED_AT
+		FROM NOTIFICATION
+		WHERE MEMBER_ID = #{memberId}
+		ORDER BY
+		IS_READ ASC, CREATED_AT DESC
+	</select>
+
+	<select id="selectUnreadCount" resultType="int">
+		SELECT COUNT(*)
+		FROM
+		NOTIFICATION
+		WHERE MEMBER_ID = #{memberId} AND IS_READ = 'N'
+	</select>
+
+	<update id="updateReadStatus">
+		UPDATE NOTIFICATION
+		SET IS_READ = 'Y'
+		WHERE NOTI_ID =
+		#{notiId}
+	</update>
+
+	<update id="updateAllReadStatus">
+		UPDATE NOTIFICATION
+		SET IS_READ = 'Y'
+		WHERE MEMBER_ID =
+		#{memberId} AND IS_READ = 'N'
+	</update>
+
+	<delete id="deleteNotification">
+		DELETE FROM NOTIFICATION
+		WHERE NOTI_ID = #{notiId}
+	</delete>
+
+	<delete id="deleteOldNotifications">
+		DELETE FROM NOTIFICATION
+		WHERE CREATED_AT &lt; SYSDATE
+		- #{days}
+	</delete>
+
+</mapper>
