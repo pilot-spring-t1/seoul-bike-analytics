@@ -1,5 +1,7 @@
 package com.metanet.seoulbike.common.log.aspect;
 
+import java.time.LocalDateTime;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -18,32 +20,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LogAspect {
 
-    private final LogMapper logMapper;
+	private final LogMapper logMapper;
 
-    @Around("execution(* com.metanet.seoulbike..controller..*.*(..))")
-    public Object recordLog(ProceedingJoinPoint joinPoint) throws Throwable {
-        long start = System.currentTimeMillis();
-        
-        ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attr.getRequest();
-        
-        LogDto dto = new LogDto();
-        dto.setRequestUri(request.getRequestURI());
-        dto.setHttpMethod(request.getMethod());
-        dto.setMethodName(joinPoint.getSignature().getName());
-        dto.setAccessIp(request.getRemoteAddr());
-        
-        try {
-            Object result = joinPoint.proceed();
-            dto.setLogLevel("INFO");
-            return result;
-        } catch (Exception e) {
-            dto.setLogLevel("ERROR");
-            dto.setErrorMsg(e.getMessage());
-            throw e;
-        } finally {
-            dto.setExecutionTime(System.currentTimeMillis() - start);
-            logMapper.insertLog(dto);
-        }
-    }
+	@Around("execution(* com.metanet.seoulbike..controller..*.*(..))")
+	public Object recordLog(ProceedingJoinPoint joinPoint) throws Throwable {
+		long start = System.currentTimeMillis();
+
+		ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		HttpServletRequest request = attr.getRequest();
+
+		LogDto dto = new LogDto();
+		dto.setRequestUri(request.getRequestURI());
+		dto.setHttpMethod(request.getMethod());
+		dto.setMethodName(joinPoint.getSignature().getName());
+		dto.setAccessIp(request.getRemoteAddr());
+
+		// 자바(WAS) 기준 현재 시간을 명시적으로 세팅 (한국 시간 반영)
+		dto.setLogDate(LocalDateTime.now());
+
+		try {
+			Object result = joinPoint.proceed();
+			dto.setLogLevel("INFO");
+			return result;
+		} catch (Exception e) {
+			dto.setLogLevel("ERROR");
+			dto.setErrorMsg(e.getMessage());
+			throw e;
+		} finally {
+			dto.setExecutionTime(System.currentTimeMillis() - start);
+			logMapper.insertLog(dto);
+		}
+	}
 }
