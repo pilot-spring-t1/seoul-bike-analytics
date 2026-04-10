@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.controller;
+package com.metanet.seoulbike.stats.controller;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.metanet.seoulbike.dto.BikeMonthlyUsageDto;
-import com.metanet.seoulbike.service.BikeUsageService;
+import com.metanet.seoulbike.stats.dto.BikeMonthlyUsageDto;
+import com.metanet.seoulbike.stats.service.BikeUsageService;
 
 import lombok.RequiredArgsConstructor;
 
