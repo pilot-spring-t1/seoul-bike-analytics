@@ -89,6 +89,7 @@ public class MemberController {
 		response.addCookie(cookie);
 		
 		return "redirect:/members/login";
+		
 	}
 	
 	@PostMapping("/update")

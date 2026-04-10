@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 전용 | 시스템 로그 센터</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<script src="/js/notification.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/color.css}">
+    <link rel="stylesheet" th:href="@{/css/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/button.css}">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+        #sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #sidebar ul { list-style: none; padding: 20px 0; }
+        #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
+        #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
+        .notice {
+			border-top: 2px solid rgba(255,255,255,0.12);
+			margin-top: 4px;
+		}
+        
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .container { flex: 1; padding: 30px; overflow-y: auto; }
+        
+        .user-mgmt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .search-bar { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .search-bar select, .search-bar input { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; outline: none; }
+        
+        .card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
+        .user-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        .user-table th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 0.85rem; }
+        .user-table td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-table tr:hover { background-color: #f8fafc; cursor: pointer; }
+
+        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        .badge-error { background: #fee2e2; color: #ef4444; }
+        .badge-info { background: #dcfce7; color: #16a34a; }
+        .badge-method { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+
+        .time-slow { color: #f59e0b; font-weight: bold; }
+        .time-danger { color: #ef4444; font-weight: bold; }
+
+        .pagination-container { display: flex; justify-content: center; margin-top: 30px; gap: 5px; }
+        .page-btn { padding: 8px 14px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; text-decoration: none; color: #475569; transition: 0.2s; }
+        .page-btn:hover { background: #f8fafc; border-color: #1abc9c; color: #1abc9c; }
+        .page-btn.active { background: #1abc9c; color: white; border-color: #1abc9c; font-weight: bold; }
+        .page-btn.disabled { color: #cbd5e1; cursor: not-allowed; pointer-events: none; background-color: #f1f5f9; }
+    </style>
+</head>
+<body class="bg-admin">
+	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
+    <nav id="sidebar" class="menu-admin-color">
+        <h2 class="logo-font">SEOUL BIKE</h2>
+        <ul>
+            <li><a th:href="@{/admin/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
+            <li><a th:href="@{/admin/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+		    <li><a th:href="@{/admin/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+		    <li><a th:href="@{/admin/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
+		    <li class="notice"><a th:href="@{/admin/notifications}"
+				style="position: relative;"> 🔔 <span
+					th:text="#{dashboard.menu.notifications}">알림 내역</span> <span
+					id="notiBadge"
+					style="position: absolute; top: 8px; right: 15px; background: #e53935; color: white; border-radius: 50%; min-width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; font-weight: bold; padding: 0 5px; display: none;">
+						0 </span>
+			</a></li>
+            <li><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
+            <li><a th:href="@{/admin/contents}">📁 콘텐츠 관리</a></li>
+            <li class="active"><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
+			<li><a href="#">⚙️ <span th:text="#{dashboard.menu.settings}">시스템 설정</span></a></li>
+            <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span style="margin-right: 20px;" class="subtitle-dark-blue-font">
+                로그 감시 모드: <b th:text="${session.adminName ?: '관리자'}"></b>
+            </span>
+            
+            <form method="get" style="margin: 0; margin-right: 10px;">
+				<select name="lang" onchange="this.form.submit()">
+					<option value="ko" th:selected="${#locale.language == 'ko'}"
+						th:text="#{language.korean}">KR</option>
+					<option value="en" th:selected="${#locale.language == 'en'}"
+						th:text="#{language.english}">EN</option>
+				</select>
+			</form>
+        </header>
+
+        <main class="container">
+            <div class="user-mgmt-header">
+                <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;">
+                    시스템 실행 로그
+                    <span class="subtitle-gray-font" th:text="'(전체 내역: ' + ${total} + '건)'"></span>
+                </h3>
+                
+                <form th:action="@{/admin/logs/list}" method="get" class="search-bar">
+                    <select name="logLevel">
+                        <option value="">레벨 전체</option>
+                        <option value="INFO" th:selected="${searchDto.logLevel == 'INFO'}">INFO</option>
+                        <option value="ERROR" th:selected="${searchDto.logLevel == 'ERROR'}">ERROR</option>
+                    </select>
+                    <select name="searchType">
+                        <option value="requestUri" th:selected="${searchDto.searchType == 'requestUri'}">요청 URI</option>
+                        <option value="loginId" th:selected="${searchDto.searchType == 'loginId'}">사용자 ID</option>
+                        <option value="methodName" th:selected="${searchDto.searchType == 'methodName'}">메서드명</option>
+                    </select>
+                    <input type="text" name="keyword" th:value="${searchDto.keyword}" placeholder="검색어 입력...">
+                    <button type="submit" class="ok-button" style="width: 80px; height: 38px; cursor: pointer;">조회</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th width="70">번호</th>
+                            <th width="80">레벨</th>
+                            <th width="80">Method</th>
+                            <th width="250">요청 URI</th>
+                            <th width="120">ID</th>
+                            <th width="180">접속 IP</th>
+                            <th width="100">소요시간</th>
+                            <th width="150">로그일시</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(list)}">
+                            <td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;">조회된 로그가 없습니다.</td>
+                        </tr>
+                        <tr th:each="log : ${list}" 
+                            th:onclick="|location.href='@{/admin/logs/view/{id}(id=${log.logId})}'|">
+                            <td th:text="${log.logId}"></td>
+                            <td>
+                                <span th:classappend="${log.logLevel == 'ERROR' ? 'badge badge-error' : 'badge badge-info'}" 
+                                      th:text="${log.logLevel}"></span>
+                            </td>
+                            <td><span class="badge badge-method" th:text="${log.httpMethod}">GET</span></td>
+                            <td th:text="${log.requestUri}" th:title="${log.requestUri}"></td>
+                            <td th:text="${log.loginId ?: '-'}"></td>
+                            <td th:text="${log.accessIp}" style="font-family: monospace; font-size: 0.8rem;"></td>
+                            <td>
+                                <span th:text="${log.executionTime} + 'ms'" 
+                                      th:classappend="${log.executionTime > 1000 ? 'time-danger' : (log.executionTime > 500 ? 'time-slow' : '')}">
+                                </span>
+                            </td>
+                            <td th:text="${#temporals.format(log.logDate, 'MM-dd HH:mm:ss')}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination-container" th:if="${total > 0}">
+                <a th:href="@{/admin/logs/list(page=${startPage - 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                   class="page-btn" th:classappend="${startPage == 1} ? 'disabled' : ''">이전</a>
+
+                <th:block th:each="pageNum : ${#numbers.sequence(startPage, endPage)}">
+                    <a th:href="@{/admin/logs/list(page=${pageNum}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                       th:text="${pageNum}" 
+                       th:classappend="${pageNum == searchDto.page ? 'page-btn active' : 'page-btn'}"></a>
+                </th:block>
+
+                <a th:href="@{/admin/logs/list(page=${endPage + 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                   class="page-btn" th:classappend="${endPage == totalPages} ? 'disabled' : ''">다음</a>
+            </div>
+        </main>
+    </div>
+    <script>
+	    document.addEventListener("DOMContentLoaded", function () {
+	        const memberId = document.getElementById("memberId")?.value;
+	        if (memberId) {
+	            initNotification(memberId);
+	        }
+	    });
+    </script>
+</body>
+</html>

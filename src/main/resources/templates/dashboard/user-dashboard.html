@@ -8,6 +8,10 @@
 <script src="/js/highcharts/highcharts.js"></script>
 <script src="/js/highcharts/exporting.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script src="/js/notification.js"></script>
+
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" th:href="@{/css/color.css}">
 <link rel="stylesheet" th:href="@{/css/fonts.css}">
@@ -33,6 +37,7 @@
 </style>
 </head>
 <body class="bg">
+	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
     <nav id="sidebar" class="menu-color">
 	    <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
 	    <ul>
@@ -152,6 +157,13 @@
                 alert(alertMessage);
             }
         });
+    });
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        const memberId = document.getElementById("memberId")?.value;
+        if (memberId) {
+            initNotification(memberId);
+        }
     });
 </script>
 

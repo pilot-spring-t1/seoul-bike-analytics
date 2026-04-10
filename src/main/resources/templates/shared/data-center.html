@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8" />
-	<title>따릉이 분석 데이터센터</title>
+	<title>자료실</title>
 	
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 	<link rel="stylesheet" th:href="@{/css/color.css}">
@@ -68,9 +68,9 @@
 		    <li><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
 		    <li><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
 		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
-		    <li class="active"><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">데이터 센터</span></a></li>
+		    <li class="active"><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
 		    <li class="notice"><a th:href="@{/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
-		    <li><a th:href="@{/}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+		    <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
 	    </ul>
 	</nav>
 

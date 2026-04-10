@@ -21,6 +21,7 @@ public class DashboardController {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
         model.addAttribute("summary", summary);
         model.addAttribute("userName", "관리자");
+        model.addAttribute("memberId", 1L); // 테스트용
         return "dashboard/user-dashboard";
     }
 
@@ -30,18 +31,26 @@ public class DashboardController {
     }
 
     @GetMapping("/detail")
-    public String detailAnalysisPage() {
+    public String detailAnalysisPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/detail";
     }
-    
+   
     @GetMapping("/data-center")
     public String dataSharePage() {
     	return "shared/data-center";
     }
 
     @GetMapping("/notifications")
-    public String notificationPage() {
+    public String notificationPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "notification/notifications";
+    }
+    
+    @GetMapping("/admin/notifications")
+    public String adminNotificationPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
+        return "notification/admin-notifications";
     }
 
     @GetMapping("/error/403")
