@@ -29,23 +29,21 @@ public class LogController {
 	 */
 	@GetMapping("/list")
 	public String list(@ModelAttribute("searchDto") LogSearchDto searchDto, Model model) {
+	    Map<String, Object> result = logService.selectLogList(searchDto);
+	    
+	    int totalPages = (int) result.get("totalPages");
+	    int currentPage = searchDto.getPage();
+	    
+	    // 한 번에 보여줄 페이지 번호 개수 (예: 1~5, 6~10)
+	    int blockLimit = 5; 
+	    int startPage = (((int)(Math.ceil((double)currentPage / blockLimit))) - 1) * blockLimit + 1;
+	    int endPage = Math.min((startPage + blockLimit - 1), totalPages);
 
-		// 1. 처음 진입 시 페이지 번호가 없으면 1페이지로 고정
-		if (searchDto.getPage() < 1) {
-			searchDto.setPage(1);
-		}
-
-		// 2. 서비스 호출하여 로그 데이터 및 페이징 정보 수집
-		// 내부적으로 selectLogList와 selectLogCount가 실행됨
-		Map<String, Object> result = logService.selectLogList(searchDto);
-
-		// 3. 뷰(Thymeleaf)로 데이터 전달
-		model.addAttribute("list", result.get("list"));
-		model.addAttribute("total", result.get("total"));
-		model.addAttribute("totalPages", result.get("totalPages"));
-
-		// @ModelAttribute("searchDto") 덕분에 searchDto는 자동으로 모델에 담김
-		return "admin/log-list";
+	    model.addAllAttributes(result);
+	    model.addAttribute("startPage", startPage);
+	    model.addAttribute("endPage", endPage);
+	    
+	    return "admin/log-list";
 	}
 
 	/**

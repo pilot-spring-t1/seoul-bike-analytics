@@ -31,7 +31,8 @@
         .user-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         .user-table th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 0.85rem; }
         .user-table td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
+        .user-table tr:hover { background-color: #f8fafc; cursor: pointer; }
+
         .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
         .badge-error { background: #fee2e2; color: #ef4444; }
         .badge-info { background: #dcfce7; color: #16a34a; }
@@ -41,8 +42,10 @@
         .time-danger { color: #ef4444; font-weight: bold; }
 
         .pagination-container { display: flex; justify-content: center; margin-top: 30px; gap: 5px; }
-        .page-btn { padding: 8px 14px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; text-decoration: none; color: #475569; }
+        .page-btn { padding: 8px 14px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; text-decoration: none; color: #475569; transition: 0.2s; }
+        .page-btn:hover { background: #f8fafc; border-color: #1abc9c; color: #1abc9c; }
         .page-btn.active { background: #1abc9c; color: white; border-color: #1abc9c; font-weight: bold; }
+        .page-btn.disabled { color: #cbd5e1; cursor: not-allowed; pointer-events: none; background-color: #f1f5f9; }
     </style>
 </head>
 <body class="bg-admin">
@@ -104,7 +107,8 @@
                         <tr th:if="${#lists.isEmpty(list)}">
                             <td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;">조회된 로그가 없습니다.</td>
                         </tr>
-                        <tr th:each="log : ${list}" th:onclick="|location.href='@{/admin/logs/view/{id}(id=${log.logId})}'|" style="cursor: pointer;">
+                        <tr th:each="log : ${list}" 
+                            th:onclick="|location.href='@{/admin/logs/view/{id}(id=${log.logId})}'|">
                             <td th:text="${log.logId}"></td>
                             <td>
                                 <span th:classappend="${log.logLevel == 'ERROR' ? 'badge badge-error' : 'badge badge-info'}" 
@@ -126,11 +130,17 @@
             </div>
 
             <div class="pagination-container" th:if="${total > 0}">
-                <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages ?: 1)}">
+                <a th:href="@{/admin/logs/list(page=${startPage - 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                   class="page-btn" th:classappend="${startPage == 1} ? 'disabled' : ''">이전</a>
+
+                <th:block th:each="pageNum : ${#numbers.sequence(startPage, endPage)}">
                     <a th:href="@{/admin/logs/list(page=${pageNum}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
                        th:text="${pageNum}" 
                        th:classappend="${pageNum == searchDto.page ? 'page-btn active' : 'page-btn'}"></a>
                 </th:block>
+
+                <a th:href="@{/admin/logs/list(page=${endPage + 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                   class="page-btn" th:classappend="${endPage == totalPages} ? 'disabled' : ''">다음</a>
             </div>
         </main>
     </div>
