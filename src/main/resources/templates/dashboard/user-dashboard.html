@@ -42,10 +42,12 @@
 	    <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
 	    <ul>
 		    <li class="active"><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
-		    <li><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
-		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
-		    <li><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
-		    <li class="notice"><a th:href="@{/notifications}"
+		    <li><a th:href="@{/dashboard/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+		    <li><a th:href="@{/dashboard/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+		    <li><a th:href="@{/dashboard/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
+
+
+		    <li class="notice"><a th:href="@{/dashboard/notifications}"
 				style="position: relative;"> 🔔 <span
 					th:text="#{dashboard.menu.notifications}">알림 내역</span> <span
 					id="notiBadge"
@@ -56,7 +58,8 @@
 	            <li><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
 	            <li><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
             </th:block>
-		    <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+            <li><a th:href="@{/members/logout}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+
 	    </ul>
     </nav>
 

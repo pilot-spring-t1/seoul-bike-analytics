@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.metanet.seoulbike.stats.mapper.SeoulBikeMapper">
+<mapper namespace="com.metanet.seoulbike.dashboard.mapper.SeoulBikeMapper">
 
 	<insert id="insertBikeBatch" parameterType="java.util.List">
 		INSERT ALL
@@ -36,7 +36,7 @@
 		SELECT * FROM DUAL
 	</insert>
 
-    <select id="findAllBikeData" resultType="com.metanet.seoulbike.stats.dto.SeoulBikeDto">
+    <select id="findAllBikeData" resultType="com.metanet.seoulbike.dashboard.dto.SeoulBikeDto">
         SELECT * FROM SEOUL_BIKE
         ORDER BY RENTAL_DATE DESC
     </select>
@@ -44,7 +44,7 @@
 
 	<!-- 사용자 대시보드 상세 분석 페이지 -->
 	<select id="getDashboardSummary"
-		resultType="com.metanet.seoulbike.stats.dto.DashboardSummaryDto">
+		resultType="com.metanet.seoulbike.dashboard.dto.DashboardSummaryDto">
 		SELECT
 		NVL(SUM(NUM_OF_USES), 0) AS totalUses,
 		NVL(SUM(DISTANCE), 0) AS totalDistance,
@@ -54,7 +54,7 @@
 	</select>
 
 	<select id="getAgeGroupUsage"
-		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		parameterType="com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto"
 		resultType="map">
 		SELECT
 		AGE_GROUP AS label,
@@ -110,8 +110,8 @@
 
 
 	<select id="findByPeriod"
-		parameterType="com.metanet.seoulbike.stats.dto.BikePeriodSearchDto"
-		resultType="com.metanet.seoulbike.stats.dto.SeoulBikeDto">
+		parameterType="com.metanet.seoulbike.dashboard.dto.BikePeriodSearchDto"
+		resultType="com.metanet.seoulbike.dashboard.dto.SeoulBikeDto">
 		SELECT *
 		FROM SEOUL_BIKE
 		<where>
@@ -126,7 +126,7 @@
 	</select>
 
 
-    <select id="getMonthlyUsage" resultType="com.metanet.seoulbike.stats.dto.BikeMonthlyUsageDto">
+    <select id="getMonthlyUsage" resultType="com.metanet.seoulbike.dashboard.dto.BikeMonthlyUsageDto">
         SELECT
             TO_NUMBER(TO_CHAR(RENTAL_DATE, 'MM')) AS month,
             SUM(NUM_OF_USES) AS totalUses
@@ -137,7 +137,7 @@
     </select>
 
 	<select id="getCustomAnalysis"
-		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		parameterType="com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto"
 		resultType="map">
 		SELECT label, value FROM (
 		SELECT
@@ -216,8 +216,8 @@
 	</select>
 
 	<select id="getDetailSummary"
-		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
-		resultType="com.metanet.seoulbike.stats.dto.DetailSummaryDto">
+		parameterType="com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto"
+		resultType="com.metanet.seoulbike.dashboard.dto.DetailSummaryDto">
 		SELECT
 		ROUND(NVL(AVG(DISTANCE) / 1000, 0), 2) AS avgDistance,
 		ROUND(NVL(AVG(USAGE_MINUTE), 0), 2) AS avgUsageMinute,
@@ -253,7 +253,7 @@
 	</select>
 
 	<select id="getGenderUsage"
-		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		parameterType="com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto"
 		resultType="map">
 
 		SELECT
@@ -291,7 +291,7 @@
 	</select>
 
 	<select id="getRentalCodeUsage"
-		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		parameterType="com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto"
 		resultType="map">
 		SELECT
 		NVL(RENTAL_CODE, '미지정') AS label,
@@ -312,7 +312,7 @@
 		ORDER BY value DESC
 	</select>
 
-    <select id="getDayUsage" resultType="com.metanet.seoulbike.stats.dto.BikeDayUsageDto">
+    <select id="getDayUsage" resultType="com.metanet.seoulbike.dashboard.dto.BikeDayUsageDto">
         SELECT
             TO_CHAR(RENTAL_DATE, 'DY') AS dayOfWeek,
             SUM(NUM_OF_USES) AS totalUsage

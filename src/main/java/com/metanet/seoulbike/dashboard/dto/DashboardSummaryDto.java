@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.stats.dto;
+package com.metanet.seoulbike.dashboard.dto;
 
 import lombok.Getter;
 import lombok.Setter;
