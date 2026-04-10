@@ -279,7 +279,8 @@
 
 	<div id="main-content">
 		<header>
-			<span style="margin-right: 20px;" class="subtitle-dark-blue-font"><b>시스템 알림 센터</b></span>
+			<span style="margin-right: 20px;" class="subtitle-dark-blue-font"
+				th:text="#{detail.header.systemNotice}"> 시스템 알림 센터 </span>
 			<form method="get" style="margin: 0; margin-right: 10px;">
 				<select name="lang" onchange="this.form.submit()">
 					<option value="ko" th:selected="${#locale.language == 'ko'}"
@@ -290,8 +291,7 @@
 			</form>
 		</header>
 
-		<main class="main">
-			<div class="container">
+		<main class="container">
 				<section class="panel filter-panel">
 					<div class="filter-left">
 						<div class="filter-group office-search-group">
@@ -352,7 +352,6 @@
 						<div id="analysisChart"></div>
 					</div>
 				</section>
-			</div>
 		</main>
 	</div>
 
