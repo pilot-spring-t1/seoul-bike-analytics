@@ -43,6 +43,11 @@ public class PageController {
         return "admin/data-manage";
     }
     
+    @GetMapping("/admin/contents")
+    public String adminContentsPage() {
+    	return "admin-contents";
+    }
+    
     @GetMapping("/data-center")
     public String dataSharePage() {
     	return "shared/data-center";
@@ -50,7 +55,7 @@ public class PageController {
 
     @GetMapping("/notifications")
     public String notificationPage() {
-        return "notification/list";
+        return "notification/notifications";
     }
 
     @GetMapping("/error/403")

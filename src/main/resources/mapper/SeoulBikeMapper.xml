@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.metanet.seoulbike.stats.mapper.SeoulBikeMapper">
+
+	<insert id="insertBikeBatch" parameterType="java.util.List">
+		INSERT ALL
+		<foreach collection="list" item="item">
+			INTO SEOUL_BIKE (
+			RENTAL_DATE,
+			RENTAL_OFFICE_NO,
+			RENTAL_OFFICE_NAME,
+			RENTAL_CODE,
+			GENDER,
+			AGE_GROUP,
+			NUM_OF_USES,
+			EXERCISE_AMOUNT,
+			CARBON_AMOUNT,
+			DISTANCE,
+			USAGE_MINUTE
+			)
+			VALUES (
+			TO_DATE(#{item.rentalDate}, 'YYYY-MM-DD'),
+			#{item.rentalOfficeNo},
+			#{item.rentalOfficeName},
+			#{item.rentalCode},
+			#{item.gender},
+			#{item.ageGroup},
+			#{item.numOfUses},
+			#{item.exerciseAmount},
+			#{item.carbonAmount},
+			#{item.distance},
+			#{item.usageMinute}
+			)
+		</foreach>
+		SELECT * FROM DUAL
+	</insert>
+
+    <select id="findAllBikeData" resultType="com.metanet.seoulbike.stats.dto.SeoulBikeDto">
+        SELECT * FROM SEOUL_BIKE
+        ORDER BY RENTAL_DATE DESC
+    </select>
+
+
+	<!-- 사용자 대시보드 상세 분석 페이지 -->
+	<select id="getDashboardSummary"
+		resultType="com.metanet.seoulbike.stats.dto.DashboardSummaryDto">
+		SELECT
+		NVL(SUM(NUM_OF_USES), 0) AS totalUses,
+		NVL(SUM(DISTANCE), 0) AS totalDistance,
+		NVL(SUM(USAGE_MINUTE), 0) AS
+		totalUsageMinute
+		FROM SEOUL_BIKE
+	</select>
+
+	<select id="getAgeGroupUsage"
+		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		resultType="map">
+		SELECT
+		AGE_GROUP AS label,
+		SUM(NUM_OF_USES) AS value
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') +
+				1
+			</if>
+			<if test="gender != null and gender != ''">
+				AND UPPER(GENDER) = UPPER(#{gender})
+			</if>
+			<if test="rentalCode != null and rentalCode != ''">
+				AND RENTAL_CODE = #{rentalCode}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME = #{keyword}
+			</if>
+		</where>
+		GROUP BY AGE_GROUP
+		ORDER BY CASE AGE_GROUP
+		WHEN '~10대' THEN 1
+		WHEN '20대'
+		THEN 2
+		WHEN '30대' THEN 3
+		WHEN '40대' THEN 4
+		WHEN '50대' THEN 5
+		WHEN '60대'
+		THEN 6
+		WHEN '70대이상' THEN 7
+		WHEN '기타' THEN 8
+		ELSE 99
+		END
+	</select>
+
+	<select id="searchOfficeNames" parameterType="string"
+		resultType="string">
+		SELECT RENTAL_OFFICE_NAME
+		FROM (
+		SELECT DISTINCT
+		RENTAL_OFFICE_NAME
+		FROM OFFICE_LIST
+		WHERE RENTAL_OFFICE_NAME LIKE '%' ||
+		#{value} || '%'
+		ORDER BY RENTAL_OFFICE_NAME
+		)
+		WHERE ROWNUM &lt;= 5
+	</select>
+
+
+	<select id="findByPeriod"
+		parameterType="com.metanet.seoulbike.stats.dto.BikePeriodSearchDto"
+		resultType="com.metanet.seoulbike.stats.dto.SeoulBikeDto">
+		SELECT *
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+			</if>
+		</where>
+		ORDER BY RENTAL_DATE ASC
+	</select>
+
+
+    <select id="getMonthlyUsage" resultType="com.metanet.seoulbike.stats.dto.BikeMonthlyUsageDto">
+        SELECT
+            TO_NUMBER(TO_CHAR(RENTAL_DATE, 'MM')) AS month,
+            SUM(NUM_OF_USES) AS totalUses
+        FROM SEOUL_BIKE
+        WHERE TO_CHAR(RENTAL_DATE, 'YYYY') = #{year}
+        GROUP BY TO_CHAR(RENTAL_DATE, 'MM')
+        ORDER BY month
+    </select>
+
+	<select id="getCustomAnalysis"
+		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		resultType="map">
+		SELECT label, value FROM (
+		SELECT
+		<choose>
+			<when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
+			<when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
+			<when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
+			<when test="groupBy == 'AGE'">AGE_GROUP</when>
+			<when test="groupBy == 'CODE'">RENTAL_CODE</when>
+			<otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
+		</choose>
+		AS label,
+		NVL(
+		<choose>
+			<when test="calcType == 'SUM'">SUM</when>
+			<when test="calcType == 'AVG'">ROUND(AVG</when>
+			<when test="calcType == 'COUNT'">COUNT</when>
+			<otherwise>SUM</otherwise>
+		</choose>
+		(
+		<choose>
+			<when test="targetCol == 'USES'">NUM_OF_USES</when>
+			<when test="targetCol == 'DISTANCE'">DISTANCE</when>
+			<when test="targetCol == 'CARBON'">CARBON_AMOUNT</when>
+			<when test="targetCol == 'EXERCISE'">EXERCISE_AMOUNT</when>
+			<when test="targetCol == 'MINUTE'">USAGE_MINUTE</when>
+			<otherwise>NUM_OF_USES</otherwise>
+		</choose>
+		)
+		<if test="calcType == 'AVG'">, 2)</if>
+		, 0) AS value
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
+			</if>
+			/* [수정] 필터링 시에도 DB 값을 UPPER로 변환하여 파라미터(F/M)와 비교 */
+			<if test="gender != null and gender != ''">
+				AND UPPER(GENDER) = UPPER(#{gender})
+			</if>
+			<if test="ageGroup != null and ageGroup != ''">
+				AND AGE_GROUP = #{ageGroup}
+			</if>
+			<if test="rentalCode != null and rentalCode != ''">
+				AND RENTAL_CODE = #{rentalCode}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME LIKE '%' || #{keyword} || '%'
+			</if>
+		</where>
+		GROUP BY
+		<choose>
+			<when test="groupBy == 'GENDER'">NVL(UPPER(GENDER), '미지정')</when>
+			<when test="groupBy == 'DATE'">TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</when>
+			<when test="groupBy == 'OFFICE'">RENTAL_OFFICE_NAME</when>
+			<when test="groupBy == 'AGE'">AGE_GROUP</when>
+			<when test="groupBy == 'CODE'">RENTAL_CODE</when>
+			<otherwise>TO_CHAR(RENTAL_DATE, 'YYYY-MM-DD')</otherwise>
+		</choose>
+		)
+		ORDER BY
+		<choose>
+			<when test="sortBy == 'VALUE'">value</when>
+			<otherwise>label</otherwise>
+		</choose>
+		<choose>
+			<when test="sortOrder == 'DESC'">DESC</when>
+			<otherwise>ASC</otherwise>
+		</choose>
+		<if test="limit != null and limit > 0">
+			OFFSET 0 ROWS FETCH NEXT #{limit} ROWS ONLY
+		</if>
+	</select>
+
+	<select id="getDetailSummary"
+		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		resultType="com.metanet.seoulbike.stats.dto.DetailSummaryDto">
+		SELECT
+		ROUND(NVL(AVG(DISTANCE) / 1000, 0), 2) AS avgDistance,
+		ROUND(NVL(AVG(USAGE_MINUTE), 0), 2) AS avgUsageMinute,
+		ROUND(NVL(SUM(NUM_OF_USES) / NULLIF(COUNT(DISTINCT RENTAL_DATE), 0),
+		0), 2) AS avgDailyUses,
+		ROUND(
+		NVL(
+		((SUM(DISTANCE) / 1000) /
+		NULLIF(SUM(USAGE_MINUTE), 0)) * 60,
+		0
+		),
+		2
+		) AS avgSpeed
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') +
+				1
+			</if>
+			<if test="gender != null and gender != ''">
+				AND UPPER(GENDER) = UPPER(#{gender})
+			</if>
+			<if test="rentalCode != null and rentalCode != ''">
+				AND RENTAL_CODE = #{rentalCode}
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME = #{keyword}
+			</if>
+		</where>
+	</select>
+
+	<select id="getGenderUsage"
+		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		resultType="map">
+
+		SELECT
+		CASE
+		WHEN UPPER(GENDER) = 'F' THEN '여성'
+		WHEN UPPER(GENDER) = 'M'
+		THEN '남성'
+		ELSE '기타/미지정'
+		END AS label,
+		SUM(NUM_OF_USES) AS value
+		FROM
+		SEOUL_BIKE
+
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') +
+				1
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME = #{keyword}
+			</if>
+		</where>
+
+		GROUP BY
+		CASE
+		WHEN UPPER(GENDER) = 'F' THEN '여성'
+		WHEN UPPER(GENDER) = 'M'
+		THEN '남성'
+		ELSE '기타/미지정'
+		END
+
+	</select>
+
+	<select id="getRentalCodeUsage"
+		parameterType="com.metanet.seoulbike.stats.dto.BikeAnalysisDto"
+		resultType="map">
+		SELECT
+		NVL(RENTAL_CODE, '미지정') AS label,
+		SUM(NUM_OF_USES) AS value
+		FROM SEOUL_BIKE
+		<where>
+			<if test="startDate != null and startDate != ''">
+				AND RENTAL_DATE >= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+			</if>
+			<if test="endDate != null and endDate != ''">
+				AND RENTAL_DATE &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+			</if>
+			<if test="keyword != null and keyword != ''">
+				AND RENTAL_OFFICE_NAME = #{keyword}
+			</if>
+		</where>
+		GROUP BY NVL(RENTAL_CODE, '미지정')
+		ORDER BY value DESC
+	</select>
+
+    <select id="getDayUsage" resultType="com.metanet.seoulbike.stats.dto.BikeDayUsageDto">
+        SELECT
+            TO_CHAR(RENTAL_DATE, 'DY') AS dayOfWeek,
+            SUM(NUM_OF_USES) AS totalUsage
+        FROM SEOUL_BIKE
+        GROUP BY TO_CHAR(RENTAL_DATE, 'DY'), TO_CHAR(RENTAL_DATE, 'D')
+        ORDER BY TO_CHAR(RENTAL_DATE, 'D')
+    </select>
+
+
+</mapper>

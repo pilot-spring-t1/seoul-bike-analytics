@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.metanet.seoulbike.common.log.mapper.LogMapper">
+
+	<insert id="insertLog" parameterType="com.metanet.seoulbike.common.log.dto.LogDto">
+	    INSERT INTO SYSTEM_LOG (
+	        /* LOG_ID는 DB가 자동으로 넣어주므로 제외합니다 */
+	        LOG_LEVEL, METHOD_NAME, REQUEST_URI, 
+	        HTTP_METHOD, EXECUTION_TIME, PARAMETER_DATA, 
+	        ERROR_MSG, ACCESS_IP, LOGIN_ID, LOG_DATE
+	    ) VALUES (
+	        #{logLevel, jdbcType=VARCHAR},
+	        #{methodName, jdbcType=VARCHAR},
+	        #{requestUri, jdbcType=VARCHAR},
+	        #{httpMethod, jdbcType=VARCHAR},
+	        #{executionTime, jdbcType=NUMERIC}, 
+	        #{parameterData, jdbcType=CLOB},
+	        #{errorMsg, jdbcType=CLOB},
+	        #{accessIp, jdbcType=VARCHAR},
+	        #{loginId, jdbcType=VARCHAR},
+	        SYSDATE
+	    )
+	</insert>
+
+</mapper>
