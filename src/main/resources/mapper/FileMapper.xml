@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.metanet.seoulbike.file.mapper.FileMapper">
+
+    <insert id="insertFile" 
+            parameterType="com.metanet.seoulbike.file.dto.FileDto" 
+            useGeneratedKeys="true" 
+            keyProperty="fileId" 
+            keyColumn="FILE_ID">
+        INSERT INTO FILE_ATTACHMENT (
+            BOARD_ID, FILE_UUID, 
+            FILE_NAME, 
+            FILE_PATH, 
+            FILE_SIZE, 
+            UPLOADER_ID
+        ) VALUES (
+            #{boardId}, #{fileUuid}, 
+            #{fileName}, 
+            #{filePath}, 
+            #{fileSize}, 
+            #{uploaderId}
+        )
+    </insert>
+
+    <select id="getFilesByBoardId" resultType="com.metanet.seoulbike.file.dto.FileDto">
+        SELECT 
+            FILE_ID as "fileId",
+            BOARD_ID as "boardId",
+            FILE_UUID as "fileUuid",
+            FILE_NAME as "fileName",
+            FILE_PATH as "filePath",
+            FILE_SIZE as "fileSize",
+            UPLOAD_DATE as "uploadDate",
+            UPLOADER_ID as "uploaderId"
+        FROM FILE_ATTACHMENT 
+        WHERE BOARD_ID = #{boardId}
+        ORDER BY FILE_ID ASC
+    </select>
+
+    <select id="getFileById" resultType="com.metanet.seoulbike.file.dto.FileDto">
+        SELECT 
+            FILE_ID as "fileId",
+            BOARD_ID as "boardId",
+            FILE_UUID as "fileUuid",
+            FILE_NAME as "fileName",
+            FILE_PATH as "filePath",
+            FILE_SIZE as "fileSize",
+            UPLOAD_DATE as "uploadDate",
+            UPLOADER_ID as "uploaderId"
+        FROM FILE_ATTACHMENT 
+        WHERE FILE_ID = #{fileId}
+    </select>
+
+    <delete id="deleteFile">
+        DELETE FROM FILE_ATTACHMENT WHERE FILE_ID = #{fileId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${board.boardId == null} ? '새 글 작성 | 관리자 센터' : '게시글 수정 | 관리자 센터'">게시글 작성 | 관리자 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        /* 기본 레이아웃 스타일 유지 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
+
+        #sidebar { width: 260px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar h2 { height: 80px; display: flex; align-items: center; padding: 0 30px; font-size: 1.3rem; font-weight: 800; color: #10b981; }
+        #sidebar ul { list-style: none; padding: 20px 0; flex-grow: 1; }
+        #sidebar ul li a { color: #94a3b8; text-decoration: none; display: block; padding: 15px 30px; transition: 0.2s; }
+        #sidebar ul li.active a { background: #1e293b; color: #10b981; }
+
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
+        .container { flex: 1; padding: 40px; overflow-y: auto; }
+
+        /* 폼 카드 스타일 */
+        .form-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 40px; }
+        .form-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 32px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
+
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 700; color: #64748b; margin-bottom: 8px; }
+        
+        .form-control { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.2s; }
+        .form-control:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        
+        select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='Mid 19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; background-size: 16px; }
+
+        textarea.form-control { height: 400px; resize: vertical; line-height: 1.6; }
+
+        .file-upload-area { border: 2px dashed #e2e8f0; border-radius: 12px; padding: 30px; text-align: center; color: #64748b; cursor: pointer; transition: 0.2s; }
+        .file-upload-area:hover { border-color: #10b981; background: #f8fafc; }
+
+        /* 하단 버튼 */
+        .button-group { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+        .btn { padding: 12px 32px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 0.95rem; border: none; }
+        .btn-outline { border: 1px solid #e2e8f0; background: white; color: #64748b; }
+        .btn-emerald { background: #10b981; color: white; }
+        .btn-emerald:hover { background: #059669; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a th:href="@{/dashboard/main}">📊 종합 분석</a></li>
+            <li><a th:href="@{/admin/members/search}">👤 회원 관리</a></li>
+            <li class="active"><a th:href="@{/admin/boards/list}">📝 콘텐츠 관리</a></li>
+            <li><a th:href="@{/admin/system}">⚙️ 시스템 설정</a></li>
+            <li><hr style="opacity:0.1; margin: 10px 0;"></li>
+            <li><a th:href="@{/logout}">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span style="font-size: 0.9rem; color: #64748b;">관리자 모드 접속 중</span>
+        </header>
+
+        <main class="container">
+            <div class="form-card">
+                <h1 class="form-title" th:text="${board.boardId == null} ? '새 글 작성' : '게시글 수정'">새 글 작성</h1>
+
+                <form th:action="${board.boardId == null} ? @{/admin/boards/register} : @{/admin/boards/modify}" 
+                      method="post" enctype="multipart/form-data">
+                    
+                    <input type="hidden" name="boardId" th:if="${board.boardId != null}" th:value="${board.boardId}">
+                    <input type="hidden" name="writer" th:value="${board.writer ?: 'ADMIN'}">
+
+                    <div class="form-group">
+                        <label class="form-label">카테고리</label>
+                        <select name="category" class="form-control" required>
+                            <option value="NOTICE" th:selected="${board.category == 'NOTICE'}">공지사항</option>
+                            <option value="SUGGESTION" th:selected="${board.category == 'SUGGESTION'}">건의사항</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">제목</label>
+                        <input type="text" name="title" class="form-control" th:value="${board.title}" placeholder="제목을 입력하세요" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">본문 내용</label>
+                        <textarea name="content" class="form-control" th:text="${board.content}" placeholder="내용을 입력하세요..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">첨부파일</label>
+                        <div class="file-upload-area" onclick="document.getElementById('uploadFiles').click()">
+                            <p>클릭하여 파일을 선택하거나 파일을 여기로 끌어다 놓으세요</p>
+                            <p style="font-size: 0.8rem; margin-top: 5px; opacity: 0.7;">(최대 10MB까지 업로드 가능)</p>
+                            <input type="file" id="uploadFiles" name="uploadFiles" multiple style="display: none;" onchange="updateFileName(this)">
+                        </div>
+                        <div id="fileList" style="margin-top: 10px; font-size: 0.85rem; color: #10b981; font-weight: 600;"></div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="btn btn-outline" th:onclick="|location.href='@{/admin/boards/list}'|">취소</button>
+                        <button type="submit" class="btn btn-emerald" th:text="${board.boardId == null} ? '등록하기' : '수정완료'">등록하기</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 파일 선택 시 파일명을 화면에 표시해주는 함수
+        function updateFileName(input) {
+            const fileList = document.getElementById('fileList');
+            if (input.files.length > 0) {
+                let names = [];
+                for (let i = 0; i < input.files.length; i++) {
+                    names.push(input.files[i].name);
+                }
+                fileList.textContent = "선택된 파일: " + names.join(", ");
+            } else {
+                fileList.textContent = "";
+            }
+        }
+    </script>
+</body>
+</html>
