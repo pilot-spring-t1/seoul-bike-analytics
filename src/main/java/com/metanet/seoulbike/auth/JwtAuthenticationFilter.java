@@ -39,5 +39,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		filterChain.doFilter(request, response);
 	}
+	
+	// 테스트용 코드 추가
+	@Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String uri = request.getRequestURI();
+
+        return uri.startsWith("/api/notifications/")
+                || uri.equals("/api/notifications")
+                || uri.startsWith("/ws")
+                || uri.startsWith("/error");
+    }
 
 }
