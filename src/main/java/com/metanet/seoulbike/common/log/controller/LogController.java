@@ -42,6 +42,7 @@ public class LogController {
 	    model.addAllAttributes(result);
 	    model.addAttribute("startPage", startPage);
 	    model.addAttribute("endPage", endPage);
+	    model.addAttribute("memberId", 1L); // 테스트용
 	    
 	    return "admin/log-list";
 	}

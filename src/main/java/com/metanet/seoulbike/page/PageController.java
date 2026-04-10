@@ -20,6 +20,7 @@ public class PageController {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
         model.addAttribute("summary", summary);
         model.addAttribute("userName", "관리자");
+        model.addAttribute("memberId", 1L); // 테스트용
         return "dashboard/user-dashboard";
     }
 
@@ -64,7 +65,8 @@ public class PageController {
     }
     
     @GetMapping("admin/data-center")
-    public String adminDataSharePage() {
+    public String adminDataSharePage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
     	return "shared/admin-data-center";
     }
 
@@ -75,7 +77,8 @@ public class PageController {
     }
     
     @GetMapping("/admin/notifications")
-    public String adminNotificationPage() {
+    public String adminNotificationPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "notification/admin-notifications";
     }
 
