@@ -18,3 +18,23 @@
 .menu-admin-color {
 	background-color: #0F172A
 }
+
+.dark-mode body {
+    background-color: #0B1220;
+}
+
+/* main */
+.dark-mode .bg-admin {
+    background-color: #0B1220 !important;
+}
+
+/* header */
+.dark-mode header {
+    background: #111827 !important;
+    color: white;
+}
+
+/* sidebar */
+.dark-mode #sidebar {
+    background-color: #0F172A !important;
+}

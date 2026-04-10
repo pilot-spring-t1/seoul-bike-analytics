@@ -36,7 +36,8 @@ public class PageController {
     }
     
     @GetMapping("/admin/detail")
-    public String AdminDetailAnalysisPage() {
+    public String AdminDetailAnalysisPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/admin-detail";
     }
 
@@ -59,7 +60,8 @@ public class PageController {
     }
     
     @GetMapping("/data-center")
-    public String dataSharePage() {
+    public String dataSharePage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
     	return "shared/data-center";
     }
     

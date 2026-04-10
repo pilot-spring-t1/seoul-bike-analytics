@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그 상세 정보 | 시스템 관리</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/color.css}">
+    <link rel="stylesheet" th:href="@{/css/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/button.css}">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+        #sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #sidebar ul { list-style: none; padding: 20px 0; }
+        #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
+        #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
+        .notice {
+			border-top: 2px solid rgba(255,255,255,0.12);
+			margin-top: 4px;
+		}
+        
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .container { flex: 1; padding: 30px; overflow-y: auto; background-color: #f8fafc; }
+        
+        .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); padding: 30px; margin-bottom: 20px; }
+        
+        .info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px; }
+        .info-item { border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; }
+        .info-label { font-size: 0.85rem; color: #64748b; margin-bottom: 5px; font-weight: 600; }
+        .info-value { font-size: 1rem; color: #1e293b; font-weight: 500; }
+
+        .data-section { margin-top: 25px; }
+        .data-label { font-size: 0.9rem; font-weight: 700; color: #1e293b; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        /* 코드 블록 스타일 (파라미터/에러메시지용) */
+        .code-block { 
+            background: #1e293b; color: #e2e8f0; padding: 20px; border-radius: 10px; 
+            font-family: 'Courier New', monospace; font-size: 0.9rem; line-height: 1.6;
+            white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow-y: auto;
+        }
+        
+        .badge { padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; }
+        .badge-error { background: #fee2e2; color: #ef4444; }
+        .badge-info { background: #dcfce7; color: #16a34a; }
+
+        .btn-back { padding: 10px 20px; background: #94a3b8; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+        .btn-back:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-admin">
+    <nav id="sidebar" class="menu-admin-color">
+        <h2 class="logo-font">SEOUL BIKE</h2>
+        <ul>
+            <li><a th:href="@{/admin/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
+            <li><a th:href="@{/admin/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+		    <li><a th:href="@{/admin/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+		    <li><a th:href="@{/admin/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
+		    <li class="notice"><a th:href="@{/admin/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
+            <li><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
+            <li><a th:href="@{/admin/contents}">📁 콘텐츠 관리</a></li>
+            <li class="active"><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
+			<li><a href="#">⚙️ <span th:text="#{dashboard.menu.settings}">시스템 설정</span></a></li>
+            <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span style="margin-right: 20px;" class="subtitle-dark-blue-font">
+                로그 분석 중: <b th:text="${session.adminName ?: '관리자'}"></b>
+            </span>
+            
+            <form method="get" style="margin: 0; margin-right: 10px;">
+				<select name="lang" onchange="this.form.submit()">
+					<option value="ko" th:selected="${#locale.language == 'ko'}"
+						th:text="#{language.korean}">KR</option>
+					<option value="en" th:selected="${#locale.language == 'en'}"
+						th:text="#{language.english}">EN</option>
+				</select>
+			</form>
+        </header>
+
+        <main class="container">
+            <div class="detail-header">
+                <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;">
+                    로그 상세 내역 <span class="subtitle-gray-font" th:text="'#' + ${log.logId}"></span>
+                </h3>
+                <a href="javascript:history.back();" class="btn-back">목록으로 돌아가기</a>
+            </div>
+
+            <div class="card">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">로그 레벨</div>
+                        <div class="info-value">
+                            <span th:classappend="${log.logLevel == 'ERROR' ? 'badge badge-error' : 'badge badge-info'}" 
+                                  th:text="${log.logLevel}"></span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">발생 일시</div>
+                        <div class="info-value" th:text="${#temporals.format(log.logDate, 'yyyy-MM-dd HH:mm:ss')}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">요청 URI</div>
+                        <div class="info-value" style="color: #3b82f6;" th:text="${log.requestUri}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">HTTP 메서드</div>
+                        <div class="info-value"><b th:text="${log.httpMethod}"></b></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">사용자 ID</div>
+                        <div class="info-value" th:text="${log.loginId ?: '(비로그인)'}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">접속 IP</div>
+                        <div class="info-value" th:text="${log.accessIp}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">호출 메서드</div>
+                        <div class="info-value" th:text="${log.methodName}"></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">소요 시간</div>
+                        <div class="info-value">
+                            <span th:text="${log.executionTime} + ' ms'"
+                                  th:style="${log.executionTime > 1000 ? 'color: #ef4444; font-weight: bold;' : ''}"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-section">
+                    <div class="data-label">📥 요청 파라미터 (Parameter Data)</div>
+                    <div class="code-block" th:text="${log.parameterData ?: '데이터가 없습니다.'}"></div>
+                </div>
+
+                <div class="data-section" th:if="${log.logLevel == 'ERROR'}">
+                    <div class="data-label" style="color: #ef4444;">⚠ 에러 로그 (Error Message)</div>
+                    <div class="code-block" style="border-left: 4px solid #ef4444;" 
+                         th:text="${log.errorMsg ?: '상세 에러 내용이 없습니다.'}"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
