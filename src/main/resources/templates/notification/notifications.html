@@ -26,30 +26,99 @@
 		}
     
         .noti-item { display: flex; padding: 20px; border-bottom: 1px solid #eee; border-left: 4px solid transparent; background:white; transition: 0.2s; }
-        .noti-item:hover { background: #f9f9f9; }
         .noti-icon { width: 40px; height: 40px; border-radius: 50%; background: #1abc9c; color: white; 
                      display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0; }
         .noti-content { flex-grow: 1; }
         .noti-time { font-size: 0.8rem; color: #999; margin-top: 5px; }
         .unread { border-left: 4px solid #1abc9c; background: #f0fdfa; }
+
+        .read-item {
+            background: #f7f7f7;
+            border-left: 4px solid #d0d7de;
+        }
+        .read-item .noti-icon {
+            background: #9aa5b1;
+        }
+        .read-item .noti-content strong,
+        .read-item .noti-content p {
+            color: #666;
+        }
+
+        .noti-main {
+            flex-grow: 1;
+        }
+
+        .noti-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-left: 16px;
+            flex-shrink: 0;
+            justify-content: center;
+        }
+
+        .noti-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .read-btn {
+            background: #1abc9c;
+            color: white;
+        }
+        .read-btn:hover {
+            background: #16a085;
+        }
+
+        .delete-btn {
+            background: #ef5350;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #d84343;
+        }
+
+        .empty-box {
+            padding: 30px;
+            background: white;
+            text-align: center;
+            color: #888;
+            border: 1px solid #eee;
+        }
     </style>
 </head>
 <body class="bg">
-    <nav id="sidebar" class=menu-color>
+    <input type="hidden" id="memberId" th:value="${memberId}" value="1">
+
+    <nav id="sidebar" class="menu-color">
         <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
         <ul>
 		    <li><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
 		    <li><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
 		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
 		    <li><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
-		    <li class="notice active"><a th:href="@{/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
+		    <li class="notice active">
+                <a th:href="@{/notifications}" style="position: relative;">
+                    🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span>
+                    <span id="notiBadge"
+                          style="position:absolute; top:8px; right:15px; background:#e53935; color:white; border-radius:50%; min-width:20px; height:20px; line-height:20px; text-align:center; font-size:11px; font-weight:bold; padding:0 5px; display:none;">
+                        0
+                    </span>
+                </a>
+            </li>
 		    <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
 	    </ul>
     </nav>
 
     <div id="main-content">
 	    <header>
-			<span style="margin-right: 20px;" class="subtitle-dark-blue-font"><b>시스템 알림 센터</b></span>
+			<span style="margin-right: 20px;" class="subtitle-dark-blue-font">
+                <b th:text="#{notification.title}">시스템 알림 센터</b>
+            </span>
 			<form method="get" style="margin: 0; margin-right: 10px;">
 				<select name="lang" onchange="this.form.submit()">
 					<option value="ko" th:selected="${#locale.language == 'ko'}"
@@ -61,25 +130,196 @@
 		</header>
 
 		<main class="container">
-            <div>
-                <div class="noti-item unread">
-                    <div class="noti-icon">!]</div>
-                    <div class="noti-content">
-                        <strong>데이터 업데이트 완료</strong>
-                        <p>2025년 5월 10일자 따릉이 이용정보 데이터가 성공적으로 적재되었습니다.</p>
-                        <div class="noti-time">방금 전</div>
-                    </div>
-                </div>
-                <div class="noti-item">
-                    <div class="noti-icon">i</div>
-                    <div class="noti-content">
-                        <strong>시스템 정기 점검 안내</strong>
-                        <p>금일 자정부터 02시까지 서버 점검이 예정되어 있습니다.</p>
-                        <div class="noti-time">2시간 전</div>
-                    </div>
-                </div>
-            </div>
+            <div id="notificationList"></div>
         </main>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="/js/notification.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const memberId = document.getElementById("memberId")?.value;
+
+            if (!memberId) return;
+
+            initNotification(memberId);
+            loadNotifications(memberId);
+
+            document.addEventListener("notification-received", function (e) {
+                const notification = e.detail;
+                prependNotification(notification);
+            });
+        });
+
+        function loadNotifications(memberId) {
+            fetch('/api/notifications/' + memberId)
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("알림 조회 실패");
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    const container = document.getElementById("notificationList");
+                    container.innerHTML = "";
+
+                    if (!data || data.length === 0) {
+                        container.innerHTML = '<div class="empty-box">알림이 없습니다.</div>';
+                        return;
+                    }
+
+                    data.forEach(function (notification) {
+                        container.appendChild(createNotificationElement(notification));
+                    });
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        }
+
+        function prependNotification(notification) {
+            const container = document.getElementById("notificationList");
+
+            if (container.querySelector(".empty-box")) {
+                container.innerHTML = "";
+            }
+
+            const el = createNotificationElement(notification);
+            container.prepend(el);
+        }
+
+        function createNotificationElement(notification) {
+            const item = document.createElement("div");
+            const isUnread = notification.isRead === 'N';
+
+            item.className = "noti-item " + (isUnread ? "unread" : "read-item");
+            item.setAttribute("data-noti-id", notification.notiId);
+            item.setAttribute("data-is-read", notification.isRead);
+
+            const actionHtml = isUnread
+                ? `
+                    <button class="noti-btn read-btn" onclick="markAsRead(${notification.notiId}, this)">읽음</button>
+                    <button class="noti-btn delete-btn" onclick="deleteNotification(${notification.notiId}, this)">삭제</button>
+                  `
+                : `
+                    <button class="noti-btn delete-btn" onclick="deleteNotification(${notification.notiId}, this)">삭제</button>
+                  `;
+
+            item.innerHTML = `
+                <div class="noti-icon">${getIcon(notification.notiType)}</div>
+                <div class="noti-main">
+                    <div class="noti-content">
+                        <strong>${escapeHtml(getTitle(notification.notiType))}</strong>
+                        <p>${escapeHtml(notification.message || "")}</p>
+                        <div class="noti-time">${formatDate(notification.createdAt)}</div>
+                    </div>
+                </div>
+                <div class="noti-actions">
+                    ${actionHtml}
+                </div>
+            `;
+
+            return item;
+        }
+
+        function markAsRead(notiId, button) {
+            fetch('/api/notifications/' + notiId + '/read', {
+                method: 'PATCH'
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("읽음 처리 실패");
+                }
+
+                const item = button.closest('.noti-item');
+                item.classList.remove('unread');
+                item.classList.add('read-item');
+                item.setAttribute('data-is-read', 'Y');
+
+                const actions = item.querySelector('.noti-actions');
+                actions.innerHTML = `
+                    <button class="noti-btn delete-btn" onclick="deleteNotification(${notiId}, this)">삭제</button>
+                `;
+
+                if (typeof unreadCount !== "undefined") {
+                    unreadCount = Math.max(0, unreadCount - 1);
+                    updateBadge();
+                }
+            })
+            .catch(function (error) {
+                console.error(error);
+                alert('읽음 처리 중 오류가 발생했습니다.');
+            });
+        }
+
+        function deleteNotification(notiId, button) {
+            fetch('/api/notifications/' + notiId, {
+                method: 'DELETE'
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("삭제 실패");
+                }
+
+                const item = button.closest('.noti-item');
+                const wasUnread = item.getAttribute('data-is-read') === 'N';
+
+                item.remove();
+
+                if (wasUnread && typeof unreadCount !== "undefined") {
+                    unreadCount = Math.max(0, unreadCount - 1);
+                    updateBadge();
+                }
+
+                const container = document.getElementById("notificationList");
+                if (!container.children.length) {
+                    container.innerHTML = '<div class="empty-box">알림이 없습니다.</div>';
+                }
+            })
+            .catch(function (error) {
+                console.error(error);
+                alert('삭제 중 오류가 발생했습니다.');
+            });
+        }
+
+        function getIcon(type) {
+            switch (type) {
+                case "SYSTEM": return "!";
+                case "COMMENT": return "💬";
+                case "LIKE": return "♥";
+                case "BOARD": return "📢";
+                case "RENTAL": return "🚲";
+                default: return "i";
+            }
+        }
+
+        function getTitle(type) {
+            switch (type) {
+                case "SYSTEM": return "시스템 알림";
+                case "COMMENT": return "댓글 알림";
+                case "LIKE": return "좋아요 알림";
+                case "BOARD": return "공지 알림";
+                case "RENTAL": return "대여 완료";
+                default: return "알림";
+            }
+        }
+
+        function formatDate(dateTimeString) {
+            if (!dateTimeString) return "";
+            const date = new Date(dateTimeString);
+            return date.toLocaleString("ko-KR");
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
 </body>
 </html>

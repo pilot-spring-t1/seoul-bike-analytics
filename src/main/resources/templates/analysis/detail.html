@@ -3,33 +3,99 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>따릉이 심층 분석 모드</title>
+<title th:text="#{detail.page.title}">따릉이 심층 분석 모드</title>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="/js/highcharts/highcharts.js"></script>
 <script src="/js/highcharts/exporting.js"></script>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<!-- 알림을 위해 추가 -->
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script src="/js/notification.js"></script>
+
+
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <link rel="stylesheet" th:href="@{/css/color.css}">
 <link rel="stylesheet" th:href="@{/css/fonts.css}">
 <link rel="stylesheet" th:href="@{/css/card.css}">
 
 <style>
-	* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
-    body { display: flex; height: 100vh; overflow: hidden; }
-	#sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
-    #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    #sidebar ul { list-style: none; padding: 20px 0; }
-    #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
-    #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
-	#main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-	header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-	.container { flex: 1; padding: 30px; overflow-y: auto; }
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Pretendard', sans-serif;
+}
 
-	.notice {
-		border-top: 2px solid rgba(255,255,255,0.12);
-		margin-top: 4px;
-	}
+body {
+	display: flex;
+	height: 100vh;
+	overflow: hidden;
+}
+
+#sidebar {
+	width: 260px;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+}
+
+#sidebar h2 {
+	height: 100px;
+	display: flex;
+	align-items: center;
+	padding: 0 25px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#sidebar ul {
+	list-style: none;
+	padding: 20px 0;
+}
+
+#sidebar ul li a {
+	color: #bdc3c7;
+	text-decoration: none;
+	display: block;
+	padding: 15px 25px;
+}
+
+#sidebar ul li.active a {
+	background: #1abc9c;
+	color: white;
+	font-weight: bold;
+}
+
+#main-content {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+header {
+	height: 60px;
+	background: white;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding: 0 30px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.container {
+	flex: 1;
+	padding: 30px;
+	overflow-y: auto;
+}
+
+.notice {
+	border-top: 2px solid rgba(255, 255, 255, 0.12);
+	margin-top: 4px;
+}
+
 .panel {
 	background: #f9f9f9;
 	border-radius: 16px;
@@ -265,17 +331,29 @@
 </style>
 </head>
 <body class="bg">
-	<nav id="sidebar" class=menu-color>
-        <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
-        <ul>
-		    <li><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
-		    <li class="active"><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
-		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
-		    <li><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
-		    <li class="notice"><a th:href="@{/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
-		    <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
-	    </ul>
-    </nav>
+	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
+	<nav id="sidebar" class="menu-color">
+		<h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
+		<ul>
+			<li><a th:href="@{/dashboard}">📊 <span
+					th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
+			<li class="active"><a th:href="@{/detail}">🔍 <span
+					th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+			<li><a th:href="@{/dashboard-map}">🗺️ <span
+					th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+			<li><a th:href="@{/data-center}">📁 <span
+					th:text="#{dashboard.menu.dataCenter}">데이터 센터</span></a></li>
+			<li class="notice"><a th:href="@{/notifications}"
+				style="position: relative;"> 🔔 <span
+					th:text="#{dashboard.menu.notifications}">알림 내역</span> <span
+					id="notiBadge"
+					style="position: absolute; top: 8px; right: 15px; background: #e53935; color: white; border-radius: 50%; min-width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; font-weight: bold; padding: 0 5px; display: none;">
+						0 </span>
+			</a></li>
+			<li><a th:href="@{/}">🔒 <span
+					th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+		</ul>
+	</nav>
 
 	<div id="main-content">
 		<header>
@@ -292,76 +370,139 @@
 		</header>
 
 		<main class="container">
-				<section class="panel filter-panel">
-					<div class="filter-left">
-						<div class="filter-group office-search-group">
-							<label>대여소 선택</label> <input type="text" id="officeKeyword"
-								placeholder="전체 대여소 또는 대여소명 검색" autocomplete="off" /> <input
-								type="hidden" id="officeSelected" value="" />
-							<div id="officeSuggestionList" class="office-suggestion-list"></div>
-						</div>
-
-						<div class="filter-group">
-							<label>시작일</label> <input type="date" id="startDate"
-								value="2025-01-01" min="2025-01-01" max="2025-12-31" />
-						</div>
-
-						<div class="filter-group">
-							<label>종료일</label> <input type="date" id="endDate"
-								value="2025-12-31" min="2025-01-01" max="2025-12-31" />
-						</div>
-
-						<button class="apply-btn" id="applyFilterBtn" type="button">필터
-							적용</button>
+			<section class="panel filter-panel">
+				<div class="filter-left">
+					<div class="filter-group office-search-group">
+						<label th:text="#{detail.filter.office}">대여소 선택</label> <input
+							type="text" id="officeKeyword"
+							th:placeholder="#{detail.filter.officePlaceholder}"
+							placeholder="전체 대여소 또는 대여소명 검색" autocomplete="off" /> <input
+							type="hidden" id="officeSelected" value="" />
+						<div id="officeSuggestionList" class="office-suggestion-list"></div>
 					</div>
-				</section>
 
-				<section class="summary-row">
-					<div class="panel summary-card">
-						<div class="label">평균 이동거리</div>
-						<div class="value" id="avgDistanceValue">0 km</div>
+					<div class="filter-group">
+						<label th:text="#{detail.filter.startDate}">시작일</label> <input
+							type="date" id="startDate" value="2025-01-01" min="2025-01-01"
+							max="2025-12-31" />
 					</div>
-					<div class="panel summary-card">
-						<div class="label">평균 이용시간</div>
-						<div class="value" id="avgUsageMinuteValue">0 분</div>
-					</div>
-					<div class="panel summary-card">
-						<div class="label">하루 평균 이용 건수</div>
-						<div class="value green" id="avgDailyUsesValue">0 건</div>
-					</div>
-					<div class="panel summary-card">
-						<div class="label">평균 이동속도</div>
-						<div class="value green" id="avgSpeedValue">0 km/h</div>
-					</div>
-				</section>
 
-				<div class="chart-topline">
-					<div class="tabs">
-						<div class="tab active" data-type="age">👤 연령대별</div>
-						<div class="tab" data-type="genderCode">🚻 성별</div>
-						<div class="tab" data-type="ticket">🎟️ 이용권별</div>
+					<div class="filter-group">
+						<label th:text="#{detail.filter.endDate}">종료일</label> <input
+							type="date" id="endDate" value="2025-12-31" min="2025-01-01"
+							max="2025-12-31" />
+					</div>
+
+					<button class="apply-btn" id="applyFilterBtn" type="button"
+						th:text="#{detail.filter.apply}">필터 적용</button>
+				</div>
+			</section>
+
+			<section class="summary-row">
+				<div class="panel summary-card">
+					<div class="label" th:text="#{detail.summary.avgDistance}">평균
+						이동거리</div>
+					<div class="value" id="avgDistanceValue">0 km</div>
+				</div>
+				<div class="panel summary-card">
+					<div class="label" th:text="#{detail.summary.avgUsageMinute}">평균
+						이용시간</div>
+					<div class="value" id="avgUsageMinuteValue">0 분</div>
+				</div>
+				<div class="panel summary-card">
+					<div class="label" th:text="#{detail.summary.avgDailyUses}">하루
+						평균 이용 건수</div>
+					<div class="value green" id="avgDailyUsesValue">0 건</div>
+				</div>
+				<div class="panel summary-card">
+					<div class="label" th:text="#{detail.summary.avgSpeed}">평균
+						이동속도</div>
+					<div class="value green" id="avgSpeedValue">0 km/h</div>
+				</div>
+			</section>
+
+			<div class="chart-topline">
+				<div class="tabs">
+					<div class="tab active" data-type="age">
+						👤 <span th:text="#{detail.tab.age}">연령대별</span>
+					</div>
+					<div class="tab" data-type="genderCode">
+						🚻 <span th:text="#{detail.tab.gender}">성별</span>
+					</div>
+					<div class="tab" data-type="ticket">
+						🎟️ <span th:text="#{detail.tab.ticket}">이용권별</span>
 					</div>
 				</div>
+			</div>
 
-				<section class="panel chart-panel">
-					<div class="chart-title-row">
-						<div class="chart-title-left">👤 연령대별 이용량 추이</div>
-					</div>
+			<section class="panel chart-panel">
+				<div class="chart-title-row">
+					<div class="chart-title-left" th:text="#{detail.chart.title.age}">👤
+						연령대별 이용량 추이</div>
+				</div>
 
-					<div class="fake-chart-wrap">
-						<div id="analysisChart"></div>
-					</div>
-				</section>
+				<div class="fake-chart-wrap">
+					<div id="analysisChart"></div>
+				</div>
+			</section>
 		</main>
 	</div>
 
-	<script>
+	<script th:inline="javascript">
 $(function () {
-	const ageCategories = ['~10대', '20대', '30대', '40대', '50대', '60대', '70대이상', '기타'];
-	const genderCategories = ['여성', '남성', '기타/미지정'];
+	const i18n = {
+		ageCategories: [
+			/*[[#{detail.age.teens}]]*/ '~10대',
+			/*[[#{detail.age.twenties}]]*/ '20대',
+			/*[[#{detail.age.thirties}]]*/ '30대',
+			/*[[#{detail.age.forties}]]*/ '40대',
+			/*[[#{detail.age.fifties}]]*/ '50대',
+			/*[[#{detail.age.sixties}]]*/ '60대',
+			/*[[#{detail.age.seventiesPlus}]]*/ '70대이상',
+			/*[[#{detail.age.etc}]]*/ '기타'
+		],
+		genderCategories: [
+			/*[[#{detail.gender.female}]]*/ '여성',
+			/*[[#{detail.gender.male}]]*/ '남성',
+			/*[[#{detail.gender.etc}]]*/ '기타/미지정'
+		],
+		unitKm: /*[[#{detail.unit.km}]]*/ 'km',
+		unitMinute: /*[[#{detail.unit.minute}]]*/ '분',
+		unitCount: /*[[#{detail.unit.count}]]*/ '건',
+		unitKmh: /*[[#{detail.unit.kmh}]]*/ 'km/h',
+		searchNoResult: /*[[#{detail.search.noResult}]]*/ '검색 결과가 없습니다.',
+		alertInvalidDate: /*[[#{detail.alert.invalidDate}]]*/ '시작일은 종료일보다 클 수 없습니다.',
+		chartTitleAge: /*[[#{detail.chart.title.age}]]*/ '👤 연령대별 이용량 추이',
+		chartTitleGender: /*[[#{detail.chart.title.gender}]]*/ '🚻 성별 이용량 추이',
+		chartTitleTicket: /*[[#{detail.chart.title.ticket}]]*/ '🎟️ 이용권별 이용 비율',
+		chartEmptyAge: /*[[#{detail.chart.empty.age}]]*/ '연령대별 데이터를 불러오지 못했습니다.',
+		chartEmptyGender: /*[[#{detail.chart.empty.gender}]]*/ '성별 데이터를 불러오지 못했습니다.',
+		chartEmptyTicket: /*[[#{detail.chart.empty.ticket}]]*/ '이용권별 데이터를 불러오지 못했습니다.',
+		yAxisUseCount: /*[[#{detail.chart.yAxis.useCount}]]*/ '대여 건수',
+		seriesUseCount: /*[[#{detail.chart.series.useCount}]]*/ '대여 건수',
+		seriesTicketRatio: /*[[#{detail.chart.series.ticketRatio}]]*/ '이용권 비율'
+	};
+
+	const ageCategoryKeys = ['~10대', '20대', '30대', '40대', '50대', '60대', '70대이상', '기타'];
+	const genderCategoryKeys = ['여성', '남성', '기타/미지정'];
+
+	const ageCategories = i18n.ageCategories;
+	const genderCategories = i18n.genderCategories;
+
+	const ticketLabelMap = {
+		'정기권': /*[[#{detail.ticket.regular}]]*/ '정기권',
+		'일일권': /*[[#{detail.ticket.daily}]]*/ '일일권',
+		'일일권(비회원)': /*[[#{detail.ticket.dailyNonMember}]]*/ '일일권(비회원)',
+		'가족권': /*[[#{detail.ticket.family}]]*/ '가족권',
+		'가족권(2시간)': /*[[#{detail.ticket.family2h}]]*/ '가족권(2시간)',
+		'가족권(3시간)': /*[[#{detail.ticket.family3h}]]*/ '가족권(3시간)',
+		'일일권(3시간)': /*[[#{detail.ticket.daily3h}]]*/ '일일권(3시간)',
+		'일일권(비회원 3시간)': /*[[#{detail.ticket.dailyNonMember3h}]]*/ '일일권(비회원 3시간)'
+	};
 
 	let officeSearchTimer = null;
 	let officeSearchXhr = null;
+	let chartRequestXhr = null;
 
 	function getFilterValues() {
 		return {
@@ -373,17 +514,24 @@ $(function () {
 	}
 
 	function formatNumber(value, fractionDigits = 0) {
-		return Number(value || 0).toLocaleString('ko-KR', {
-			minimumFractionDigits: fractionDigits,
-			maximumFractionDigits: fractionDigits
-		});
+		return Number(value || 0).toLocaleString(
+			/*[[${#locale.language}]]*/ 'ko',
+			{
+				minimumFractionDigits: fractionDigits,
+				maximumFractionDigits: fractionDigits
+			}
+		);
+	}
+
+	function getTranslatedTicketLabel(label) {
+		return ticketLabelMap[label] ?? label;
 	}
 
 	function renderSummary(summary) {
-		$('#avgDistanceValue').text(formatNumber(summary.avgDistance, 2) + ' km');
-		$('#avgUsageMinuteValue').text(formatNumber(summary.avgUsageMinute, 2) + ' 분');
-		$('#avgDailyUsesValue').text(formatNumber(summary.avgDailyUses, 2) + ' 건');
-		$('#avgSpeedValue').text(formatNumber(summary.avgSpeed, 2) + ' km/h');
+		$('#avgDistanceValue').text(formatNumber(summary.avgDistance, 2) + ' ' + i18n.unitKm);
+		$('#avgUsageMinuteValue').text(formatNumber(summary.avgUsageMinute, 2) + ' ' + i18n.unitMinute);
+		$('#avgDailyUsesValue').text(formatNumber(summary.avgDailyUses, 2) + ' ' + i18n.unitCount);
+		$('#avgSpeedValue').text(formatNumber(summary.avgSpeed, 2) + ' ' + i18n.unitKmh);
 	}
 
 	function loadSummary() {
@@ -431,7 +579,7 @@ $(function () {
 		$list.empty();
 
 		if (!offices || offices.length === 0) {
-			$list.append('<div class="office-suggestion-empty">검색 결과가 없습니다.</div>');
+			$list.append('<div class="office-suggestion-empty">' + i18n.searchNoResult + '</div>');
 			$list.show();
 			return;
 		}
@@ -450,18 +598,22 @@ $(function () {
 	function renderAgeChart(response) {
 		clearOverlayMessage();
 
-		const ageData = new Array(8).fill(0);
+		const ageData = new Array(ageCategoryKeys.length).fill(0);
 
 		response.forEach(item => {
 			const label = item.label ?? item.LABEL;
 			const value = item.value ?? item.VALUE;
-			const index = ageCategories.indexOf(label);
+			const index = ageCategoryKeys.indexOf(label);
+
 			if (index !== -1) {
 				ageData[index] = Number(value);
 			}
 		});
 
 		Highcharts.chart('analysisChart', {
+			lang: {
+				thousandsSep: ','
+			},
 			accessibility: { enabled: false },
 			chart: {
 				type: 'column',
@@ -488,7 +640,7 @@ $(function () {
 				}
 			},
 			yAxis: {
-				title: { text: '대여 건수' },
+				title: { text: i18n.yAxisUseCount },
 				gridLineColor: '#e9eeee',
 				labels: {
 					style: {
@@ -498,7 +650,7 @@ $(function () {
 				}
 			},
 			tooltip: {
-				valueSuffix: '건'
+				valueSuffix: ' ' + i18n.unitCount
 			},
 			plotOptions: {
 				column: {
@@ -508,30 +660,34 @@ $(function () {
 				}
 			},
 			series: [{
-				name: '대여 건수',
+				name: i18n.seriesUseCount,
 				data: ageData,
 				color: '#25bea9'
 			}]
 		});
 
-		$('.chart-title-left').text('👤 연령대별 이용량 추이');
+		$('.chart-title-left').text(i18n.chartTitleAge);
 	}
 
 	function renderGenderChart(response) {
 		clearOverlayMessage();
 
-		const genderData = new Array(3).fill(0);
+		const genderData = new Array(genderCategoryKeys.length).fill(0);
 
 		response.forEach(item => {
 			const label = item.label ?? item.LABEL;
 			const value = item.value ?? item.VALUE;
-			const index = genderCategories.indexOf(label);
+			const index = genderCategoryKeys.indexOf(label);
+
 			if (index !== -1) {
 				genderData[index] = Number(value);
 			}
 		});
 
 		Highcharts.chart('analysisChart', {
+			lang: {
+				thousandsSep: ','
+			},
 			accessibility: { enabled: false },
 			chart: {
 				type: 'column',
@@ -558,7 +714,7 @@ $(function () {
 				}
 			},
 			yAxis: {
-				title: { text: '대여 건수' },
+				title: { text: i18n.yAxisUseCount },
 				gridLineColor: '#e9eeee',
 				labels: {
 					style: {
@@ -568,7 +724,7 @@ $(function () {
 				}
 			},
 			tooltip: {
-				valueSuffix: '건'
+				valueSuffix: ' ' + i18n.unitCount
 			},
 			plotOptions: {
 				column: {
@@ -578,82 +734,64 @@ $(function () {
 				}
 			},
 			series: [{
-				name: '대여 건수',
+				name: i18n.seriesUseCount,
 				data: genderData,
 				color: '#4e9df7'
 			}]
 		});
 
-		$('.chart-title-left').text('🚻 성별 이용량 추이');
+		$('.chart-title-left').text(i18n.chartTitleGender);
 	}
 
 	function renderTicketChart(response) {
 		clearOverlayMessage();
 
-		const categories = [];
-		const ticketData = [];
+		const pieData = [];
 
 		response.forEach(item => {
 			const label = item.label ?? item.LABEL;
-			const value = item.value ?? item.VALUE;
-			categories.push(label);
-			ticketData.push(Number(value));
+			const value = Number(item.value ?? item.VALUE);
+
+			pieData.push({
+				name: getTranslatedTicketLabel(label),
+				y: value
+			});
 		});
 
 		Highcharts.chart('analysisChart', {
+			lang: {
+				thousandsSep: ','
+			},
 			accessibility: { enabled: false },
 			chart: {
-				type: 'bar',
-				backgroundColor: '#fcfcfc',
-				spacingTop: 20,
-				spacingRight: 20,
-				spacingBottom: 20,
-				spacingLeft: 20
+				type: 'pie',
+				backgroundColor: '#fcfcfc'
 			},
 			title: { text: null },
 			credits: { enabled: false },
 			exporting: { enabled: false },
-			legend: { enabled: false },
-			xAxis: {
-				categories: categories,
-				title: { text: null },
-				lineColor: '#dfe4e4',
-				tickColor: '#dfe4e4',
-				labels: {
-					style: {
-						color: '#7d878f',
-						fontSize: '12px'
-					}
-				}
-			},
-			yAxis: {
-				title: { text: '대여 건수' },
-				gridLineColor: '#e9eeee',
-				labels: {
-					style: {
-						color: '#7d878f',
-						fontSize: '12px'
+			plotOptions: {
+				pie: {
+					innerSize: '55%',
+					borderRadius: 6,
+					allowPointSelect: true,
+					cursor: 'pointer',
+					dataLabels: {
+						enabled: true,
+						format: '{point.name}: {point.y} ' + i18n.unitCount + ' ({point.percentage:.2f}%)'
 					}
 				}
 			},
 			tooltip: {
-				valueSuffix: '건'
-			},
-			plotOptions: {
-				bar: {
-					borderRadius: 6,
-					pointPadding: 0.08,
-					groupPadding: 0.1
-				}
+				pointFormat: '<b>{point.y} ' + i18n.unitCount + '</b> ({point.percentage:.2f}%)'
 			},
 			series: [{
-				name: '대여 건수',
-				data: ticketData,
-				color: '#f5a623'
+				name: i18n.seriesTicketRatio,
+				data: pieData
 			}]
 		});
 
-		$('.chart-title-left').text('🎟️ 이용권별 이용량 추이');
+		$('.chart-title-left').text(i18n.chartTitleTicket);
 	}
 
 	function renderEmptyChart(titleText, message) {
@@ -686,12 +824,40 @@ $(function () {
 		showOverlayMessage(message);
 	}
 
+	function requestChart(options) {
+		if (chartRequestXhr) {
+			chartRequestXhr.abort();
+			chartRequestXhr = null;
+		}
+
+		chartRequestXhr = $.ajax({
+			url: options.url,
+			method: 'GET',
+			data: options.data,
+			success: function (response) {
+				console.log(options.successLog, response);
+				options.onSuccess(response);
+			},
+			error: function (xhr, status, error) {
+				if (status === 'abort') {
+					return;
+				}
+
+				console.error(options.errorLog, error);
+				console.log(xhr.responseText);
+				renderEmptyChart(options.emptyTitle, options.emptyMessage);
+			},
+			complete: function () {
+				chartRequestXhr = null;
+			}
+		});
+	}
+
 	function loadAgeChart() {
 		const filters = getFilterValues();
 
-		$.ajax({
+		requestChart({
 			url: '/api/analysis/age',
-			method: 'GET',
 			data: {
 				startDate: filters.startDate,
 				endDate: filters.endDate,
@@ -699,61 +865,47 @@ $(function () {
 				targetCol: 'USES',
 				calcType: 'SUM'
 			},
-			success: function (response) {
-				console.log('연령대별 응답 데이터:', response);
-				renderAgeChart(response);
-			},
-			error: function (xhr, status, error) {
-				console.error('연령대별 데이터 조회 실패:', error);
-				console.log(xhr.responseText);
-				renderEmptyChart('👤 연령대별 이용량 추이', '연령대별 데이터를 불러오지 못했습니다.');
-			}
+			successLog: '연령대별 응답 데이터:',
+			errorLog: '연령대별 데이터 조회 실패:',
+			emptyTitle: i18n.chartTitleAge,
+			emptyMessage: i18n.chartEmptyAge,
+			onSuccess: renderAgeChart
 		});
 	}
 
 	function loadGenderChart() {
 		const filters = getFilterValues();
 
-		$.ajax({
+		requestChart({
 			url: '/api/analysis/gender',
-			method: 'GET',
 			data: {
 				startDate: filters.startDate,
 				endDate: filters.endDate,
 				keyword: filters.officeSelected
 			},
-			success: function (response) {
-				console.log('성별 응답 데이터:', response);
-				renderGenderChart(response);
-			},
-			error: function (xhr, status, error) {
-				console.error('성별 데이터 조회 실패:', error);
-				console.log(xhr.responseText);
-				renderEmptyChart('🚻 성별 이용량 추이', '성별 데이터를 불러오지 못했습니다.');
-			}
+			successLog: '성별 응답 데이터:',
+			errorLog: '성별 데이터 조회 실패:',
+			emptyTitle: i18n.chartTitleGender,
+			emptyMessage: i18n.chartEmptyGender,
+			onSuccess: renderGenderChart
 		});
 	}
 
 	function loadTicketChart() {
 		const filters = getFilterValues();
 
-		$.ajax({
+		requestChart({
 			url: '/api/analysis/ticket',
-			method: 'GET',
 			data: {
 				startDate: filters.startDate,
 				endDate: filters.endDate,
 				keyword: filters.officeSelected
 			},
-			success: function (response) {
-				console.log('이용권별 응답 데이터:', response);
-				renderTicketChart(response);
-			},
-			error: function (xhr, status, error) {
-				console.error('이용권별 데이터 조회 실패:', error);
-				console.log(xhr.responseText);
-				renderEmptyChart('🎟️ 이용권별 이용량 추이', '이용권별 데이터를 불러오지 못했습니다.');
-			}
+			successLog: '이용권별 응답 데이터:',
+			errorLog: '이용권별 데이터 조회 실패:',
+			emptyTitle: i18n.chartTitleTicket,
+			emptyMessage: i18n.chartEmptyTicket,
+			onSuccess: renderTicketChart
 		});
 	}
 
@@ -782,28 +934,27 @@ $(function () {
 	}
 
 	$('#officeKeyword').on('input', function () {
-    const keyword = $(this).val().trim();
-    $('#officeSelected').val('');
+		const keyword = $(this).val().trim();
+		$('#officeSelected').val('');
 
-    clearTimeout(officeSearchTimer);
+		clearTimeout(officeSearchTimer);
 
-    if (officeSearchXhr) {
-        officeSearchXhr.abort();
-        officeSearchXhr = null;
-    }
+		if (officeSearchXhr) {
+			officeSearchXhr.abort();
+			officeSearchXhr = null;
+		}
 
-    if (keyword === '') {
-        hideOfficeSuggestions();
-        return;
-    }
+		if (keyword === '') {
+			hideOfficeSuggestions();
+			return;
+		}
 
-    // 1글자일 때는 조금 더 기다렸다가 요청
-    const delay = keyword.length === 1 ? 450 : 250;
+		const delay = keyword.length === 1 ? 450 : 250;
 
-    officeSearchTimer = setTimeout(function () {
-        requestOfficeSuggestions(keyword);
-    }, delay);
-});
+		officeSearchTimer = setTimeout(function () {
+			requestOfficeSuggestions(keyword);
+		}, delay);
+	});
 
 	$(document).on('click', '.office-suggestion-item', function () {
 		const officeName = $(this).data('name');
@@ -833,7 +984,7 @@ $(function () {
 		const endDate = $('#endDate').val();
 
 		if (startDate > endDate) {
-			alert('시작일은 종료일보다 클 수 없습니다.');
+			alert(i18n.alertInvalidDate);
 			return;
 		}
 
@@ -866,6 +1017,14 @@ $(function () {
 	loadSummary();
 	loadAgeChart();
 });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const memberId = document.getElementById("memberId")?.value;
+        if (memberId) {
+            initNotification(memberId);
+        }
+    });
+
 </script>
 </body>
 </html>
