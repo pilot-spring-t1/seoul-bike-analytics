@@ -5,8 +5,8 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.metanet.seoulbike.admin.dto.MemberSearchDto;
 import com.metanet.seoulbike.test.dto.MemberDto;
-import com.metanet.seoulbike.test.dto.MemberSearchDto;
 
 @Mapper
 public interface MemberMapper {

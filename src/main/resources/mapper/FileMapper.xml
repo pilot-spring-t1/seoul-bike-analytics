@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.metanet.seoulbike.test.mapper.FileMapper">
+<mapper namespace="com.metanet.seoulbike.file.mapper.FileMapper">
 
     <insert id="insertFile" 
-            parameterType="com.metanet.seoulbike.test.dto.FileDto" 
+            parameterType="com.metanet.seoulbike.file.dto.FileDto" 
             useGeneratedKeys="true" 
             keyProperty="fileId" 
             keyColumn="FILE_ID">
         INSERT INTO FILE_ATTACHMENT (
-            FILE_UUID, 
+            BOARD_ID, FILE_UUID, 
             FILE_NAME, 
             FILE_PATH, 
             FILE_SIZE, 
             UPLOADER_ID
         ) VALUES (
-            #{fileUuid}, 
+            #{boardId}, #{fileUuid}, 
             #{fileName}, 
             #{filePath}, 
             #{fileSize}, 
@@ -23,12 +23,37 @@
         )
     </insert>
 
-    <select id="findAllFiles" resultType="com.metanet.seoulbike.test.dto.FileDto">
-        SELECT * FROM FILE_ATTACHMENT ORDER BY UPLOAD_DATE DESC
+    <select id="getFilesByBoardId" resultType="com.metanet.seoulbike.file.dto.FileDto">
+        SELECT 
+            FILE_ID as "fileId",
+            BOARD_ID as "boardId",
+            FILE_UUID as "fileUuid",
+            FILE_NAME as "fileName",
+            FILE_PATH as "filePath",
+            FILE_SIZE as "fileSize",
+            UPLOAD_DATE as "uploadDate",
+            UPLOADER_ID as "uploaderId"
+        FROM FILE_ATTACHMENT 
+        WHERE BOARD_ID = #{boardId}
+        ORDER BY FILE_ID ASC
     </select>
 
-    <select id="findFileById" resultType="com.metanet.seoulbike.test.dto.FileDto">
-        SELECT * FROM FILE_ATTACHMENT WHERE FILE_ID = #{fileId}
+    <select id="getFileById" resultType="com.metanet.seoulbike.file.dto.FileDto">
+        SELECT 
+            FILE_ID as "fileId",
+            BOARD_ID as "boardId",
+            FILE_UUID as "fileUuid",
+            FILE_NAME as "fileName",
+            FILE_PATH as "filePath",
+            FILE_SIZE as "fileSize",
+            UPLOAD_DATE as "uploadDate",
+            UPLOADER_ID as "uploaderId"
+        FROM FILE_ATTACHMENT 
+        WHERE FILE_ID = #{fileId}
     </select>
+
+    <delete id="deleteFile">
+        DELETE FROM FILE_ATTACHMENT WHERE FILE_ID = #{fileId}
+    </delete>
 
 </mapper>

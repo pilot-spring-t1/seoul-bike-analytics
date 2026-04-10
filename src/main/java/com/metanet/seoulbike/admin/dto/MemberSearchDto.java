@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.test.dto;
+package com.metanet.seoulbike.admin.dto;
 
 import lombok.Getter;
 import lombok.Setter;

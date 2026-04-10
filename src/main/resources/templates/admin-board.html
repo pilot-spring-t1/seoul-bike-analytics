@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 전용 | 콘텐츠 운영 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
+
+        #sidebar { width: 260px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar h2 { height: 80px; display: flex; align-items: center; padding: 0 30px; font-size: 1.3rem; font-weight: 800; color: #10b981; letter-spacing: 1px; }
+        #sidebar ul { list-style: none; padding: 20px 0; flex-grow: 1; }
+        #sidebar ul li a { color: #94a3b8; text-decoration: none; display: block; padding: 15px 30px; transition: 0.2s; font-size: 0.95rem; }
+        #sidebar ul li a:hover, #sidebar ul li.active a { background: #1e293b; color: #10b981; }
+
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 64px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; border-bottom: 1px solid #e2e8f0; }
+        .container { flex: 1; padding: 40px; overflow-y: auto; }
+
+        .action-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .tab-group { display: flex; background: #e2e8f0; padding: 4px; border-radius: 8px; gap: 4px; }
+        .tab-btn { padding: 8px 16px; border-radius: 6px; font-size: 0.875rem; cursor: pointer; border: none; font-weight: 600; color: #64748b; background: none; text-decoration: none; }
+        .tab-btn.active { background: white; color: #0f172a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+        .search-group { display: flex; gap: 8px; }
+        .search-group input { padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; width: 320px; outline: none; }
+        .btn-black { background: #0f172a; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+        .table-container { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { background: #f8fafc; padding: 16px 24px; text-align: left; font-size: 0.75rem; font-weight: 700; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        .admin-table td { padding: 20px 24px; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; }
+        .admin-table tr:hover { background: #f8fafc; cursor: pointer; }
+
+        .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+        .bg-blue { background: #eff6ff; color: #2563eb; }
+        .bg-orange { background: #fff7ed; color: #ea580c; }
+
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+        .page-link { padding: 8px 12px; border-radius: 6px; background: white; border: 1px solid #e2e8f0; color: #64748b; text-decoration: none; font-size: 0.875rem; }
+        .page-link.active { background: #0f172a; color: white; border-color: #0f172a; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a th:href="@{/dashboard/main}">📊 종합 분석</a></li>
+            <li><a th:href="@{/admin/members/search}">👤 회원 관리</a></li>
+            <li class="active"><a th:href="@{/admin/boards/list}">📝 콘텐츠 관리</a></li>
+            <li><a th:href="@{/admin/system}">⚙️ 시스템 설정</a></li>
+            <li><hr style="opacity:0.1; margin: 10px 0;"></li>
+            <li><a th:href="@{/logout}">🔒 로그아웃</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span style="font-size: 0.9rem; color: #64748b;">현재 서버 상태: <b style="color: #10b981;">Stable</b></span>
+        </header>
+
+        <main class="container">
+            <div class="action-row">
+                <div class="tab-group">
+                    <a th:href="@{/admin/boards/list(category='', keyword=${searchDto.keyword})}" 
+                       class="tab-btn" th:classappend="${searchDto.category == null || searchDto.category == ''} ? 'active' : ''">전체</a>
+                    <a th:href="@{/admin/boards/list(category='NOTICE', keyword=${searchDto.keyword})}" 
+                       class="tab-btn" th:classappend="${searchDto.category == 'NOTICE'} ? 'active' : ''">공지사항</a>
+                    <a th:href="@{/admin/boards/list(category='SUGGESTION', keyword=${searchDto.keyword})}" 
+                       class="tab-btn" th:classappend="${searchDto.category == 'SUGGESTION'} ? 'active' : ''">건의사항</a>
+                </div>
+
+				<form th:action="@{/admin/boards/list}" method="post" class="search-group">
+				    <input type="hidden" name="category" th:value="${searchDto.category}">
+				    <input type="text" name="keyword" th:value="${searchDto.keyword}" placeholder="제목 또는 작성자 검색...">
+				    <button type="submit" class="btn-black">검색</button>
+				</form>
+            </div>
+
+            <div class="table-container">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th width="80">ID</th>
+                            <th width="120">카테고리</th>
+                            <th>제목</th>
+                            <th width="150">작성자</th>
+                            <th width="150">날짜</th>
+                            <th width="90" style="text-align: center;">조회수</th>
+                            <th width="90" style="text-align: center;">추천수</th> </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.isEmpty(list)}">
+                            <td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">등록된 게시글이 없습니다.</td>
+                        </tr>
+                        <tr th:each="post : ${list}" th:onclick="|location.href='@{/admin/boards/view/{id}(id=${post.boardId})}'|">
+                            <td th:text="${post.boardId}">0</td>
+                            <td>
+                                <span th:if="${post.category == 'NOTICE'}" class="badge bg-blue">공지사항</span>
+                                <span th:if="${post.category == 'SUGGESTION'}" class="badge bg-orange">건의사항</span>
+                            </td>
+                            <td style="font-weight: 600;" th:text="${post.title}">제목</td>
+                            <td th:text="${post.writer}">작성자</td>
+                            <td th:text="${#temporals.format(post.createdAt, 'yyyy-MM-dd')}">2026-04-09</td>
+                            <td style="text-align: center; color: #64748b;" th:text="${post.viewCount}">0</td>
+                            <td style="text-align: center; color: #3b82f6; font-weight: 600;" th:text="${post.likeCount}">0</td> </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" th:if="${totalPages > 1}">
+                <th:block th:each="num : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{/admin/boards/list(page=${num}, category=${searchDto.category}, keyword=${searchDto.keyword})}" 
+                       th:text="${num}" 
+                       class="page-link" th:classappend="${num == searchDto.page} ? 'active' : ''">1</a>
+                </th:block>
+            </div>
+            
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end;">
+                <button class="btn-black" th:onclick="|location.href='@{/admin/boards/write}'|">새 글 작성</button>
+            </div>
+        </main>
+    </div>
+    
+    
+    	<script th:inline="javascript">
+        
+		    // 페이지 진입 시 실행
+		    window.onpageshow = function(event) {
+		        // event.persisted는 캐시를 통해 페이지가 로드되었는지 여부를 반환함
+		        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+		            // 캐시된 페이지라면 강제로 새로고침
+		            window.location.reload();
+		        }
+		    };
+	    </script>
+</body>
+</html>

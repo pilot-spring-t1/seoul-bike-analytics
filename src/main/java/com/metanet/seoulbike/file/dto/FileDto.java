@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.test.dto;
+package com.metanet.seoulbike.file.dto;
 
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 @Data
 public class FileDto {
     private int fileId;           // FILE_ID (PK)
+    private Long boardId;		  // 어떤 게시글에 속한 파일인지 (FK)
     private String fileUuid;      // FILE_UUID (고유이름)
     private String fileName;      // FILE_NAME (원본이름)
     private String filePath;      // FILE_PATH (저장경로)

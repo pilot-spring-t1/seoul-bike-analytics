@@ -1,4 +1,4 @@
-package com.metanet.seoulbike.test.controller;
+package com.metanet.seoulbike.file.controller;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,9 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.metanet.seoulbike.dto.SeoulBikeDto;
+import com.metanet.seoulbike.file.dto.FileDto;
+import com.metanet.seoulbike.file.mapper.FileMapper;
 import com.metanet.seoulbike.mapper.SeoulBikeMapper;
-import com.metanet.seoulbike.test.dto.FileDto;
-import com.metanet.seoulbike.test.mapper.FileMapper;
 
 @RestController
 @RequestMapping("/test/file")
@@ -83,9 +83,9 @@ public class FileTestController {
 	}
 
 	@PostMapping("/refresh-db/{fileId}")
-	public String refreshDbFromFile(@PathVariable int fileId) {
+	public String refreshDbFromFile(@PathVariable Long fileId) {
 		// 1. DB에서 파일 정보 조회
-		FileDto fileInfo = fileMapper.findFileById(fileId);
+		FileDto fileInfo = fileMapper.getFileById(fileId);
 		if (fileInfo == null)
 			return "해당 파일 정보를 찾을 수 없습니다.";
 

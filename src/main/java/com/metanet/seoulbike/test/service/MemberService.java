@@ -7,8 +7,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.metanet.seoulbike.admin.dto.MemberSearchDto;
 import com.metanet.seoulbike.test.dto.MemberDto;
-import com.metanet.seoulbike.test.dto.MemberSearchDto;
 import com.metanet.seoulbike.test.mapper.MemberMapper;
 
 @Service("testMemberService")

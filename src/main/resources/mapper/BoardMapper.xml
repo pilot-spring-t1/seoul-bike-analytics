@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.metanet.seoulbike.board.mapper.BoardMapper">
+
+    <sql id="searchCondition">
+        <where>
+            <if test="dto.category != null and dto.category != ''">
+                AND CATEGORY = #{dto.category}
+            </if>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                AND (TITLE LIKE '%' || #{dto.keyword} || '%' 
+                     OR WRITER LIKE '%' || #{dto.keyword} || '%')
+            </if>
+        </where>
+    </sql>
+
+    <select id="getBoardList" resultType="com.metanet.seoulbike.board.dto.BoardDto">
+        SELECT 
+            BOARD_ID as "boardId",
+            CATEGORY as "category",
+            TITLE as "title",
+            WRITER as "writer",
+            VIEW_COUNT as "viewCount",
+            LIKE_COUNT as "likeCount",
+            CREATED_AT as "createdAt"
+        FROM BOARD
+        <include refid="searchCondition" />
+        ORDER BY BOARD_ID DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{dto.size} ROWS ONLY
+    </select>
+
+    <select id="getBoardCount" resultType="int">
+        SELECT COUNT(*) FROM BOARD
+        <include refid="searchCondition" />
+    </select>
+
+    <select id="getBoardById" resultType="com.metanet.seoulbike.board.dto.BoardDto">
+        SELECT 
+            BOARD_ID as "boardId",
+            CATEGORY as "category",
+            TITLE as "title",
+            CONTENT as "content",
+            WRITER as "writer",
+            VIEW_COUNT as "viewCount",
+            LIKE_COUNT as "likeCount",
+            CREATED_AT as "createdAt"
+        FROM BOARD
+        WHERE BOARD_ID = #{boardId}
+    </select>
+
+    <insert id="insertBoard" 
+            parameterType="com.metanet.seoulbike.board.dto.BoardDto"
+            useGeneratedKeys="true" 
+            keyProperty="boardId" 
+            keyColumn="BOARD_ID">
+        INSERT INTO BOARD (
+            CATEGORY, TITLE, CONTENT, WRITER
+        ) VALUES (
+            #{category}, #{title}, #{content}, #{writer}
+        )
+    </insert>
+
+    <update id="updateBoard">
+        UPDATE BOARD
+        SET TITLE = #{title},
+            CONTENT = #{content},
+            CATEGORY = #{category}
+        WHERE BOARD_ID = #{boardId}
+    </update>
+
+    <delete id="deleteBoard">
+        DELETE FROM BOARD WHERE BOARD_ID = #{boardId}
+    </delete>
+
+    <select id="getCategoryCounts" resultType="map">
+        SELECT 
+            COUNT(CASE WHEN CATEGORY = 'NOTICE' THEN 1 END) AS "NOTICE_CNT",
+            COUNT(CASE WHEN CATEGORY = 'SUGGESTION' THEN 1 END) AS "SUGGESTION_CNT"
+        FROM BOARD
+    </select>
+
+    <update id="updateViewCount">
+        UPDATE BOARD SET VIEW_COUNT = VIEW_COUNT + 1 WHERE BOARD_ID = #{boardId}
+    </update>
+
+    <update id="updateLikeCount">
+        UPDATE BOARD SET LIKE_COUNT = LIKE_COUNT + 1 WHERE BOARD_ID = #{boardId}
+    </update>
+    
+    <select id="getCommentsByBoardId" resultType="com.metanet.seoulbike.board.dto.CommentDto">
+        SELECT 
+            COMMENT_ID as "commentId",
+            BOARD_ID as "boardId",
+            PARENT_ID as "parentId",
+            CONTENT as "content",
+            WRITER as "writer",
+            CREATED_AT as "createdAt"
+        FROM BOARD_COMMENT
+        WHERE BOARD_ID = #{boardId}
+        ORDER BY NVL(PARENT_ID, COMMENT_ID), CREATED_AT ASC
+    </select>
+
+    <select id="getCommentById" resultType="com.metanet.seoulbike.board.dto.CommentDto">
+        SELECT 
+            COMMENT_ID as "commentId",
+            BOARD_ID as "boardId",
+            PARENT_ID as "parentId",
+            CONTENT as "content",
+            WRITER as "writer",
+            CREATED_AT as "createdAt"
+        FROM BOARD_COMMENT
+        WHERE COMMENT_ID = #{commentId}
+    </select>
+    
+    <insert id="insertComment">
+        INSERT INTO BOARD_COMMENT (
+            BOARD_ID, PARENT_ID, CONTENT, WRITER
+        ) VALUES (
+            #{boardId}, 
+            #{parentId, jdbcType=NUMERIC}, 
+            #{content}, 
+            #{writer}
+        )
+    </insert>
+    
+    <update id="updateComment">
+	    UPDATE BOARD_COMMENT SET CONTENT = #{content} WHERE COMMENT_ID = #{commentId}
+	</update>
+
+	<delete id="deleteComment">
+	    DELETE FROM BOARD_COMMENT WHERE COMMENT_ID = #{commentId}
+	</delete>
+
+</mapper>
