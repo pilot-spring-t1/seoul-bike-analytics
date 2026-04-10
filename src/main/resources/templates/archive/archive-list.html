@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시스템 아카이브 | 운영 센터</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+
+    <style>
+        /* 보드 디자인과 동일한 CSS 유지 */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
+
+        #sidebar { width: 260px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar h2 { height: 80px; display: flex; align-items: center; padding: 0 30px; font-size: 1.3rem; font-weight: 800; color: #10b981; }
+        #sidebar ul { list-style: none; padding: 20px 0; flex-grow: 1; }
+        #sidebar ul li a { color: #94a3b8; text-decoration: none; display: block; padding: 15px 30px; transition: 0.2s; }
+        #sidebar ul li.active a { background: #1e293b; color: #10b981; }
+
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
+        .container { flex: 1; padding: 40px; overflow-y: auto; }
+
+        .action-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .page-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
+        
+        .search-group { display: flex; gap: 8px; }
+        .search-group input { padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; width: 300px; outline: none; }
+        .btn-black { background: #0f172a; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+        .table-container { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .admin-table { width: 100%; border-collapse: collapse; }
+        .admin-table th { background: #f8fafc; padding: 16px 24px; text-align: left; font-size: 0.75rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        .admin-table td { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+        .admin-table tr:hover { background: #f8fafc; cursor: pointer; }
+
+        /* 아카이브 전용 뱃지 스타일 */
+        .badge-archive { padding: 4px 10px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: #f1f5f9; color: #475569; }
+        .archive-desc { font-size: 0.85rem; color: #64748b; margin-top: 4px; font-weight: 400; }
+
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+        .page-link { padding: 8px 12px; border-radius: 6px; background: white; border: 1px solid #e2e8f0; color: #64748b; text-decoration: none; }
+        .page-link.active { background: #0f172a; color: white; border-color: #0f172a; }
+
+        .btn-download-sm { font-size: 0.85rem; color: #10b981; font-weight: 700; text-decoration: none; border: 1px solid #10b981; padding: 4px 10px; border-radius: 6px; }
+        .btn-download-sm:hover { background: #10b981; color: white; }
+    </style>
+</head>
+
+<body>
+
+<nav id="sidebar">
+    <h2>SEOUL BIKE</h2>
+    <ul>
+        <li><a th:href="@{/dashboard/main}">📊 종합 분석</a></li>
+        <li><a th:href="@{/members/search}">👤 회원 관리</a></li>
+        <li><a th:href="@{/boards/notice}">📝 공지사항 관리</a></li>
+        <li><a th:href="@{/boards/suggestion}">💡 건의사항 관리</a></li>
+        <li class="active"><a th:href="@{/archive/list}">📂 시스템 아카이브</a></li>
+        <li><a th:href="@{/system}">⚙️ 시스템 설정</a></li>
+    </ul>
+</nav>
+
+<div id="main-content">
+
+    <header>
+        <span style="font-size: 0.9rem; color: #64748b;">
+            <span sec:authentication="name"></span> 님 접속 중
+        </span>
+    </header>
+
+    <main class="container">
+
+        <div class="action-row">
+            <h1 class="page-title">SYSTEM ARCHIVE</h1>
+
+            <form th:action="@{/archive/search}" method="post" class="search-group">
+                <input type="text" name="keyword" th:value="${searchDto.keyword}" placeholder="아카이브 제목/내용 검색...">
+                <button type="submit" class="btn-black">검색</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th width="80">번호</th>
+                    <th width="120">구분</th>
+                    <th>자료 제목 및 설명</th>
+                    <th width="150">등록일</th>
+                    <th width="120" style="text-align: center;">파일 용량</th>
+                    <th width="120" style="text-align: center;">다운로드</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:if="${#lists.isEmpty(list)}">
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 40px;">
+                        등록된 아카이브 자료가 없습니다.
+                    </td>
+                </tr>
+
+                <tr th:each="file : ${list}">
+                    <td th:text="${file.id}"></td>
+                    <td><span class="badge-archive">아카이브</span></td>
+                    <td>
+                        <div style="font-weight: 600; color: #0f172a;" th:text="${file.title}"></div>
+                        <div class="archive-desc" th:text="${file.description}"></div>
+                    </td>
+                    <td th:text="${#temporals.format(file.createdAt, 'yyyy-MM-dd')}"></td>
+                    <td style="text-align: center; color: #64748b;" th:text="${file.fileSize}"></td>
+                    <td style="text-align: center;">
+                        <a th:href="@{/archive/download/{id}(id=${file.id})}" class="btn-download-sm">
+                            받기
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" th:if="${totalPages > 1}">
+            <th:block th:each="num : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/archive/list(page=${num}, keyword=${searchDto.keyword})}"
+                   th:text="${num}"
+                   class="page-link"
+                   th:classappend="${num == searchDto.page} ? 'active' : ''">
+                </a>
+            </th:block>
+        </div>
+
+        <div style="margin-top: 24px; display: flex; justify-content: flex-end;"
+             sec:authorize="hasRole('ADMIN')">
+            <button class="btn-black"
+                    th:onclick="|location.href='@{/admin/archive/register}'|">
+                자료 등록
+            </button>
+        </div>
+
+    </main>
+</div>
+
+<script th:inline="javascript">
+    window.onpageshow = function(event) {
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            window.location.reload();
+        }
+    };
+</script>
+
+</body>
+</html>

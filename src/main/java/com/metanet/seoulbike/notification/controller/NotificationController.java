@@ -18,12 +18,12 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<List<NotificationDto>> getNotifications(@PathVariable Long memberId) {
+    public ResponseEntity<List<NotificationDto>> selectNotifications(@PathVariable Long memberId) {
         return ResponseEntity.ok(notificationService.selectNotificationsByMemberId(memberId));
     }
 
     @GetMapping("/{memberId}/unread-count")
-    public ResponseEntity<Integer> getUnreadCount(@PathVariable Long memberId) {
+    public ResponseEntity<Integer> selectUnreadCount(@PathVariable Long memberId) {
         return ResponseEntity.ok(notificationService.selectUnreadCount(memberId));
     }
 

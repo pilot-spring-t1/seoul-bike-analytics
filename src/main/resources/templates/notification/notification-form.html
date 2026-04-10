@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알림 발송 관리 | 운영 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
+
+        #sidebar { width: 260px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        #sidebar h2 { height: 80px; display: flex; align-items: center; padding: 0 30px; font-size: 1.3rem; font-weight: 800; color: #10b981; }
+        #sidebar ul { list-style: none; padding: 20px 0; flex-grow: 1; }
+        #sidebar ul li a { color: #94a3b8; text-decoration: none; display: block; padding: 15px 30px; transition: 0.2s; }
+        #sidebar ul li.active a { background: #1e293b; color: #10b981; }
+
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
+        .container { flex: 1; padding: 40px; overflow-y: auto; }
+
+        .form-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 40px; max-width: 700px; margin: 0 auto; }
+        .form-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 32px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
+
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 700; color: #64748b; margin-bottom: 10px; }
+        
+        .type-group { display: flex; gap: 20px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .radio-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: 0.95rem; }
+        .radio-item input { width: 18px; height: 18px; accent-color: #10b981; }
+
+        .form-control { width: 100%; padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 0.95rem; outline: none; transition: 0.2s; }
+        .form-control:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+
+        textarea.form-control { height: 200px; resize: none; line-height: 1.6; }
+
+        .button-group { display: flex; justify-content: flex-end; gap: 12px; margin-top: 32px; }
+        .btn { padding: 12px 32px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 0.95rem; border: none; transition: 0.2s; }
+        .btn-outline { border: 1px solid #e2e8f0; background: white; color: #64748b; }
+        .btn-emerald { background: #10b981; color: white; }
+        .btn-emerald:hover { background: #059669; transform: translateY(-1px); }
+        .btn-emerald:disabled { background: #94a3b8; cursor: not-allowed; }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <nav id="sidebar">
+        <h2>SEOUL BIKE</h2>
+        <ul>
+            <li><a th:href="@{/dashboard/main}">📊 종합 분석</a></li>
+            <li><a th:href="@{/members/search}">👤 회원 관리</a></li>
+            <li><a th:href="@{/boards/notice}">📝 공지사항 관리</a></li>
+            <li><a th:href="@{/boards/suggestion}">💡 건의사항 관리</a></li>
+            <li class="active"><a href="#">🔔 알림 발송 관리</a></li>
+            <li><a th:href="@{/system}">⚙️ 시스템 설정</a></li>
+        </ul>
+    </nav>
+
+    <div id="main-content">
+        <header>
+            <span style="font-size: 0.9rem; color: #64748b;">
+                <span sec:authentication="name">Admin</span> 님 접속 중
+            </span>
+        </header>
+
+        <main class="container">
+            <div class="form-card">
+                <h1 class="form-title">시스템 알림 발송</h1>
+
+                <form id="notificationForm">
+                    <div class="form-group">
+                        <label class="form-label">발송 방식</label>
+                        <div class="type-group">
+                            <label class="radio-item">
+                                <input type="radio" name="sendType" value="BROADCAST" checked onclick="toggleTargetInput(false)">
+                                전체 발송 (Broadcast)
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="sendType" value="UNICAST" onclick="toggleTargetInput(true)">
+                                특정 사용자 (Unicast)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group hidden" id="targetInputSection">
+                        <label class="form-label">수신자 ID (memberId)</label>
+                        <input type="text" name="targetUser" id="targetUser" class="form-control" placeholder="대상 사용자의 ID를 입력하세요">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">알림 내용 (message)</label>
+                        <textarea name="message" id="message" class="form-control" placeholder="사용자에게 전달할 메시지를 입력하세요..." required></textarea>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="reset" class="btn btn-outline" onclick="toggleTargetInput(false)">초기화</button>
+                        <button type="submit" id="submitBtn" class="btn btn-emerald">즉시 발송하기</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script th:inline="javascript">
+        // 입력창 토글 함수
+        function toggleTargetInput(show) {
+            const section = document.getElementById('targetInputSection');
+            const input = document.getElementById('targetUser');
+            if (show) {
+                section.classList.remove('hidden');
+                input.focus();
+            } else {
+                section.classList.add('hidden');
+                input.value = "";
+            }
+        }
+
+        // 비동기 알림 전송 로직
+        document.getElementById('notificationForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // 페이지 새로고침 방지
+
+            const sendType = document.querySelector('input[name="sendType"]:checked').value;
+            const targetUser = document.getElementById('targetUser').value;
+            const message = document.getElementById('message').value;
+            const submitBtn = document.getElementById('submitBtn');
+
+            // 1. 유효성 검사
+            if (sendType === 'UNICAST' && !targetUser.trim()) {
+                alert("특정 사용자 발송을 위해 수신자 ID를 입력해주세요.");
+                return;
+            }
+
+            const confirmMsg = sendType === 'BROADCAST' 
+                ? "주의: 모든 서비스 이용자에게 실시간 알림이 발송됩니다. 진행하시겠습니까?" 
+                : `${targetUser}님에게 알림을 발송하시겠습니까?`;
+
+            if (!confirm(confirmMsg)) return;
+
+            // 2. 데이터 구성 (API Body 규격: memberId, notiType, message)
+            const payload = {
+                memberId: sendType === 'BROADCAST' ? "ALL" : targetUser,
+                notiType: sendType,
+                message: message
+            };
+
+            try {
+                // 버튼 비활성화 (중복 클릭 방지)
+                submitBtn.disabled = true;
+                submitBtn.innerText = "발송 중...";
+
+                // 3. fetch API 호출
+                const response = await fetch('/api/notifications/test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                        // CSRF 보호가 활성화된 경우 아래 주석 해제하여 토큰 전달
+                        // ,'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    alert("알림 발송 요청에 성공했습니다.");
+                    this.reset(); // 폼 초기화
+                    toggleTargetInput(false);
+                } else {
+                    const err = await response.json();
+                    alert("발송 실패: " + (err.message || "서버 응답 오류"));
+                }
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                alert("네트워크 오류가 발생했습니다. 서버 연결 상태를 확인하세요.");
+            } finally {
+                // 버튼 복구
+                submitBtn.disabled = false;
+                submitBtn.innerText = "즉시 발송하기";
+            }
+        });
+    </script>
+</body>
+</html>

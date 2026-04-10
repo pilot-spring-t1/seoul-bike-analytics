@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>아카이브 자료 등록 | 운영 센터</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+        body { display: flex; height: 100vh; background-color: #f1f5f9; }
+        
+        /* 사이드바 스타일 유지 */
+        #sidebar { width: 260px; background-color: #0f172a; color: white; flex-shrink: 0; }
+        #sidebar h2 { height: 80px; display: flex; align-items: center; padding: 0 30px; font-size: 1.3rem; font-weight: 800; color: #10b981; }
+        #sidebar ul { list-style: none; padding: 20px 0; }
+        #sidebar ul li a { color: #94a3b8; text-decoration: none; display: block; padding: 15px 30px; }
+        #sidebar ul li.active a { background: #1e293b; color: #10b981; }
+
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
+        .container { padding: 40px; overflow-y: auto; }
+        
+        .form-card { background: white; border-radius: 12px; padding: 40px; border: 1px solid #e2e8f0; max-width: 800px; margin: 0 auto; }
+        .form-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; color: #0f172a; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-weight: 700; color: #475569; font-size: 0.9rem; }
+        .form-control { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; transition: 0.2s; }
+        .form-control:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+
+        .file-drop-area { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center; color: #64748b; cursor: pointer; background: #f8fafc; transition: 0.2s; }
+        .file-drop-area:hover { border-color: #10b981; background: #f0fdf4; }
+        
+        .btn-submit { width: 100%; margin-top: 30px; padding: 15px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-submit:hover { background: #1e293b; }
+    </style>
+</head>
+<body>
+    <div id="main-content">
+        <header>
+            <span style="font-size: 0.9rem; color: #64748b;">
+                <span sec:authentication="name">Admin</span> 님 접속 중
+            </span>
+        </header>
+        <main class="container">
+            <div class="form-card">
+                <h1 class="form-title">아카이브(Archive) 자료 등록</h1>
+                <form th:action="@{/admin/archive/register}" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="form-label">자료 제목</label>
+                        <input type="text" name="title" class="form-control" placeholder="아카이브에 표시될 제목을 입력하세요" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">상세 설명</label>
+                        <textarea name="description" class="form-control" style="height: 100px; resize: none;" placeholder="해당 자료에 대한 설명을 입력하세요"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">파일 업로드</label>
+                        <div class="file-drop-area" onclick="document.getElementById('fileInput').click()">
+                            <p>📎 클릭하거나 파일을 여기로 드래그하여 업로드하세요</p>
+                            <input type="file" id="fileInput" name="files" multiple style="display:none" onchange="updateList(this)">
+                        </div>
+                        <div id="fileListDisplay" style="margin-top:15px; font-size:0.85rem; color:#10b981; font-weight: 600;"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">아카이브 등록 완료</button>
+                </form>
+            </div>
+        </main>
+    </div>
+    <script>
+        function updateList(input) {
+            const display = document.getElementById('fileListDisplay');
+            const names = Array.from(input.files).map(f => f.name).join(', ');
+            display.textContent = names ? "선택된 파일: " + names : "";
+        }
+    </script>
+</body>
+</html>
