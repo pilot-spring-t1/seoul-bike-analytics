@@ -149,7 +149,7 @@
     			</div>
 				
 				<label class="subtitle-gray-font text-center mb-4">
-					<input type="checkbox" />
+					<input type="checkbox" required />
 					<span th:text="#{signup.agree}">개인정보 수집 및 이용에 동의합니다.</span>
 				</label>
 				
@@ -162,5 +162,24 @@
 			</form>
 		</div>
 	</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const message = [[${message}]];
+    const error = [[${error}]];
+    
+    if (message) {
+        alert(message);
+    }
+    
+    if (error) {
+        alert(error);
+    }
+    /*]]>*/
+</script>
+
+<div th:if="${message}" class="alert alert-success mt-3" th:text="${message}"></div>
+<div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+
 </body>
+
 </html>

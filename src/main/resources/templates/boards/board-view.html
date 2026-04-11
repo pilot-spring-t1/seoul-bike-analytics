@@ -73,6 +73,10 @@
             <li th:classappend="${board.category == 'SUGGESTION'} ? 'active' : ''">
                 <a th:href="@{/boards/suggestion}">💡 건의사항 관리</a>
             </li>
+            <th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+	            <li><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
+	            <li><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
+            </th:block>
             <li><a th:href="@{/system}">⚙️ 시스템 설정</a></li>
             <li><hr style="opacity: 0.1; margin: 10px 0;"></li>
             <li><a th:href="@{/logout}">🔒 로그아웃</a></li>

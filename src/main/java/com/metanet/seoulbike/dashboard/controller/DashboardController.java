@@ -1,25 +1,27 @@
-package com.metanet.seoulbike.page;
+package com.metanet.seoulbike.dashboard.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.metanet.seoulbike.stats.dto.DashboardSummaryDto;
-import com.metanet.seoulbike.stats.service.BikeAnalysisService;
-
+import com.metanet.seoulbike.dashboard.dto.DashboardSummaryDto;
+import com.metanet.seoulbike.dashboard.service.BikeAnalysisService;
 
 @Controller
-public class PageController {
+@RequestMapping("/dashboard")
+public class DashboardController {
 	
 	@Autowired
 	private BikeAnalysisService bikeAnalysisService;
 
-    @GetMapping("/dashboard")
+    @GetMapping
     public String dashboardPage(Model model) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
         model.addAttribute("summary", summary);
         model.addAttribute("userName", "관리자");
+        model.addAttribute("memberId", 1L); // 테스트용
         return "dashboard/user-dashboard";
     }
 
@@ -29,50 +31,25 @@ public class PageController {
     }
 
     @GetMapping("/detail")
-    public String detailAnalysisPage() {
+    public String detailAnalysisPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/detail";
     }
-    
-    @GetMapping("/admin/detail")
-    public String AdminDetailAnalysisPage() {
-        return "analysis/admin-detail";
-    }
-
-    @GetMapping("/admin/dashboard")
-    public String adminDashboardPage(Model model) {
-    	DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
-        model.addAttribute("summary", summary);
-        model.addAttribute("userName", "관리자");
-        return "dashboard/admin-dashboard";
-    }
-
-    @GetMapping("/admin/data")
-    public String dataManagePage() {
-        return "admin/data-manage";
-    }
-    
-    @GetMapping("/admin/contents")
-    public String adminContentsPage() {
-    	return "admin-contents";
-    }
-    
+   
     @GetMapping("/data-center")
     public String dataSharePage() {
     	return "shared/data-center";
     }
-    
-    @GetMapping("admin/data-center")
-    public String adminDataSharePage() {
-    	return "shared/admin-data-center";
-    }
 
     @GetMapping("/notifications")
-    public String notificationPage() {
+    public String notificationPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "notification/notifications";
     }
     
     @GetMapping("/admin/notifications")
-    public String adminNotificationPage() {
+    public String adminNotificationPage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
         return "notification/admin-notifications";
     }
 
@@ -100,6 +77,4 @@ public class PageController {
     public String monthlyUsagePage() {
         return "monthly-usage";
     }
-    
-
 }
