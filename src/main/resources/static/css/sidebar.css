@@ -1,0 +1,53 @@
+#sidebar { 
+    width: 260px; 
+    background-color: #0f172a; /* 기본 배경색 추가 (필요시) */
+    display: flex; 
+    flex-direction: column; 
+    flex-shrink: 0; 
+    height: 100vh;
+}
+
+#sidebar h2 { 
+    height: 100px; 
+    display: flex; 
+    align-items: center; 
+    padding: 0 25px; 
+    border-bottom: 1px solid rgba(255,255,255,0.05); 
+    color: #10b981; /* 로고 색상 */
+}
+
+#sidebar ul { 
+    list-style: none; 
+    padding: 20px 0; 
+    flex-grow: 1;
+}
+
+#sidebar ul li a { 
+    color: #bdc3c7; 
+    text-decoration: none; 
+    display: block; 
+    padding: 15px 25px; 
+    transition: 0.2s;
+}
+
+#sidebar ul li a:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+#sidebar ul li.active a { 
+    background: #1abc9c; 
+    color: white; 
+    font-weight: bold; 
+}
+
+/* 사이드바 내의 구분선 */
+.sidebar-divider {
+    border-top: 2px solid rgba(255,255,255,0.12);
+    margin: 10px 0;
+}
+
+/* 로그아웃 등 하단 메뉴용 (필요시) */
+.sidebar-bottom {
+    border-top: 1px solid rgba(255,255,255,0.05);
+}

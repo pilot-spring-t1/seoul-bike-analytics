@@ -39,11 +39,6 @@ public class AdminController {
     	return "admin-contents";
     }
     
-    @GetMapping("admin/data-center")
-    public String adminDataSharePage() {
-    	return "shared/admin-data-center";
-    }
-    
     @GetMapping("/admin/notifications")
     public String adminNotificationPage() {
         return "notification/admin-notifications";

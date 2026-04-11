@@ -3,19 +3,23 @@
 
 <mapper namespace="com.metanet.seoulbike.board.mapper.BoardMapper">
 
+    <!-- 검색 조건 -->
     <sql id="searchCondition">
         <where>
             <if test="dto.category != null and dto.category != ''">
                 AND CATEGORY = #{dto.category}
             </if>
             <if test="dto.keyword != null and dto.keyword != ''">
-                AND (TITLE LIKE '%' || #{dto.keyword} || '%' 
-                     OR WRITER LIKE '%' || #{dto.keyword} || '%')
+                AND (
+                    TITLE LIKE '%' || #{dto.keyword} || '%' 
+                    OR WRITER LIKE '%' || #{dto.keyword} || '%'
+                )
             </if>
         </where>
     </sql>
 
-    <select id="getBoardList" resultType="com.metanet.seoulbike.board.dto.BoardDto">
+    <!-- 게시글 리스트 -->
+    <select id="selectBoardList" resultType="com.metanet.seoulbike.board.dto.BoardDto">
         SELECT 
             BOARD_ID as "boardId",
             CATEGORY as "category",
@@ -30,12 +34,15 @@
         OFFSET #{offset} ROWS FETCH NEXT #{dto.size} ROWS ONLY
     </select>
 
-    <select id="getBoardCount" resultType="int">
-        SELECT COUNT(*) FROM BOARD
+    <!-- 게시글 수 -->
+    <select id="selectBoardCount" resultType="int">
+        SELECT COUNT(*) 
+        FROM BOARD
         <include refid="searchCondition" />
     </select>
 
-    <select id="getBoardById" resultType="com.metanet.seoulbike.board.dto.BoardDto">
+    <!-- 게시글 상세 -->
+    <select id="selectBoardById" resultType="com.metanet.seoulbike.board.dto.BoardDto">
         SELECT 
             BOARD_ID as "boardId",
             CATEGORY as "category",
@@ -49,10 +56,11 @@
         WHERE BOARD_ID = #{boardId}
     </select>
 
-    <insert id="insertBoard" 
+    <!-- 게시글 등록 -->
+    <insert id="insertBoard"
             parameterType="com.metanet.seoulbike.board.dto.BoardDto"
-            useGeneratedKeys="true" 
-            keyProperty="boardId" 
+            useGeneratedKeys="true"
+            keyProperty="boardId"
             keyColumn="BOARD_ID">
         INSERT INTO BOARD (
             CATEGORY, TITLE, CONTENT, WRITER
@@ -61,34 +69,46 @@
         )
     </insert>
 
+    <!-- 게시글 수정 -->
     <update id="updateBoard">
         UPDATE BOARD
-        SET TITLE = #{title},
+        SET 
+            TITLE = #{title},
             CONTENT = #{content},
             CATEGORY = #{category}
         WHERE BOARD_ID = #{boardId}
     </update>
 
+    <!-- 게시글 삭제 -->
     <delete id="deleteBoard">
-        DELETE FROM BOARD WHERE BOARD_ID = #{boardId}
+        DELETE FROM BOARD 
+        WHERE BOARD_ID = #{boardId}
     </delete>
 
-    <select id="getCategoryCounts" resultType="map">
+    <!-- 카테고리 통계 -->
+    <select id="selectCategoryCounts" resultType="map">
         SELECT 
             COUNT(CASE WHEN CATEGORY = 'NOTICE' THEN 1 END) AS "NOTICE_CNT",
             COUNT(CASE WHEN CATEGORY = 'SUGGESTION' THEN 1 END) AS "SUGGESTION_CNT"
         FROM BOARD
     </select>
 
+    <!-- 조회수 증가 -->
     <update id="updateViewCount">
-        UPDATE BOARD SET VIEW_COUNT = VIEW_COUNT + 1 WHERE BOARD_ID = #{boardId}
+        UPDATE BOARD 
+        SET VIEW_COUNT = VIEW_COUNT + 1 
+        WHERE BOARD_ID = #{boardId}
     </update>
 
+    <!-- 추천수 증가 -->
     <update id="updateLikeCount">
-        UPDATE BOARD SET LIKE_COUNT = LIKE_COUNT + 1 WHERE BOARD_ID = #{boardId}
+        UPDATE BOARD 
+        SET LIKE_COUNT = LIKE_COUNT + 1 
+        WHERE BOARD_ID = #{boardId}
     </update>
-    
-    <select id="getCommentsByBoardId" resultType="com.metanet.seoulbike.board.dto.CommentDto">
+
+    <!-- 댓글 리스트 -->
+    <select id="selectCommentsByBoardId" resultType="com.metanet.seoulbike.board.dto.CommentDto">
         SELECT 
             COMMENT_ID as "commentId",
             BOARD_ID as "boardId",
@@ -101,7 +121,8 @@
         ORDER BY NVL(PARENT_ID, COMMENT_ID), CREATED_AT ASC
     </select>
 
-    <select id="getCommentById" resultType="com.metanet.seoulbike.board.dto.CommentDto">
+    <!-- 댓글 단건 -->
+    <select id="selectCommentById" resultType="com.metanet.seoulbike.board.dto.CommentDto">
         SELECT 
             COMMENT_ID as "commentId",
             BOARD_ID as "boardId",
@@ -112,24 +133,30 @@
         FROM BOARD_COMMENT
         WHERE COMMENT_ID = #{commentId}
     </select>
-    
+
+    <!-- 댓글 등록 -->
     <insert id="insertComment">
         INSERT INTO BOARD_COMMENT (
             BOARD_ID, PARENT_ID, CONTENT, WRITER
         ) VALUES (
-            #{boardId}, 
-            #{parentId, jdbcType=NUMERIC}, 
-            #{content}, 
+            #{boardId},
+            #{parentId, jdbcType=NUMERIC},
+            #{content},
             #{writer}
         )
     </insert>
-    
-    <update id="updateComment">
-	    UPDATE BOARD_COMMENT SET CONTENT = #{content} WHERE COMMENT_ID = #{commentId}
-	</update>
 
-	<delete id="deleteComment">
-	    DELETE FROM BOARD_COMMENT WHERE COMMENT_ID = #{commentId}
-	</delete>
+    <!-- 댓글 수정 -->
+    <update id="updateComment">
+        UPDATE BOARD_COMMENT 
+        SET CONTENT = #{content} 
+        WHERE COMMENT_ID = #{commentId}
+    </update>
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteComment">
+        DELETE FROM BOARD_COMMENT 
+        WHERE COMMENT_ID = #{commentId}
+    </delete>
 
 </mapper>

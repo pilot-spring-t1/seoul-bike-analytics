@@ -14,11 +14,11 @@ import com.metanet.seoulbike.board.dto.CommentDto;
 public interface BoardMapper {
 
 	// 게시글 관련
-	List<BoardDto> getBoardList(@Param("dto") BoardSearchDto dto, @Param("offset") int offset);
+	List<BoardDto> selectBoardList(@Param("dto") BoardSearchDto dto, @Param("offset") int offset);
 
-	int getBoardCount(@Param("dto") BoardSearchDto dto);
+	int selectBoardCount(@Param("dto") BoardSearchDto dto);
 
-	BoardDto getBoardById(Long boardId);
+	BoardDto selectBoardById(Long boardId);
 
 	int insertBoard(BoardDto boardDto);
 
@@ -26,21 +26,21 @@ public interface BoardMapper {
 
 	int deleteBoard(Long boardId);
 
-	Map<String, Object> getCategoryCounts();
+	Map<String, Object> selectCategoryCounts();
 
 	int updateViewCount(Long boardId);
 
 	int updateLikeCount(Long boardId);
 
-	// 댓글 관련 (반환 타입 수정)
+	// 댓글 관련
 	int insertComment(@Param("boardId") Long boardId, @Param("parentId") Long parentId,
 			@Param("content") String content, @Param("writer") String writer);
 
-	List<CommentDto> getCommentsByBoardId(Long boardId); // Map -> CommentDto 변경
+	List<CommentDto> selectCommentsByBoardId(Long boardId);
 
-	CommentDto getCommentById(Long commentId); // Map -> CommentDto 변경
-	
+	CommentDto selectCommentById(Long commentId);
+
 	int updateComment(@Param("commentId") Long commentId, @Param("content") String content);
+
 	int deleteComment(Long commentId);
-	
 }

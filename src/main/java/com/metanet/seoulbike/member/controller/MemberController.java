@@ -3,6 +3,9 @@ package com.metanet.seoulbike.member.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +23,7 @@ import com.metanet.seoulbike.member.model.Member;
 import com.metanet.seoulbike.member.service.MemberService;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,9 +61,20 @@ public class MemberController {
 	}
 	
 	@GetMapping("/login")
-    public String loginForm() {
-        return "auth/login"; 
-    }
+	public String loginForm(HttpServletRequest request) {
+	    // 1. JwtTokenProvider를 통해 쿠키에서 토큰을 꺼내 유효한지 확인하거나,
+	    // 2. 이미 필터를 통과해 SecurityContext에 인증 정보가 있는지 확인합니다.
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+	    // 인증 정보가 있고, 익명 사용자(anonymousUser)가 아니라면 이미 로그인된 상태임
+	    if (auth != null && auth.isAuthenticated() && 
+	        !(auth instanceof AnonymousAuthenticationToken)) {
+	        log.info("이미 로그인된 사용자입니다. 대시보드로 리다이렉트합니다.");
+	        return "redirect:/dashboard";
+	    }
+
+	    return "auth/login"; 
+	}
 	
 	@PostMapping("/login")
 	public String login(@RequestParam Map<String, String> user, HttpServletResponse response) {
@@ -116,6 +131,6 @@ public class MemberController {
 	    model.addAttribute("totalPages", totalPages);
 	    model.addAttribute("searchDto", dto); 
 	    
-		return "admin-users";
+		return "admin/admin-users";
 	}
 }

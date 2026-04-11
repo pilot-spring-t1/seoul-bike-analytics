@@ -13,73 +13,133 @@
     <link rel="stylesheet" th:href="@{/css/color.css}">
     <link rel="stylesheet" th:href="@{/css/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/button.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     
     <style>
-        /* 레이아웃 및 테이블 스타일 (기존과 동일) */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
-        body { display: flex; height: 100vh; overflow: hidden; }
-        #sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
-        #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        #sidebar ul { list-style: none; padding: 20px 0; }
-        #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
-        #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
-        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-        header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .container { flex: 1; padding: 30px; overflow-y: auto; }
-        .user-mgmt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .notice {
-			border-top: 2px solid rgba(255,255,255,0.12);
-			margin-top: 4px;
-		}
-        
-        .search-bar { display: flex; gap: 10px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .search-bar select, .search-bar input { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; outline: none; }
-        .card { background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); overflow: hidden; }
-        .user-table { width: 100%; border-collapse: collapse; }
-        .user-table th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 0.85rem; }
-        .user-table td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; vertical-align: middle; }
-        .badge { padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
-        .badge-admin { background: #fee2e2; color: #ef4444; }
-        .badge-user { background: #dcfce7; color: #16a34a; }
-        .table-action-btn { padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-        .table-btn-delete { color: #ef4444; border-color: #fee2e2; }
-        .pagination-container { display: flex; justify-content: center; margin-top: 30px; gap: 5px; }
-        .page-btn { padding: 8px 14px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; text-decoration: none; color: #475569; }
-        .page-btn.active { background: #1abc9c; color: white; border-color: #1abc9c; font-weight: bold; }
-    </style>
+	    /* 기본 레이아웃 가독성 강화 */
+	    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+	    body { display: flex; height: 100vh; overflow: hidden; background-color: #f1f5f9; }
+	
+	    /* 메인 영역 */
+	    #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+	    
+	    header { 
+	        height: 60px; 
+	        background: white; 
+	        display: flex; 
+	        align-items: center; 
+	        justify-content: flex-end; 
+	        padding: 0 30px; 
+	        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+	        z-index: 10;
+	    }
+	
+	    .container { flex: 1; padding: 30px; overflow-y: auto; }
+	
+	    /* 헤더 및 검색바 */
+	    .user-mgmt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+	    
+	    .search-bar { 
+	        display: flex; 
+	        gap: 8px; 
+	        background: white; 
+	        padding: 8px 12px; 
+	        border-radius: 10px; 
+	        box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
+	    }
+	    
+	    .search-bar select, .search-bar input { 
+	        border: 1px solid #e2e8f0; 
+	        padding: 8px 12px; 
+	        border-radius: 6px; 
+	        outline: none; 
+	        font-size: 0.9rem;
+	        transition: border-color 0.2s;
+	    }
+	
+	    .search-bar select:focus, .search-bar input:focus { border-color: #1abc9c; }
+	
+	    /* 카드 및 테이블 디자인 상세화 */
+	    .card { 
+	        background: white; 
+	        border-radius: 12px; 
+	        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+	        overflow: hidden; 
+	    }
+	
+	    .user-table { width: 100%; border-collapse: collapse; }
+	    
+	    .user-table th { 
+	        background: #f8fafc; 
+	        padding: 16px; 
+	        text-align: left; 
+	        color: #475569; 
+	        font-size: 0.85rem; 
+	        font-weight: 600;
+	        border-bottom: 1px solid #e2e8f0;
+	    }
+	    
+	    .user-table td { 
+	        padding: 14px 16px; 
+	        border-bottom: 1px solid #f1f5f9; 
+	        font-size: 0.9rem; 
+	        color: #1e293b;
+	        vertical-align: middle; 
+	    }
+	
+	    .user-table tr:last-child td { border-bottom: none; }
+	    .user-table tr:hover { background-color: #fbfcfe; }
+	
+	    /* 뱃지 및 액션 버튼 */
+	    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+	    .badge-admin { background: #fee2e2; color: #ef4444; }
+	    .badge-user { background: #dcfce7; color: #16a34a; }
+	
+	    .table-action-btn { 
+	        padding: 6px 12px; 
+	        border: 1px solid #e2e8f0; 
+	        background: white; 
+	        border-radius: 6px; 
+	        cursor: pointer; 
+	        font-size: 0.8rem; 
+	        transition: all 0.2s;
+	    }
+	    
+	    .table-btn-delete:hover { background: #ef4444; color: white; border-color: #ef4444; }
+	
+	    /* 페이지네이션 */
+	    .pagination-container { display: flex; justify-content: center; margin-top: 30px; gap: 6px; }
+	    
+	    .page-btn { 
+	        padding: 8px 16px; 
+	        border: 1px solid #e2e8f0; 
+	        background: white; 
+	        border-radius: 6px; 
+	        text-decoration: none; 
+	        color: #64748b; 
+	        font-size: 0.9rem;
+	        transition: 0.2s;
+	    }
+	
+	    .page-btn:hover:not(.active) { background: #f1f5f9; border-color: #cbd5e1; }
+	
+	    .page-btn.active { 
+	        background: #1abc9c; 
+	        color: white; 
+	        border-color: #1abc9c; 
+	        font-weight: 600; 
+	        box-shadow: 0 2px 4px rgba(26, 188, 156, 0.3);
+	    }
+	</style>
 </head>
 <body class="bg-admin">
 	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
-    <nav id="sidebar" class="menu-admin-color">
-        <h2 class="logo-font">SEOUL BIKE</h2>
-        <ul>
-            <li><a th:href="@{/admin/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
-            <li><a th:href="@{/admin/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
-		    <li><a th:href="@{/admin/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
-		    <li><a th:href="@{/admin/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
-		    <li class="notice"><a th:href="@{/admin/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
-            <li class="active"><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
-            <li><a th:href="@{/admin/contents}">📁 콘텐츠 관리</a></li>
-            <li><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
-			<li><a href="#">⚙️ <span th:text="#{dashboard.menu.settings}">시스템 설정</span></a></li>
-            <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
-        </ul>
-    </nav>
+	
+	<div th:replace="~{fragment/sidebar :: sidebar('users')}"></div>
 
     <div id="main-content">
-        <header>
-            <span style="margin-right: 20px;" class="subtitle-dark-blue-font">
-            마스터 권한: <b th:text="${session.adminName ?: '슈퍼관리자'}"></b></span>
-            
-            <form method="get" style="margin: 0; margin-right: 10px;">
-				<select name="lang" onchange="this.form.submit()">
-					<option value="ko" th:selected="${#locale.language == 'ko'}"
-						th:text="#{language.korean}">KR</option>
-					<option value="en" th:selected="${#locale.language == 'en'}"
-						th:text="#{language.english}">EN</option>
-				</select>
-			</form>
-        </header>
+
+        <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
 
         <main class="container">
             <div class="user-mgmt-header">

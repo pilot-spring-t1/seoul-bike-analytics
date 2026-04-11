@@ -13,15 +13,12 @@
     <link rel="stylesheet" th:href="@{/css/color.css}">
     <link rel="stylesheet" th:href="@{/css/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/button.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; overflow: hidden; }
-        #sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
-        #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        #sidebar ul { list-style: none; padding: 20px 0; }
-        #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
-        #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
+
         .notice {
 			border-top: 2px solid rgba(255,255,255,0.12);
 			margin-top: 4px;
@@ -59,44 +56,12 @@
 </head>
 <body class="bg-admin">
 	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
-    <nav id="sidebar" class="menu-admin-color">
-        <h2 class="logo-font">SEOUL BIKE</h2>
-        <ul>
-            <li><a th:href="@{/admin/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
-            <li><a th:href="@{/admin/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
-		    <li><a th:href="@{/admin/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
-		    <li><a th:href="@{/admin/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
-		    <li class="notice"><a th:href="@{/admin/notifications}"
-				style="position: relative;"> 🔔 <span
-					th:text="#{dashboard.menu.notifications}">알림 내역</span> <span
-					id="notiBadge"
-					style="position: absolute; top: 8px; right: 15px; background: #e53935; color: white; border-radius: 50%; min-width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; font-weight: bold; padding: 0 5px; display: none;">
-						0 </span>
-			</a></li>
-            <li><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
-            <li><a th:href="@{/admin/contents}">📁 콘텐츠 관리</a></li>
-            <li class="active"><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
-			<li><a href="#">⚙️ <span th:text="#{dashboard.menu.settings}">시스템 설정</span></a></li>
-            <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
-        </ul>
-    </nav>
+ 	
+ 	<div th:replace="~{fragment/sidebar :: sidebar('overview')}"></div>
 
     <div id="main-content">
-        <header>
-            <span style="margin-right: 20px;" class="subtitle-dark-blue-font">
-                로그 분석 중: <b th:text="${session.adminName ?: '관리자'}"></b>
-            </span>
-            
-            <form method="get" style="margin: 0; margin-right: 10px;">
-				<select name="lang" onchange="this.form.submit()">
-					<option value="ko" th:selected="${#locale.language == 'ko'}"
-						th:text="#{language.korean}">KR</option>
-					<option value="en" th:selected="${#locale.language == 'en'}"
-						th:text="#{language.english}">EN</option>
-				</select>
-			</form>
-        </header>
-
+        <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
+        
         <main class="container">
             <div class="detail-header">
                 <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;">

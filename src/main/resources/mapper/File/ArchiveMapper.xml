@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.metanet.seoulbike.file.archive.mapper.ArchiveMapper">
+
+    <sql id="searchCondition">
+        <if test="keyword != null and keyword != ''">
+            AND (
+                ARCHIVE_TITLE LIKE '%' || #{keyword} || '%'
+                OR ARCHIVE_DESC LIKE '%' || #{keyword} || '%'
+            )
+        </if>
+    </sql>
+
+    <insert id="insertArchive"
+            parameterType="com.metanet.seoulbike.file.archive.dto.ArchiveDto"
+            useGeneratedKeys="true"
+            keyProperty="archiveId"
+            keyColumn="ARCHIVE_ID">
+        INSERT INTO FILE_ARCHIVE (
+            ARCHIVE_ID,
+            ARCHIVE_TITLE,
+            ARCHIVE_DESC,
+            FILE_UUID,
+            FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            UPLOADER_ID,
+            UPLOAD_DATE
+        ) VALUES (
+            SEQ_ARCHIVE.NEXTVAL, -- 오라클 시퀀스 가정
+            #{archiveTitle},
+            #{archiveDesc},
+            #{fileUuid},
+            #{fileName},
+            #{filePath},
+            #{fileSize},
+            #{uploaderId},
+            SYSDATE
+        )
+    </insert>
+
+    <select id="selectArchiveList"
+            parameterType="com.metanet.seoulbike.file.archive.dto.ArchiveSearchDto"
+            resultType="com.metanet.seoulbike.file.archive.dto.ArchiveDto">
+        SELECT
+            ARCHIVE_ID    AS "archiveId",
+            ARCHIVE_TITLE AS "archiveTitle",
+            ARCHIVE_DESC  AS "archiveDesc",
+            FILE_UUID     AS "fileUuid",
+            FILE_NAME     AS "fileName",
+            FILE_PATH     AS "filePath",
+            FILE_SIZE     AS "fileSize",
+            UPLOAD_DATE   AS "createdAt", -- HTML과 맞추기 위해 Alias 변경
+            UPLOADER_ID   AS "uploaderId"
+        FROM FILE_ARCHIVE
+        WHERE 1=1
+        <include refid="searchCondition" />
+        ORDER BY ARCHIVE_ID DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{recordSize} ROWS ONLY
+    </select>
+
+    <select id="selectArchiveCount"
+            parameterType="com.metanet.seoulbike.file.archive.dto.ArchiveSearchDto"
+            resultType="int">
+        SELECT COUNT(*)
+        FROM FILE_ARCHIVE
+        WHERE 1=1
+        <include refid="searchCondition" />
+    </select>
+
+    <select id="selectArchiveById"
+            resultType="com.metanet.seoulbike.file.archive.dto.ArchiveDto">
+        SELECT
+            ARCHIVE_ID    AS "archiveId",
+            ARCHIVE_TITLE AS "archiveTitle",
+            ARCHIVE_DESC  AS "archiveDesc",
+            FILE_UUID     AS "fileUuid",
+            FILE_NAME     AS "fileName",
+            FILE_PATH     AS "filePath",
+            FILE_SIZE     AS "fileSize",
+            UPLOAD_DATE   AS "createdAt",
+            UPLOADER_ID   AS "uploaderId"
+        FROM FILE_ARCHIVE
+        WHERE ARCHIVE_ID = #{archiveId}
+    </select>
+
+    <delete id="deleteArchive">
+        DELETE FROM FILE_ARCHIVE
+        WHERE ARCHIVE_ID = #{archiveId}
+    </delete>
+
+</mapper>

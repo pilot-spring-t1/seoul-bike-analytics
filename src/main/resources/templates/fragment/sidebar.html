@@ -1,0 +1,53 @@
+<nav th:fragment="sidebar(activeMenu)" id="sidebar" class="menu-color">
+    <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
+    <ul>
+        <li th:classappend="${activeMenu == 'overview'} ? 'active'">
+            <a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a>
+        </li>
+        <li th:classappend="${activeMenu == 'detail'} ? 'active'">
+            <a th:href="@{/dashboard/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a>
+        </li>
+        <li th:classappend="${activeMenu == 'map'} ? 'active'">
+            <a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a>
+        </li>
+
+        <div class="sidebar-divider"></div> 
+        
+        <li th:classappend="${activeMenu == 'notice'} ? 'active'">
+            <a th:href="@{/boards/notice}">📢 <span th:text="#{dashboard.menu.notice}">공지사항</span></a>
+        </li>
+        <li th:classappend="${activeMenu == 'suggestion'} ? 'active'">
+            <a th:href="@{/boards/suggestion}">💡 <span th:text="#{dashboard.menu.suggestion}">건의사항</span></a>
+        </li>
+        <li th:classappend="${activeMenu == 'archive'} ? 'active'">
+            <a th:href="@{/archive/list}">📁 <span th:text="#{dashboard.menu.archive}">자료실</span></a>
+        </li>
+
+        <th:block sec:authorize="hasRole('ADMIN')">
+            <div class="sidebar-divider"></div>
+            <li style="padding: 10px 25px; font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase;">Admin Only</li>
+            
+            <li th:classappend="${activeMenu == 'users'} ? 'active'">
+                <a th:href="@{/members/list}">👥 <span th:text="#{dashboard.menu.users}">사용자 관리</span></a>
+            </li>
+            <li th:classappend="${activeMenu == 'logs'} ? 'active'">
+                <a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">시스템 로그</span></a>
+            </li>
+        </th:block>
+
+        <div class="sidebar-divider"></div>
+
+        <li th:classappend="${activeMenu == 'notifications'} ? 'active' : 'notice'">
+            <a th:href="@{/notifications}" style="position: relative;">
+                🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span>
+                <span id="notiBadge"
+                      style="position:absolute; top:8px; right:15px; background:#e53935; color:white; border-radius:50%; min-width:20px; height:20px; line-height:20px; text-align:center; font-size:11px; font-weight:bold; padding:0 5px; display:none;">
+                    0
+                </span>
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/members/logout}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a>
+        </li>
+    </ul>
+</nav>
