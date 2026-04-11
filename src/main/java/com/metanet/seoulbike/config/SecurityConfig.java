@@ -38,25 +38,24 @@ public class SecurityConfig {
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // [A] 누구나 접근 가능 (로그인, 회원가입, 정적 파일)
+                // 누구나 접근 가능 (로그인, 회원가입, 정적 파일)
                 .requestMatchers("/members/login", "/members/signup").permitAll()
                 .requestMatchers("/assets/**", "/css/**", "/js/**", "/img/**", "/*.ico").permitAll()
                 
-                // [B] 게시판 및 아카이브 조회 (비로그인 허용 그룹)
-                .requestMatchers("/boards/notice", "/boards/suggestion", "/boards/view/**").permitAll()
-                .requestMatchers("/archive/list").permitAll()
 
-                // [C] 관리자 전용 그룹 (경로 패턴으로 묶기)
+                // 관리자 전용 그룹 (경로 패턴으로 묶기)
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/members/list", "/members/delete/**").hasRole("ADMIN")
                 .requestMatchers("/archive/write", "/archive/register", "/archive/delete/**").hasRole("ADMIN")
                 .requestMatchers("/dashboard/admin/**").hasRole("ADMIN") // 관리자용 대시보드가 있다면
 
-                // [D] 그 외 대시보드 및 모든 기능 (인증된 유저만)
-                // 개별 페이지(/detail, /summary 등)를 나열할 필요 없이 /dashboard/** 하나로 끝납니다.
+                // 인증필요
                 .requestMatchers("/dashboard/**").authenticated() 
                 .requestMatchers("/archive/download/**", "/boards/like/**", "/boards/comment/**").authenticated()
-
-                // 나머지 모든 요청은 인증 필요
+                .requestMatchers("/boards/notice", "/boards/suggestion", "/boards/view/**").authenticated()
+                .requestMatchers("/archive/list").authenticated()
+                
+                // 나머지 모든 요청도 인증 필요
                 .anyRequest().authenticated()
             )
             .exceptionHandling(handler -> handler.authenticationEntryPoint(jwtAuthenticationEntryPoint))
