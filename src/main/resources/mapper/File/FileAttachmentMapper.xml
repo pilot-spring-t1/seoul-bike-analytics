@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.metanet.seoulbike.file.attachment.mapper.FileAttachmentMapper">
+
+    <insert id="insertFile"
+            parameterType="com.metanet.seoulbike.file.attachment.dto.FileAttachmentDto"
+            useGeneratedKeys="true"
+            keyProperty="fileId"
+            keyColumn="FILE_ID">
+        INSERT INTO FILE_ATTACHMENT (
+            BOARD_ID,
+            FILE_UUID,
+            FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            UPLOADER_ID
+        ) VALUES (
+            #{boardId},
+            #{fileUuid},
+            #{fileName},
+            #{filePath},
+            #{fileSize},
+            #{uploaderId}
+        )
+    </insert>
+
+    <select id="selectFilesByBoardId"
+            resultType="com.metanet.seoulbike.file.attachment.dto.FileAttachmentDto">
+        SELECT
+            FILE_ID     AS "fileId",
+            BOARD_ID    AS "boardId",
+            FILE_UUID   AS "fileUuid",
+            FILE_NAME   AS "fileName",
+            FILE_PATH   AS "filePath",
+            FILE_SIZE   AS "fileSize",
+            UPLOAD_DATE AS "uploadDate",
+            UPLOADER_ID AS "uploaderId"
+        FROM FILE_ATTACHMENT
+        WHERE BOARD_ID = #{boardId}
+        ORDER BY FILE_ID ASC
+    </select>
+
+    <select id="selectFileById"
+            resultType="com.metanet.seoulbike.file.attachment.dto.FileAttachmentDto">
+        SELECT
+            FILE_ID     AS "fileId",
+            BOARD_ID    AS "boardId",
+            FILE_UUID   AS "fileUuid",
+            FILE_NAME   AS "fileName",
+            FILE_PATH   AS "filePath",
+            FILE_SIZE   AS "fileSize",
+            UPLOAD_DATE AS "uploadDate",
+            UPLOADER_ID AS "uploaderId"
+        FROM FILE_ATTACHMENT
+        WHERE FILE_ID = #{fileId}
+    </select>
+
+    <delete id="deleteFile">
+        DELETE FROM FILE_ATTACHMENT
+        WHERE FILE_ID = #{fileId}
+    </delete>
+
+</mapper>
