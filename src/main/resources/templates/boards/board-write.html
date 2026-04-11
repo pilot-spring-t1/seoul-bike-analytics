@@ -69,11 +69,12 @@
     </nav>
 
     <div id="main-content">
-        <header>
+        <!-- <header>
             <span style="font-size: 0.9rem; color: #64748b;">
                 <span sec:authentication="name">사용자</span> 님 접속 중
             </span>
-        </header>
+        </header> -->
+        <div th:replace="fragment/header :: header('dashboard.welcome', ${userName})"></div>
 
         <main class="container">
             <div class="form-card">

@@ -94,7 +94,7 @@
 <body class="bg">
     <input type="hidden" id="memberId" th:value="${memberId}" value="1">
 
-    <nav id="sidebar" class="menu-color">
+    <!-- <nav id="sidebar" class="menu-color">
         <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
         <ul>
 		    <li><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
@@ -104,10 +104,11 @@
 		    <li class="notice active"><a th:href="@{/dashboard/notifications}">🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span></a></li>
 		    <li><a th:href="@{members/logout}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
 	    </ul>
-    </nav>
+    </nav> -->
+    <div th:replace="fragment/sidebar :: sidebar('notifications')"></div>
 
     <div id="main-content">
-	    <header>
+	    <!-- <header>
 			<span style="margin-right: 20px;" class="subtitle-dark-blue-font">
                 <b th:text="#{notification.title}">시스템 알림 센터</b>
             </span>
@@ -119,7 +120,8 @@
 						th:text="#{language.english}">EN</option>
 				</select>
 			</form>
-		</header>
+		</header> -->
+        <div th:replace="fragment/header :: header('dashboard.welcome', ${userName})"></div>
 
 		<main class="container">
             <div id="notificationList"></div>

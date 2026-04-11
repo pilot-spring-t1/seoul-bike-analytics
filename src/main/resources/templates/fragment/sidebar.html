@@ -1,0 +1,32 @@
+<nav th:fragment="sidebar(activeMenu)" id="sidebar" class="menu-color">
+    <h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
+    <ul>
+        <li th:classappend="${activeMenu == 'overview'} ? 'active'">
+            <a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a>
+        </li>
+
+        <li th:classappend="${activeMenu == 'detail'} ? 'active'">
+            <a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a>
+        </li>
+
+        <li>
+            <a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a>
+        </li>
+
+        <li>
+            <a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a>
+        </li>
+
+        <li class="notice">
+            <a th:href="@{/notifications}" style="position: relative;">
+                🔔 <span th:text="#{dashboard.menu.notifications}">알림 내역</span>
+                <span id="notiBadge"
+                      style="position:absolute; top:8px; right:15px; background:#e53935; color:white; border-radius:50%; min-width:20px; height:20px; line-height:20px; text-align:center; font-size:11px; font-weight:bold; padding:0 5px; display:none;">
+                    0
+                </span>
+            </a>
+        </li>
+
+        <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+    </ul>
+</nav>

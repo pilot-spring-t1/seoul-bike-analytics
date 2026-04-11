@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 
     <style>
+        /* CSS 스타일 유지 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
 
@@ -20,7 +21,6 @@
         #sidebar ul li.active a { background: #1e293b; color: #10b981; }
 
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-        header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
         .container { flex: 1; padding: 40px; overflow-y: auto; }
 
         .action-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
@@ -55,6 +55,7 @@
         <li><a th:href="@{/members/search}">👤 회원 관리</a></li>
         <li class="active"><a th:href="@{/boards/notice}">📝 공지사항 관리</a></li>
         <li><a th:href="@{/boards/suggestion}">💡 건의사항 관리</a></li>
+        <li><a th:href="@{/archive/list}">📂 시스템 아카이브</a></li>
         <li><a th:href="@{/system}">⚙️ 시스템 설정</a></li>
         
         <li><hr style="opacity: 0.1; margin: 10px 0;"></li>
@@ -64,16 +65,11 @@
 
 <div id="main-content">
 
-    <header>
-        <span style="font-size: 0.9rem; color: #64748b;">
-            <span sec:authentication="name"></span> 님 접속 중
-        </span>
-    </header>
+    <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
 
     <main class="container">
 
         <div class="action-row">
-
             <div class="tab-group">
                 <a th:href="@{/boards/notice}" class="tab-btn active">공지사항</a>
                 <a th:href="@{/boards/suggestion}" class="tab-btn">건의사항</a>
@@ -133,15 +129,12 @@
             </th:block>
         </div>
 
-        <!-- 관리자만 -->
         <div style="margin-top: 24px; display: flex; justify-content: flex-end;"
              sec:authorize="hasRole('ADMIN')">
-
             <button class="btn-black"
                     th:onclick="|location.href='@{/boards/write(category=NOTICE)}'|">
                 공지 등록
             </button>
-
         </div>
 
     </main>

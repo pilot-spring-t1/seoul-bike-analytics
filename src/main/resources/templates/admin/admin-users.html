@@ -67,7 +67,7 @@
     </nav>
 
     <div id="main-content">
-        <header>
+        <!-- <header>
             <span style="margin-right: 20px;" class="subtitle-dark-blue-font">
             마스터 권한: <b th:text="${session.adminName ?: '슈퍼관리자'}"></b></span>
             
@@ -79,7 +79,8 @@
 						th:text="#{language.english}">EN</option>
 				</select>
 			</form>
-        </header>
+        </header> -->
+        <div th:replace="fragment/header :: header('dashboard.welcome', ${userName})"></div>
 
         <main class="container">
             <div class="user-mgmt-header">
