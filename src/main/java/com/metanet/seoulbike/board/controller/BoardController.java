@@ -45,7 +45,9 @@ public class BoardController {
         model.addAttribute("list", result.get("list"));
         model.addAttribute("totalPages", result.get("totalPages"));
         model.addAttribute("searchDto", searchDto);
-
+        model.addAttribute("activeMenu", category.toLowerCase());
+        
+        
         return category.equals("NOTICE") ? "boards/board-notice" : "boards/board-suggestion";
     }
 

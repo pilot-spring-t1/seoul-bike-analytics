@@ -71,7 +71,7 @@ public class ArchiveController {
     @PostMapping("/register")
     @PreAuthorize("hasRole('ADMIN')")
     public String register(
-            @RequestParam("uploadFile") MultipartFile file, // HTML input name과 일치
+            @RequestParam("uploadFile") MultipartFile file,
             @RequestParam("archiveTitle") String archiveTitle,
             @RequestParam(value = "archiveDesc", required = false) String archiveDesc,
             Authentication auth,

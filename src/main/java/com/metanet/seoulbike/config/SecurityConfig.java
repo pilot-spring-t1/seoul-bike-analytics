@@ -34,51 +34,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. CSRF 비활성화 (JWT 사용 시 필수)
             .csrf(csrf -> csrf.disable())
-            
-            // 2. 세션 정책: Stateless (서버에 세션을 저장하지 않음)
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            // 3. 권한 설정
             .authorizeHttpRequests(auth -> auth
-                // [누구나 접근 가능]
-                .requestMatchers(
-                    "/members/login", "/members/signup", // 회원가입/로그인 경로 (정확한 매칭)
-                    "/boards/notice", "/boards/suggestion", // 게시판 목록
-                    "/boards/view/**",                     // 게시판 상세
-                    "/archive/list",                        // 아카이브 목록
-                    "/assets/**", "/css/**", "/js/**", "/img/**", "/favicon.ico" // 정적 리소스
-                ).permitAll()
+                // [A] 누구나 접근 가능 (로그인, 회원가입, 정적 파일)
+                .requestMatchers("/members/login", "/members/signup").permitAll()
+                .requestMatchers("/assets/**", "/css/**", "/js/**", "/img/**", "/*.ico").permitAll()
+                
+                // [B] 게시판 및 아카이브 조회 (비로그인 허용 그룹)
+                .requestMatchers("/boards/notice", "/boards/suggestion", "/boards/view/**").permitAll()
+                .requestMatchers("/archive/list").permitAll()
 
-                // [인증된 사용자만 접근 가능]
-                .requestMatchers(
-                    "/archive/download/**",
-                    "/boards/like/**",
-                    "/boards/comment/**",
-                    "/dashboard/**"                        // 대시보드 및 상세 분석
-                ).authenticated()
+                // [C] 관리자 전용 그룹 (경로 패턴으로 묶기)
+                .requestMatchers("/members/list", "/members/delete/**").hasRole("ADMIN")
+                .requestMatchers("/archive/write", "/archive/register", "/archive/delete/**").hasRole("ADMIN")
+                .requestMatchers("/dashboard/admin/**").hasRole("ADMIN") // 관리자용 대시보드가 있다면
 
-                // [관리자 전용]
-                .requestMatchers(
-                    "/archive/write", 
-                    "/archive/register", 
-                    "/archive/delete/**",
-                    "/members/list",                       // 회원 관리 목록
-                    "/members/delete/**"
-                ).hasRole("ADMIN")
+                // [D] 그 외 대시보드 및 모든 기능 (인증된 유저만)
+                // 개별 페이지(/detail, /summary 등)를 나열할 필요 없이 /dashboard/** 하나로 끝납니다.
+                .requestMatchers("/dashboard/**").authenticated() 
+                .requestMatchers("/archive/download/**", "/boards/like/**", "/boards/comment/**").authenticated()
 
-                // 그 외 모든 요청은 인증 필요
+                // 나머지 모든 요청은 인증 필요
                 .anyRequest().authenticated()
             )
-            
-            // 예외 처리 핸들러 등록
-            .exceptionHandling(handler -> handler
-                    .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-                )
-            
-            // 4. JWT 필터 배치
+            .exceptionHandling(handler -> handler.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

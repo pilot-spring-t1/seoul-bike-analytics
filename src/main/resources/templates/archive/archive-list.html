@@ -6,16 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>시스템 아카이브 | 운영 센터</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <style>
         /* 기본 레이아웃 및 사이드바 스타일 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
-
-        #sidebar { width: 260px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        #sidebar h2 { height: 80px; display: flex; align-items: center; padding: 0 30px; font-size: 1.3rem; font-weight: 800; color: #10b981; }
-        #sidebar ul { list-style: none; padding: 20px 0; flex-grow: 1; }
-        #sidebar ul li a { color: #94a3b8; text-decoration: none; display: block; padding: 15px 30px; transition: 0.2s; }
-        #sidebar ul li.active a { background: #1e293b; color: #10b981; }
 
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
         header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
@@ -58,19 +53,7 @@
 
 <body>
 
-<nav id="sidebar">
-    <h2>SEOUL BIKE</h2>
-    <ul>
-        <li><a th:href="@{/dashboard/main}">📊 종합 분석</a></li>
-        <li><a th:href="@{/members/search}">👤 회원 관리</a></li>
-        <li><a th:href="@{/boards/notice}">📝 공지사항 관리</a></li>
-        <li><a th:href="@{/boards/suggestion}">💡 건의사항 관리</a></li>
-        <li class="active"><a th:href="@{/archive/list}">📂 시스템 아카이브</a></li>
-        <li><a th:href="@{/system}">⚙️ 시스템 설정</a></li>
-        <li><hr style="opacity: 0.1; margin: 10px 0;"></li>
-        <li><a th:href="@{/logout}">🔒 로그아웃</a></li>
-    </ul>
-</nav>
+<div th:replace="~{fragment/sidebar :: sidebar('archive')}"></div>
 
 <div id="main-content">
 

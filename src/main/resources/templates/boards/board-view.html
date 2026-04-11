@@ -4,17 +4,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>콘텐츠 상세 보기 | 운영 센터</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<title th:text="#{detail.page.title}">콘텐츠 상세 보기 | 운영 센터</title>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/dist/stomp.min.js"></script>
+    <script src="/js/notification.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+	<link rel="stylesheet" th:href="@{/css/color.css}">
+	<link rel="stylesheet" th:href="@{/css/fonts.css}">
+	<link rel="stylesheet" th:href="@{/css/card.css}">
+	<link rel="stylesheet" th:href="@{/css/sidebar.css}">
 <style>
-    /* CSS 스타일 유지 */
+    /* 기존 스타일 유지 (생략 없이 사용 가능) */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
     body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
-    #sidebar { width: 260px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-    #sidebar h2 { height: 80px; display: flex; align-items: center; padding: 0 30px; font-size: 1.3rem; font-weight: 800; color: #10b981; }
-    #sidebar ul { list-style: none; padding: 20px 0; flex-grow: 1; }
-    #sidebar ul li a { color: #94a3b8; text-decoration: none; display: block; padding: 15px 30px; transition: 0.2s; }
-    #sidebar ul li.active a { background: #1e293b; color: #10b981; }
     #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
     header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
     .container { flex: 1; padding: 40px; overflow-y: auto; }
@@ -34,7 +39,6 @@
     .comment-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
     .comment-form { margin-bottom: 32px; }
     .comment-form textarea { width: 100%; height: 100px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; resize: none; margin-bottom: 12px; outline: none; }
-    .comment-form textarea:focus { border-color: #10b981; }
     .comment-list { list-style: none; }
     .comment-item { padding: 20px 0; border-top: 1px solid #f1f5f9; }
     .reply-item { margin-left: 50px; padding: 16px 20px; background-color: #f8fafc; border-radius: 8px; margin-top: 10px; border-top: none !important; }
@@ -58,94 +62,54 @@
     .btn-blue { background: #3b82f6; color: white; }
     .bg-blue { background: #eff6ff; color: #2563eb; }
     .bg-orange { background: #fff7ed; color: #ea580c; }
-    .btn-sm { padding: 6px 14px; font-size: 0.75rem; border-radius: 6px; }
 </style>
 </head>
 <body>
-    <nav id="sidebar">
-        <h2>SEOUL BIKE</h2>
-        <ul>
-            <li><a th:href="@{/dashboard/main}">📊 종합 분석</a></li>
-            <li><a th:href="@{/members/search}">👤 회원 관리</a></li>
-            <li th:classappend="${board.category == 'NOTICE'} ? 'active' : ''">
-                <a th:href="@{/boards/notice}">📝 공지사항 관리</a>
-            </li>
-            <li th:classappend="${board.category == 'SUGGESTION'} ? 'active' : ''">
-                <a th:href="@{/boards/suggestion}">💡 건의사항 관리</a>
-            </li>
-            <th:block th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-	            <li><a th:href="@{/admin/members/search}">👤 <span th:text="#{dashboard.menu.members}">회원 관리</span></a></li>
-	            <li><a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">로그 관리</span></a></li>
-            </th:block>
-            <li><a th:href="@{/system}">⚙️ 시스템 설정</a></li>
-            <li><hr style="opacity: 0.1; margin: 10px 0;"></li>
-            <li><a th:href="@{/logout}">🔒 로그아웃</a></li>
-        </ul>
-    </nav>
+    <input type="hidden" id="memberId" th:value="${memberId}">
 
-    <div id="main-content">
-        <!-- <header>
-            <span style="font-size: 0.9rem; color: #64748b;">
-                <span sec:authentication="name">사용자</span> 님 접속 중
-            </span>
-        </header> -->
-        <div th:replace="fragment/header :: header('dashboard.welcome', ${userName})"></div>
+    <div th:replace="~{fragment/sidebar :: sidebar(${board.category.toLowerCase()})}"></div>
 
+	<div id="main-content">
+        <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
+        
         <main class="container">
             <div class="content-card">
                 <div class="view-header">
-                    <span th:if="${board.category == 'NOTICE'}" class="view-category bg-blue">공지사항</span> 
-                    <span th:if="${board.category == 'SUGGESTION'}" class="view-category bg-orange">건의사항</span>
+                    <span th:if="${board.category == 'NOTICE'}" class="view-category bg-blue" th:text="#{dashboard.menu.notice}">공지사항</span> 
+                    <span th:if="${board.category == 'SUGGESTION'}" class="view-category bg-orange" th:text="#{dashboard.menu.suggestion}">건의사항</span>
 
                     <div class="title-row">
                         <h1 th:text="${board.title}">게시글 제목</h1>
                         <form th:action="@{/boards/like/{id}(id=${board.boardId})}" method="post">
                             <button type="submit" class="btn btn-outline" style="color: #3b82f6; border-color: #3b82f6;">
-                                👍 추천 <span th:text="${board.likeCount}">0</span>
+                                👍 <span th:text="#{detail.tab.ticket}">추천</span> <span th:text="${board.likeCount}">0</span>
                             </button>
                         </form>
                     </div>
 
                     <div class="meta-info">
-                        <span><b>작성자</b> <span th:text="${board.writer}">ADMIN</span></span>
-                        <span><b>작성일</b> <span th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></span>
-                        <span><b>조회수</b> <span th:text="${board.viewCount}">0</span></span>
+                        <span><b th:text="#{board.notice.writer}">작성자</b> <span th:text="${board.writer}">ADMIN</span></span>
+                        <span><b th:text="#{board.notice.date}">작성일</b> <span th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></span>
+                        <span><b th:text="#{board.notice.view}">조회수</b> <span th:text="${board.viewCount}">0</span></span>
                     </div>
                 </div>
 
                 <div class="view-body" th:utext="${board.content}">본문 내용</div>
 
-                <div class="file-section" th:if="${not #lists.isEmpty(files)}">
-                    <p style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-bottom: 10px;">📎 첨부파일</p>
-                    <ul class="file-list">
-                        <li class="file-item" th:each="file : ${files}">
-                            <a th:href="@{/download/{id}(id=${file.fileId})}"> 
-                                <span th:text="${file.fileName}">파일명.pdf</span> 
-                                <small style="margin-left: 8px; opacity: 0.6;" 
-                                       th:text="'(' + ${#numbers.formatInteger(file.fileSize, 0, 'COMMA')} + ' bytes)'"></small>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
                 <div class="comment-section">
                     <div class="comment-title">
-                        💬 댓글 <span th:text="${#lists.size(comments)}" style="color: #10b981;">0</span>
+                        💬 <span th:text="#{dashboard.menu.notifications}">댓글</span> <span th:text="${#lists.size(comments)}" style="color: #10b981;">0</span>
                     </div>
 
                     <form th:action="@{/boards/comment/register}" method="post" class="comment-form">
                         <input type="hidden" name="boardId" th:value="${board.boardId}">
-                        <textarea name="content" placeholder="댓글을 입력하세요." required></textarea>
+                        <textarea name="content" th:placeholder="#{detail.filter.officePlaceholder}" required></textarea>
                         <div style="text-align: right;">
-                            <button type="submit" class="btn btn-emerald">댓글 등록</button>
+                            <button type="submit" class="btn btn-emerald" th:text="#{detail.filter.apply}">댓글 등록</button>
                         </div>
                     </form>
-
+                    
                     <ul class="comment-list">
-                        <li class="comment-item" th:if="${#lists.isEmpty(comments)}"
-                            style="text-align: center; color: #94a3b8; padding: 40px 0;">
-                            등록된 댓글이 없습니다.</li>
-
                         <th:block th:each="comment : ${comments}">
                             <li class="comment-item" th:id="'comment-block-' + ${comment.commentId}"
                                 th:classappend="${comment.parentId != null} ? 'reply-item' : ''">
@@ -156,12 +120,9 @@
                                     </span> 
                                     <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
                                 </div>
-
                                 <div class="comment-content" th:id="'comment-text-' + ${comment.commentId}" th:text="${comment.content}">내용</div>
-
                                 <div class="comment-actions">
                                     <button th:if="${comment.parentId == null}" class="action-btn reply" th:onclick="|toggleForm('reply', ${comment.commentId})|">답글</button>
-                                    
                                     <th:block th:if="${comment.writer == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
                                         <button class="action-btn" th:onclick="|toggleForm('edit', ${comment.commentId})|">수정</button>
                                         <form th:action="@{/boards/comment/delete}" method="post" style="display: inline;" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
@@ -171,30 +132,7 @@
                                         </form>
                                     </th:block>
                                 </div>
-
-                                <div th:if="${comment.parentId == null}" th:id="'form-reply-' + ${comment.commentId}" class="inline-form">
-                                    <form th:action="@{/boards/comment/register}" method="post">
-                                        <input type="hidden" name="boardId" th:value="${board.boardId}"> 
-                                        <input type="hidden" name="parentId" th:value="${comment.commentId}">
-                                        <textarea name="content" required></textarea>
-                                        <div style="text-align: right;">
-                                            <button type="button" class="btn btn-outline btn-sm" th:onclick="|toggleForm('reply', ${comment.commentId})|">취소</button>
-                                            <button type="submit" class="btn btn-emerald btn-sm">답글 등록</button>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div th:id="'form-edit-' + ${comment.commentId}" class="inline-form">
-                                    <form th:action="@{/boards/comment/modify}" method="post">
-                                        <input type="hidden" name="commentId" th:value="${comment.commentId}"> 
-                                        <input type="hidden" name="boardId" th:value="${board.boardId}">
-                                        <textarea name="content" th:text="${comment.content}" required></textarea>
-                                        <div style="text-align: right;">
-                                            <button type="button" class="btn btn-outline btn-sm" th:onclick="|toggleForm('edit', ${comment.commentId})|">취소</button>
-                                            <button type="submit" class="btn btn-blue btn-sm">수정 완료</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </li>
+                                </li>
                         </th:block>
                     </ul>
                 </div>
@@ -217,8 +155,17 @@
     </div>
 
     <script th:inline="javascript">
+        // 3. 알림 초기화 추가
+        $(function() {
+            const memberId = $('#memberId').val();
+            if (memberId && typeof initNotification === 'function') {
+                initNotification(memberId);
+            }
+        });
+
         function toggleForm(type, id) {
             const form = document.getElementById('form-' + type + '-' + id);
+            if (!form) return;
             const otherType = (type === 'reply') ? 'edit' : 'reply';
             const otherForm = document.getElementById('form-' + otherType + '-' + id);
             if (otherForm) otherForm.style.display = 'none';
@@ -229,6 +176,7 @@
                 form.style.display = 'none';
             }
         }
+
         window.onpageshow = function(event) {
             if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
                 window.location.reload();

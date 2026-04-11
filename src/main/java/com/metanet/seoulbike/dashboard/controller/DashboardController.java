@@ -36,12 +36,6 @@ public class DashboardController {
     	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/detail";
     }
-   
-    @GetMapping("/data-center")
-    public String dataSharePage(Model model) {
-    	model.addAttribute("memberId", 1L); // 테스트용
-    	return "shared/data-center";
-    }
 
     @GetMapping("/notifications")
     public String notificationPage(Model model) {

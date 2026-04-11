@@ -19,6 +19,7 @@
 <link rel="stylesheet" th:href="@{/css/color.css}">
 <link rel="stylesheet" th:href="@{/css/fonts.css}">
 <link rel="stylesheet" th:href="@{/css/card.css}">
+<link rel="stylesheet" th:href="@{/css/sidebar.css}">
 
 <style>
 /* CSS 스타일 유지 */
@@ -276,7 +277,7 @@ header {
 <body class="bg">
     <input type="hidden" id="memberId" th:value="${memberId}">
 
-    <div th:replace="~{fragment/sidebar :: sidebar('detail')}"></div>
+	<div th:replace="~{fragment/sidebar :: sidebar('detail')}"></div>
 
 	<div id="main-content">
         <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
