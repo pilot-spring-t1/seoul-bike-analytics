@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8" />
+	<title>따릉이 분석 데이터센터</title>
+	
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+	<link rel="stylesheet" th:href="@{/css/color.css}">
+    <link rel="stylesheet" th:href="@{/css/fonts.css}">
+    <link rel="stylesheet" th:href="@{/css/card.css}">
+    <link rel="stylesheet" th:href="@{/css/button.css}">
+    
+    <!-- 알림을 위해 추가 -->
+	<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<script src="/js/notification.js"></script>
+	
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
+	    body { display: flex; height: 100vh; overflow: hidden; }
+		#sidebar { width: 260px; display: flex; flex-direction: column; flex-shrink: 0; }
+	    #sidebar h2 { height: 100px; display: flex; align-items: center; padding: 0 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+	    #sidebar ul { list-style: none; padding: 20px 0; }
+	    #sidebar ul li a { color: #bdc3c7; text-decoration: none; display: block; padding: 15px 25px; }
+	    #sidebar ul li.active a { background: #1abc9c; color: white; font-weight: bold; }
+		#main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+		header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+		.container { flex: 1; padding: 30px; overflow-y: auto; }
+		.notice {
+			border-top: 2px solid rgba(255,255,255,0.12);
+			margin-top: 4px;
+		}
+		.section-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 22px;
+		}
+		.section-title {
+			font-size: 22px;
+			font-weight: 800;
+			color: #111;
+		}
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			background: white;
+		}
+		th, td {
+			border: 1px solid #d7d7d7;
+			padding: 14px 14px;
+			text-align: left;
+			font-size: 16px;
+		}
+		th {
+			background-color: #efefef;
+			font-weight: 800;
+		}
+		@media (max-width: 1100px) {
+			.menu li {
+				font-size: 16px;
+			}
+			th, td {
+				font-size: 14px;
+			}
+	  }
+	</style>
+</head>
+<body class="bg">
+	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
+	<nav id="sidebar" class=menu-color>
+		<h2 class="logo-font" th:text="#{dashboard.logo}">SEOUL BIKE</h2>
+	    <ul>
+		    <li><a th:href="@{/dashboard}">📊 <span th:text="#{dashboard.menu.overview}">종합 분석</span></a></li>
+		    <li><a th:href="@{/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a></li>
+		    <li><a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a></li>
+		    <li class="active"><a th:href="@{/data-center}">📁 <span th:text="#{dashboard.menu.dataCenter}">자료실</span></a></li>
+		    <li class="notice"><a th:href="@{/notifications}"
+				style="position: relative;"> 🔔 <span
+					th:text="#{dashboard.menu.notifications}">알림 내역</span> <span
+					id="notiBadge"
+					style="position: absolute; top: 8px; right: 15px; background: #e53935; color: white; border-radius: 50%; min-width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 11px; font-weight: bold; padding: 0 5px; display: none;">
+						0 </span>
+			</a></li>
+		    <li><a th:href="@{/members/login}">🔒 <span th:text="#{dashboard.menu.logout}">로그아웃</span></a></li>
+	    </ul>
+	</nav>
+
+	<div id=main-content>
+		<header>
+			<span style="margin-right: 20px;" class="subtitle-dark-blue-font">
+				<b th:text="#{menu.data.management}">Raw Data &amp; Report
+					Management</b>
+			</span>
+			<form method="get" style="margin: 0; margin-right: 10px;">
+				<select name="lang" onchange="this.form.submit()">
+					<option value="ko" th:selected="${#locale.language == 'ko'}"
+						th:text="#{language.korean}">KR</option>
+					<option value="en" th:selected="${#locale.language == 'en'}"
+						th:text="#{language.english}">EN</option>
+				</select>
+			</form>
+		</header>
+
+		<main class="container">
+			<div class="section-header">
+				<h2 class="section-title">[따릉이 이용정보 원본 데이터]</h2>
+				<div style="display: flex; gap: 6px">
+					<button class="white-button">Excel 다운로드</button>
+					<button class="dark-button">CSV 내보내기</button>
+				</div>
+			</div>
+
+			<div class="content-card">
+				<table>
+					<thead>
+						<tr>
+							<th>대여일자</th>
+							<th>대여소번호</th>
+							<th>대여소명</th>
+							<th>대여건수</th>
+							<th>이용거리(m)</th>
+							<th>상태</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>2025-05-01</td>
+							<td>ST-101</td>
+							<td>마포구청역</td>
+							<td>450</td>
+							<td>12,500</td>
+							<td><span class="status">정상적재</span></td>
+						</tr>
+						<tr>
+							<td>2025-05-01</td>
+							<td>ST-202</td>
+							<td>여의나루역</td>
+							<td>890</td>
+							<td>35,400</td>
+							<td><span class="status">정상적재</span></td>
+						</tr>
+						<tr>
+							<td>2025-05-01</td>
+							<td>ST-305</td>
+							<td>뚝섬유원지역</td>
+							<td>720</td>
+							<td>28,100</td>
+							<td><span class="status">정상적재</span></td>
+						</tr>
+						<tr>
+							<td>2025-05-01</td>
+							<td>ST-408</td>
+							<td>광화문역</td>
+							<td>310</td>
+							<td>8,900</td>
+							<td><span class="status">정상적재</span></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</main>
+	</div>
+	<script>
+	document.addEventListener("DOMContentLoaded", function () {
+        const memberId = document.getElementById("memberId")?.value;
+        if (memberId) {
+            initNotification(memberId);
+        }
+    });
+	</script>
+</body>
+</html>

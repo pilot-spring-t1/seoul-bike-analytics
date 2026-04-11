@@ -12,43 +12,75 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.metanet.seoulbike.auth.JwtAuthenticationEntryPoint;
 import com.metanet.seoulbike.auth.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity // 컨트롤러의 @PreAuthorize 활성화
 public class SecurityConfig {
 
-	@Autowired
-	JwtAuthenticationFilter authenticationFilter;
+    @Autowired
+    private JwtAuthenticationFilter authenticationFilter;
+    
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-	}
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
 
-	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable())
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests((authHttpReq) -> authHttpReq
-						// 1. 누구나 접근 가능한 경로 (목록, 상세, 로그인 등)
-						.requestMatchers("/boards/notice", "/boards/suggestion", "/boards/view/**").permitAll()
-						.requestMatchers("/archive/list").permitAll() // 아카이브 목록은 공개 (필요시)
-						.requestMatchers("/login", "/join", "/assets/**", "/css/**", "/js/**", "/img/**").permitAll()
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            // 1. CSRF 비활성화 (JWT 사용 시 필수)
+            .csrf(csrf -> csrf.disable())
+            
+            // 2. 세션 정책: Stateless (서버에 세션을 저장하지 않음)
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            
+            // 3. 권한 설정
+            .authorizeHttpRequests(auth -> auth
+                // [누구나 접근 가능]
+                .requestMatchers(
+                    "/members/login", "/members/signup", // 회원가입/로그인 경로 (정확한 매칭)
+                    "/boards/notice", "/boards/suggestion", // 게시판 목록
+                    "/boards/view/**",                     // 게시판 상세
+                    "/archive/list",                        // 아카이브 목록
+                    "/assets/**", "/css/**", "/js/**", "/img/**", "/favicon.ico" // 정적 리소스
+                ).permitAll()
 
-						// 2. 인증된 사용자만 가능한 경로 (다운로드 등)
-						.requestMatchers("/archive/download/**").authenticated()
-						.requestMatchers("/boards/like/**", "/boards/comment/**").authenticated()
+                // [인증된 사용자만 접근 가능]
+                .requestMatchers(
+                    "/archive/download/**",
+                    "/boards/like/**",
+                    "/boards/comment/**",
+                    "/dashboard/**"                        // 대시보드 및 상세 분석
+                ).authenticated()
 
-						// 3. 관리자만 가능한 경로 (아카이브 등록/삭제 등)
-						// 컨트롤러에 @PreAuthorize가 있어도 필터 레벨에서 한 번 더 막아주는 것이 안전합니다.
-						.requestMatchers("/archive/write", "/archive/register", "/archive/delete/**").hasRole("ADMIN")
+                // [관리자 전용]
+                .requestMatchers(
+                    "/archive/write", 
+                    "/archive/register", 
+                    "/archive/delete/**",
+                    "/members/list",                       // 회원 관리 목록
+                    "/members/delete/**"
+                ).hasRole("ADMIN")
 
-						// 4. 그 외 모든 요청은 인증 필요
-						.anyRequest().authenticated())
-				.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // 그 외 모든 요청은 인증 필요
+                .anyRequest().authenticated()
+            )
+            
+            // 예외 처리 핸들러 등록
+            .exceptionHandling(handler -> handler
+                    .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
+            
+            // 4. JWT 필터 배치
+            .addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-		return http.build();
-	}
+        return http.build();
+    }
 }

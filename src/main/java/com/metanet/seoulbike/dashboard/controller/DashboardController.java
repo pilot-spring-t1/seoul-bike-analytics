@@ -19,6 +19,7 @@ public class DashboardController {
     @GetMapping
     public String dashboardPage(Model model) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
+        model.addAttribute("memberId", 1L); // 테스트용
         model.addAttribute("summary", summary);
         model.addAttribute("userName", "관리자");
         model.addAttribute("memberId", 1L); // 테스트용
@@ -37,7 +38,8 @@ public class DashboardController {
     }
    
     @GetMapping("/data-center")
-    public String dataSharePage() {
+    public String dataSharePage(Model model) {
+    	model.addAttribute("memberId", 1L); // 테스트용
     	return "shared/data-center";
     }
 
