@@ -95,10 +95,15 @@ public class MemberController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/list")
-    public String getAllMembersByPage(@ModelAttribute("searchDto") MemberSearchDto dto, Model model) {
+    public String getAllMembersByPage(@ModelAttribute("searchDto") MemberSearchDto dto, Authentication auth, Model model) {
         // 서비스에서 startPage, endPage, totalPages 등 모든 페이징 계산을 수행함
         Map<String, Object> result = memberService.getAllMembersByPage(dto);
         
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         model.addAllAttributes(result);
         model.addAttribute("searchDto", dto);
         return "members/member-list";

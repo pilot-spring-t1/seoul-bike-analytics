@@ -68,8 +68,8 @@
                 </div>
 
                 <form th:action="@{/boards/notice}" method="get" class="search-group">
-                    <input type="text" name="keyword" th:value="${searchDto.keyword}" th:placeholder="#{detail.filter.officePlaceholder}">
-                    <button type="submit" class="btn-black" th:text="#{detail.filter.apply}">검색</button>
+                    <input type="text" name="keyword" th:value="${searchDto.keyword}" th:placeholder="#{board.notice.filter.placeholder}">
+                    <button type="submit" class="btn-black" th:text="#{board.notice.filter.search}">검색</button>
                 </form>
             </div>
 
@@ -78,19 +78,19 @@
                     <thead>
                         <tr>
                             <th width="80">No</th>
-                            <th width="120" th:text="#{detail.tab.ticket}">구분</th>
-                            <th th:text="#{dashboard.menu.notice}">제목</th>
-                            <th width="150">작성자</th>
-                            <th width="150">등록일</th>
-                            <th width="100" style="text-align: center;">조회</th>
-                            <th width="100" style="text-align: center;">추천</th>
+                            <th width="120" th:text="#{board.notice.category}">구분</th>
+                            <th th:text="#{board.notice.title}">제목</th>
+                            <th width="150" th:text="#{board.notice.author}">작성자</th>
+                            <th width="150" th:text="#{board.notice.date}">등록일</th>
+                            <th width="100" style="text-align: center;" th:text="#{board.notice.views}">조회</th>
+                            <th width="100" style="text-align: center;" th:text="#{board.notice.recommend}">추천</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <tr th:if="${#lists.isEmpty(list)}">
-                            <td colspan="7" style="text-align: center; color: #94a3b8; padding: 60px 0;">
-                                조회된 데이터가 없습니다.
+                            <td colspan="7" style="text-align: center; color: #94a3b8; padding: 60px 0;" th:text="#{board.notice.content.empty}">
+                                조회된 공지사항이 없습니다.
                             </td>
                         </tr>
 
@@ -119,7 +119,7 @@
             <div style="margin-top: 24px; display: flex; justify-content: flex-end;"
                  sec:authorize="hasRole('ADMIN')">
                 <button class="btn-black" th:onclick="|location.href='@{/boards/write(category=NOTICE)}'|">
-                    ➕ <span th:text="#{dashboard.menu.notice}">공지 등록</span>
+                    ➕ <span th:text="#{board.notice.content.register}">공지 등록</span>
                 </button>
             </div>
         </main>

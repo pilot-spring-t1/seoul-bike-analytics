@@ -57,7 +57,7 @@
         
         <main class="container">
             <div class="form-card">
-                <h1 class="form-title" th:text="${board.boardId == null} ? '게시글 등록' : '게시글 수정'"></h1>
+                <h1 class="form-title" th:text="${board.boardId == null} ? #{boardwrite.title.register} : #{boardwrite.title.modify}"></h1>
 
                 <form th:action="${board.boardId == null} ? @{/boards/register} : @{/boards/modify}"
                       method="post" enctype="multipart/form-data">
@@ -66,54 +66,54 @@
                     <input type="hidden" name="writer" th:value="${board.writer != null ? board.writer : #authentication.name}">
 
                     <div class="form-group">
-                        <label class="form-label">카테고리</label>
+                        <label class="form-label" th:text="#{board.notice.category}">카테고리</label>
                         <select name="category" class="form-control" th:disabled="${board.boardId != null}">
-                            <option value="NOTICE" 
+                            <option value="NOTICE" th:text="#{boardwrite.category.notice}"
                                     th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
                                     th:selected="${board.category == 'NOTICE'}">공지사항 (관리자 전용)</option>
-                            <option value="SUGGESTION" 
+                            <option value="SUGGESTION" th:text="#{dashboard.menu.suggestion}"
                                     th:selected="${board.category == 'SUGGESTION'}">건의사항</option>
                         </select>
                         <input type="hidden" name="category" th:if="${board.boardId != null}" th:value="${board.category}">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">제목</label>
-                        <input type="text" name="title" class="form-control" th:value="${board.title}" placeholder="제목을 입력해 주세요." required>
+                        <label class="form-label" th:text="#{board.notice.title}">제목</label>
+                        <input type="text" name="title" class="form-control" th:value="${board.title}" th:placeholder="#{boardwrite.content.title.placeholder}" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">내용</label>
-                        <textarea name="content" class="form-control" th:text="${board.content}" placeholder="내용을 입력해 주세요." required></textarea>
+                        <label class="form-label" th:text="#{boardwrite.content}">내용</label>
+                        <textarea name="content" class="form-control" th:text="${board.content}" th:placeholder="#{boardwrite.content.placeholder}" required></textarea>
                     </div>
 
                     <div class="form-group" th:if="${board.boardId != null and not #lists.isEmpty(files)}">
-                        <label class="form-label">기존 첨부파일</label>
+                        <label class="form-label" th:text="#{boardwrite.file.previous}">기존 첨부파일</label>
                         <div class="existing-files">
                             <div th:each="file : ${files}" class="file-item">
-                                <span th:text="${file.fileName}" style="font-size: 0.95rem;">파일명.pdf</span>
+                                <span style="font-size: 0.95rem;" th:text="#{boardwrite.file.filename}">파일명.pdf</span>
                                 <label class="delete-label">
                                     <input type="checkbox" name="deleteFileIds" th:value="${file.fileId}">
                                     삭제
                                 </label>
                             </div>
-                            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;">* 삭제를 체크한 파일은 수정 완료 후 영구 삭제됩니다.</p>
+                            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;" th:text="#{boardwrite.file.previous.message}">* 삭제를 체크한 파일은 수정 완료 후 영구 삭제됩니다.</p>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">첨부파일 추가</label>
+                        <label class="form-label" th:text="#{boardwrite.file.new}">첨부파일 추가</label>
                         <div class="file-upload-area" onclick="document.getElementById('uploadFiles').click()">
-                            <p>📁 클릭하거나 파일을 이곳에 드래그하여 선택하세요.</p>
+                            <p th:text="#{boardwrite.file.new.message}">📁 클릭하거나 파일을 이곳에 드래그하여 선택하세요.</p>
                             <input type="file" id="uploadFiles" name="uploadFiles" multiple style="display:none;" onchange="updateFileName(this)">
                         </div>
                         <div id="fileList" style="margin-top:12px; font-size: 0.9rem; color: #10b981; font-weight: 600;"></div>
                     </div>
 
                     <div class="button-group">
-                        <button type="button" class="btn btn-outline" onclick="history.back()">취소</button>
+                        <button type="button" class="btn btn-outline" onclick="history.back()" th:text="#{boardwrite.cancel}">취소</button>
                         <button type="submit" class="btn btn-emerald" 
-                                th:text="${board.boardId == null} ? '게시글 등록' : '수정 완료'"></button>
+                                th:text="${board.boardId == null} ? #{board.notice.content.register} : #{boardview.comment.modify}"></button>
                     </div>
                 </form>
             </div>

@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title th:text="#{detail.page.title}">콘텐츠 상세 보기 | 운영 센터</title>
+<title th:text="#{boardview.page.title}">콘텐츠 상세 보기 | 운영 센터</title>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -83,29 +83,29 @@
                         <h1 th:text="${board.title}">게시글 제목</h1>
                         <form th:action="@{/boards/like/{id}(id=${board.boardId})}" method="post">
                             <button type="submit" class="btn btn-outline" style="color: #3b82f6; border-color: #3b82f6;">
-                                👍 <span th:text="#{detail.tab.ticket}">추천</span> <span th:text="${board.likeCount}">0</span>
+                                👍 <span th:text="#{board.notice.recommend}">추천</span> <span th:text="${board.likeCount}">0</span>
                             </button>
                         </form>
                     </div>
                     <div class="meta-info">
-                        <span><b th:text="#{board.notice.writer}">작성자</b> <span th:text="${board.writer}">ADMIN</span></span>
+                        <span><b th:text="#{board.notice.author}">작성자</b> <span th:text="${board.writer}">ADMIN</span></span>
                         <span><b th:text="#{board.notice.date}">작성일</b> <span th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></span>
-                        <span><b th:text="#{board.notice.view}">조회수</b> <span th:text="${board.viewCount}">0</span></span>
+                        <span><b th:text="#{board.notice.views}">조회수</b> <span th:text="${board.viewCount}">0</span></span>
                     </div>
                 </div>
                 <div class="view-body" th:utext="${board.content}">본문 내용</div>
 
                 <div class="comment-section">
                     <div class="comment-title">
-                        💬 <span th:text="#{dashboard.menu.notifications}">댓글</span> 
+                        💬 <span th:text="#{boardview.comment}">댓글</span> 
                         <span th:text="${#lists.size(comments)}" style="color: #10b981;">0</span>
                     </div>
 
                     <form th:action="@{/boards/comment/register}" method="post" class="comment-form">
                         <input type="hidden" name="boardId" th:value="${board.boardId}">
-                        <textarea name="content" th:placeholder="#{detail.filter.officePlaceholder}" required></textarea>
+                        <textarea name="content" th:placeholder="#{boardview.comment.placeholder}" required></textarea>
                         <div style="text-align: right;">
-                            <button type="submit" class="btn btn-emerald" th:text="#{detail.filter.apply}">댓글 등록</button>
+                            <button type="submit" class="btn btn-emerald" th:text="#{board.notice.content.register}">댓글 등록</button>
                         </div>
                     </form>
                     
@@ -125,15 +125,15 @@
                                 <div class="comment-content" th:id="'comment-text-' + ${comment.commentId}" th:text="${comment.content}">내용</div>
                                 
                                 <div class="comment-actions">
-                                    <button th:if="${comment.depth == 0}" class="action-btn reply" 
+                                    <button th:if="${comment.depth == 0}" class="action-btn reply" th:text="#{boardview.comment.reply}"
                                             th:onclick="toggleForm('reply', [[${comment.commentId}]])">답글</button>
                                     
                                     <th:block th:if="${comment.writer == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
-                                        <button class="action-btn" th:onclick="toggleForm('edit', [[${comment.commentId}]])">수정</button>
-                                        <form th:action="@{/boards/comment/delete}" method="post" style="display: inline;" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
+                                        <button class="action-btn" th:onclick="toggleForm('edit', [[${comment.commentId}]])" th:text="#{boardview.comment.modify}">수정</button>
+                                        <form th:action="@{/boards/comment/delete}" method="post" style="display: inline;" th:onsubmit="|return confirm('#{boardview.comment.delete.confirm}');|">
                                             <input type="hidden" name="commentId" th:value="${comment.commentId}"> 
                                             <input type="hidden" name="boardId" th:value="${board.boardId}">
-                                            <button type="submit" class="action-btn delete">삭제</button>
+                                            <button type="submit" class="action-btn delete" th:text="#{boardview.comment.delete}">삭제</button>
                                         </form>
                                     </th:block>
                                 </div>
@@ -142,9 +142,9 @@
                                     <form th:action="@{/boards/comment/register}" method="post">
                                         <input type="hidden" name="boardId" th:value="${board.boardId}">
                                         <input type="hidden" name="parentId" th:value="${comment.commentId}">
-                                        <textarea name="content" placeholder="답글 내용을 입력하세요" required></textarea>
+                                        <textarea name="content" th:placeholder="#{boardview.comment.reply.placeholder}" required></textarea>
                                         <div style="text-align: right;">
-                                            <button type="submit" class="btn btn-emerald">답글 등록</button>
+                                            <button type="submit" class="btn btn-emerald" th:text="#{board.notice.content.register}">답글 등록</button>
                                         </div>
                                     </form>
                                 </div>
@@ -155,7 +155,7 @@
                                         <input type="hidden" name="boardId" th:value="${board.boardId}">
                                         <textarea name="content" th:text="${comment.content}" required></textarea>
                                         <div style="text-align: right;">
-                                            <button type="submit" class="btn btn-blue">수정 완료</button>
+                                            <button type="submit" class="btn btn-blue" th:text="#{boardview.modify.complete}">수정 완료</button>
                                         </div>
                                     </form>
                                 </div>
@@ -166,14 +166,14 @@
             </div>
 
             <div class="button-group">
-                <a th:href="@{/boards/{category}(category=${#strings.toLowerCase(board.category)})}" class="btn btn-outline">목록으로 돌아가기</a>
+                <a th:href="@{/boards/{category}(category=${#strings.toLowerCase(board.category)})}" class="btn btn-outline" th:text="#{boardview.return}">목록으로 돌아가기</a>
                 <div style="display: flex; gap: 8px;">
                     <th:block th:if="${(board.category == 'NOTICE' and #authorization.expression('hasRole(''ADMIN'')')) or (board.category == 'SUGGESTION')}">
-                        <form th:action="@{/boards/delete/{id}(id=${board.boardId})}" method="post" onsubmit="return confirm('게시글을 삭제하시겠습니까?');">
+                        <form th:action="@{/boards/delete/{id}(id=${board.boardId})}" method="post" th:onsubmit="|return confirm('#{boardview.delete.confirm}');|">
                             <input type="hidden" name="category" th:value="${board.category}">
-                            <button type="submit" class="btn btn-danger">삭제하기</button>
+                            <button type="submit" class="btn btn-danger" th:text="#{boardview.delete}">삭제하기</button>
                         </form>
-                        <button class="btn btn-blue" th:onclick="|location.href='@{/boards/edit/{id}(id=${board.boardId})}'|">수정하기</button>
+                        <button class="btn btn-blue" th:onclick="|location.href='@{/boards/edit/{id}(id=${board.boardId})}'|" th:text="#{boardview.modify}">수정하기</button>
                     </th:block>
                 </div>
             </div>

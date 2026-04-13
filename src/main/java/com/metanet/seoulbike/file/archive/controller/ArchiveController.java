@@ -44,13 +44,18 @@ public class ArchiveController {
      * 1. 아카이브 목록 조회 (검색 및 페이징 포함)
      */
     @GetMapping("/list")
-    public String list(@ModelAttribute("searchDto") ArchiveSearchDto searchDto, Model model) {
+    public String list(@ModelAttribute("searchDto") ArchiveSearchDto searchDto, Model model, Authentication auth) {
         // 서비스에서 검색 조건에 맞는 리스트와 전체 페이지 수를 Map으로 반환한다고 가정
         Map<String, Object> result = archiveService.selectArchiveList(searchDto);
         
         model.addAttribute("list", result.get("list"));
         model.addAttribute("totalPages", result.get("totalPages"));
         // searchDto는 @ModelAttribute에 의해 자동으로 모델에 담김
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         
         return "archive/archive-list";
     }
@@ -60,8 +65,13 @@ public class ArchiveController {
      */
     @GetMapping("/write")
     @PreAuthorize("hasRole('ADMIN')")
-    public String writeForm(Model model) {
+    public String writeForm(Model model, Authentication auth) {
         model.addAttribute("archive", new ArchiveDto());
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "archive/archive-write";
     }
 

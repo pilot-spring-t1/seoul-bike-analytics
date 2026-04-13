@@ -69,8 +69,8 @@
 				</div>
 
 				<form th:action="@{/boards/suggestion}" method="get" class="search-group">
-					<input type="text" name="keyword" th:value="${searchDto.keyword}" th:placeholder="#{detail.filter.officePlaceholder}">
-					<button type="submit" class="btn-black" th:text="#{detail.filter.apply}">검색</button>
+					<input type="text" name="keyword" th:value="${searchDto.keyword}" th:placeholder="#{board.suggestion.filter.placeholder}">
+					<button type="submit" class="btn-black" th:text="#{board.notice.filter.search}">검색</button>
 				</form>
 			</div>
 
@@ -79,17 +79,17 @@
 					<thead>
 						<tr>
 							<th width="80">No</th>
-							<th width="120">구분</th>
-							<th>제목</th>
-							<th width="150">작성자</th>
-							<th width="150">등록일</th>
-							<th width="100" style="text-align: center;">조회</th>
-							<th width="100" style="text-align: center;">추천</th>
+                            <th width="120" th:text="#{board.notice.category}">구분</th>
+                            <th th:text="#{board.notice.title}">제목</th>
+                            <th width="150" th:text="#{board.notice.author}">작성자</th>
+                            <th width="150" th:text="#{board.notice.date}">등록일</th>
+                            <th width="100" style="text-align: center;" th:text="#{board.notice.views}">조회</th>
+                            <th width="100" style="text-align: center;" th:text="#{board.notice.recommend}">추천</th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr th:if="${#lists.isEmpty(list)}">
-							<td colspan="7" style="text-align: center; color: #94a3b8; padding: 60px 0;">조회된 건의사항이 없습니다.</td>
+							<td colspan="7" style="text-align: center; color: #94a3b8; padding: 60px 0;" th:text="#{board.suggestion.empty}">조회된 건의사항이 없습니다.</td>
 						</tr>
 
 						<tr th:each="post : ${list}"
@@ -117,7 +117,7 @@
 
 			<div style="margin-top: 24px; display: flex; justify-content: flex-end;">
 				<button class="btn-black" th:onclick="|location.href='@{/boards/write(category='SUGGESTION')}'|">
-					➕ <span th:text="#{dashboard.menu.suggestion}">건의 등록</span>
+					➕ <span th:text="#{board.notice.content.register}">건의 등록</span>
                 </button>
 			</div>
 
