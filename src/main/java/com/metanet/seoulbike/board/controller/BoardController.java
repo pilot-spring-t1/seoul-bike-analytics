@@ -48,8 +48,10 @@ public class BoardController {
         model.addAttribute("totalPages", result.get("totalPages"));
         model.addAttribute("searchDto", searchDto);
         model.addAttribute("activeMenu", category.toLowerCase());
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }
@@ -64,8 +66,10 @@ public class BoardController {
         model.addAttribute("board", boardService.getBoardById(id));
         model.addAttribute("files", fileAttachmentService.selectFilesByBoardId(id));
         model.addAttribute("comments", boardService.getComments(id));
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }
@@ -82,8 +86,10 @@ public class BoardController {
         BoardDto dto = new BoardDto();
         dto.setCategory(category);
         model.addAttribute("board", dto);
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }
