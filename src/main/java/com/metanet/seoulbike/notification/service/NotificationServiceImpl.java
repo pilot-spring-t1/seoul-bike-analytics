@@ -22,21 +22,49 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void createNotification(NotificationDto notificationDto) {
 
-        // 1. DB 저장
-        notificationMapper.insertNotification(notificationDto);
+        // 브로드캐스트: memberId == -1
+        if (Long.valueOf(-1L).equals(notificationDto.getMemberId())) {
 
-        // 2. 방금 저장된 알림 다시 조회 (가장 최근 1건)
-        List<NotificationDto> list =
-            notificationMapper.selectNotificationsByMemberId(notificationDto.getMemberId());
+            List<Long> memberIds = notificationMapper.selectAllMemberIdsExceptSender();
 
-        NotificationDto latest = list.get(0); // 최신순 정렬이라 0번
+            for (Long memberId : memberIds) {
+                NotificationDto dto = new NotificationDto();
+                dto.setMemberId(memberId);
+                dto.setNotiType(notificationDto.getNotiType());
+                dto.setMessage(notificationDto.getMessage());
 
-        // 3. 웹소켓으로 해당 사용자에게 push
-        messagingTemplate.convertAndSendToUser(
-            notificationDto.getMemberId().toString(), // 사용자 식별자
-            "/queue/notifications",
-            latest
-        );
+                // 1. DB 저장
+                notificationMapper.insertNotification(dto);
+
+                // 2. 방금 저장된 알림 다시 조회
+                List<NotificationDto> list =
+                    notificationMapper.selectNotificationsByMemberId(memberId);
+
+                NotificationDto latest = list.get(0);
+
+                // 3. 웹소켓 전송
+                messagingTemplate.convertAndSendToUser(
+                    memberId.toString(),
+                    "/queue/notifications",
+                    latest
+                );
+            }
+
+        } else {
+            // 유니캐스트
+            notificationMapper.insertNotification(notificationDto);
+
+            List<NotificationDto> list =
+                notificationMapper.selectNotificationsByMemberId(notificationDto.getMemberId());
+
+            NotificationDto latest = list.get(0);
+
+            messagingTemplate.convertAndSendToUser(
+                notificationDto.getMemberId().toString(),
+                "/queue/notifications",
+                latest
+            );
+        }
     }
 
     @Override

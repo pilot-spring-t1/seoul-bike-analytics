@@ -105,6 +105,11 @@ public class PageController {
     public String monthlyUsagePage() {
         return "monthly-usage";
     }
+    @GetMapping("/notification/form")
+    public String notificationFormPage() {
+        return "notification/notification-form";
+    }
+    
     
 
 }

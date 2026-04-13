@@ -152,7 +152,7 @@
 
             // API Body 구성
             const payload = {
-                memberId: sendType === 'BROADCAST' ? "ALL" : targetUser,
+                memberId: sendType === 'BROADCAST' ? -1 : targetUser,
                 notiType: notiType, // 선택한 상세 타입 (SYSTEM, COMMENT 등)
                 message: message
             };
