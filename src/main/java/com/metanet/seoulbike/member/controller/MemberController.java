@@ -99,8 +99,10 @@ public class MemberController {
         // 서비스에서 startPage, endPage, totalPages 등 모든 페이징 계산을 수행함
         Map<String, Object> result = memberService.getAllMembersByPage(dto);
         
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }

@@ -56,14 +56,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String uri = request.getRequestURI();
 
-        // 회원가입, 로그인, 정적 리소스, 웹소켓 등은 JWT 검사를 하지 않음
+        // 회원가입, 로그인, 정적 리소스은 JWT 검사를 하지 않음
         return uri.startsWith("/members/signup") 
                 || uri.startsWith("/members/login")
                 || uri.startsWith("/css/") 
                 || uri.startsWith("/js/") 
                 || uri.startsWith("/img/")
                 || uri.startsWith("/assets/")
-                || uri.startsWith("/ws")
                 || uri.startsWith("/error");
     }
 
