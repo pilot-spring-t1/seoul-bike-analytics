@@ -19,10 +19,7 @@ public class DashboardController {
     @GetMapping
     public String dashboardPage(Model model) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
-        model.addAttribute("memberId", 1L); // 테스트용
         model.addAttribute("summary", summary);
-        model.addAttribute("userName", "관리자");
-        model.addAttribute("memberId", 1L); // 테스트용
         return "dashboard/user-dashboard";
     }
 
@@ -33,20 +30,12 @@ public class DashboardController {
 
     @GetMapping("/detail")
     public String detailAnalysisPage(Model model) {
-    	model.addAttribute("memberId", 1L); // 테스트용
         return "analysis/detail";
     }
 
     @GetMapping("/notifications")
     public String notificationPage(Model model) {
-    	model.addAttribute("memberId", 1L); // 테스트용
         return "notification/notifications";
-    }
-    
-    @GetMapping("/admin/notifications")
-    public String adminNotificationPage(Model model) {
-    	model.addAttribute("memberId", 1L); // 테스트용
-        return "notification/admin-notifications";
     }
 
     @GetMapping("/error/403")
@@ -68,9 +57,5 @@ public class DashboardController {
     @GetMapping("/memory-monitor")
     public String memoryMonitorPage() {
         return "notification/memory-monitor";
-    }
-    @GetMapping("/monthly-usage")
-    public String monthlyUsagePage() {
-        return "monthly-usage";
     }
 }
