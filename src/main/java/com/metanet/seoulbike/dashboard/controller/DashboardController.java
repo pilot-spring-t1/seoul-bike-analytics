@@ -1,6 +1,7 @@
 package com.metanet.seoulbike.dashboard.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,12 +18,17 @@ public class DashboardController {
 	private BikeAnalysisService bikeAnalysisService;
 
     @GetMapping
-    public String dashboardPage(Model model) {
+    public String dashboardPage(Model model, Authentication auth) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
         model.addAttribute("memberId", 1L); // 테스트용
         model.addAttribute("summary", summary);
         model.addAttribute("userName", "관리자");
         model.addAttribute("memberId", 1L); // 테스트용
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "dashboard/user-dashboard";
     }
 
@@ -32,8 +38,13 @@ public class DashboardController {
     }
 
     @GetMapping("/detail")
-    public String detailAnalysisPage(Model model) {
+    public String detailAnalysisPage(Model model, Authentication auth) {
     	model.addAttribute("memberId", 1L); // 테스트용
+    	if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "analysis/detail";
     }
 
