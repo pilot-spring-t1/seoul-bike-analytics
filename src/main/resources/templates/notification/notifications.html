@@ -6,6 +6,10 @@
     <meta charset="UTF-8">
     <title th:text=#{notification.pagetitle}>알림 센터 | SEOUL BIKE</title>
     
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<script src="/js/notification.js"></script>
+	
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/color.css}">
     <link rel="stylesheet" th:href="@{/css/fonts.css}">
@@ -95,6 +99,7 @@
     </style>
 </head>
 <body>
+	<input type="hidden" id="memberId" th:value="${memberId}">
 
     <div th:replace="~{fragment/sidebar :: sidebar('notifications')}"></div>
 
@@ -207,6 +212,7 @@
                         const card = btn.closest('.noti-item');
                         card.classList.remove('unread'); // 점이 사라지고 배경색이 변경됨
                         btn.remove(); // '읽음' 버튼 제거
+                        refreshUnreadCount(currentMemberId);
                         if(typeof updateNotificationBadge === 'function') updateNotificationBadge();
                     }
                 });
@@ -223,6 +229,7 @@
                         if(container.children.length === 0) {
                             container.innerHTML = '<div class="empty-box">새로운 알림이 없습니다.</div>';
                         }
+                        refreshUnreadCount(currentMemberId);
                     }
                 });
         }
@@ -247,6 +254,26 @@
             if(!s) return "";
             return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); 
         }
+        
+        function refreshUnreadCount(memberId) {
+    fetch(`/api/notifications/${memberId}/unread-count`)
+        .then(res => {
+            if (!res.ok) throw new Error("안 읽은 알림 수 조회 실패");
+            return res.json();
+        })
+        .then(count => {
+            unreadCount = count;
+            updateBadge();
+        })
+        .catch(err => console.error(err));
+}
+        
+        document.addEventListener("DOMContentLoaded", function () {
+    const memberId = document.getElementById("memberId")?.value;
+    if (memberId) {
+        initNotification(memberId);
+    }
+});
     </script>
 </body>
 </html>

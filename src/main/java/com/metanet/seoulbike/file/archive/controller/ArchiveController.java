@@ -27,6 +27,7 @@ import com.metanet.seoulbike.file.archive.dto.ArchiveDto;
 import com.metanet.seoulbike.file.archive.dto.ArchiveSearchDto;
 import com.metanet.seoulbike.file.archive.service.ArchiveService;
 import com.metanet.seoulbike.file.service.FileStorageService;
+import com.metanet.seoulbike.member.model.Member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,8 +52,14 @@ public class ArchiveController {
         model.addAttribute("list", result.get("list"));
         model.addAttribute("totalPages", result.get("totalPages"));
         // searchDto는 @ModelAttribute에 의해 자동으로 모델에 담김
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+		/*
+		 * if (auth != null) { model.addAttribute("userName", auth.getName()); } else {
+		 * model.addAttribute("userName", "Guest"); }
+		 */
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }

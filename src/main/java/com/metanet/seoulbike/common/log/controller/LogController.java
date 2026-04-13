@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import com.metanet.seoulbike.common.log.dto.LogDto;
 import com.metanet.seoulbike.common.log.dto.LogSearchDto;
 import com.metanet.seoulbike.common.log.service.LogService;
+import com.metanet.seoulbike.member.model.Member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +37,10 @@ public class LogController {
 	    Map<String, Object> result = logService.getLogList(searchDto);
 	    
 	    model.addAllAttributes(result);
-	    if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+	    if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }
@@ -48,16 +51,17 @@ public class LogController {
 	 * 로그 상세 정보 보기 (parameterData 및 errorMsg)
 	 */
 	@GetMapping("/view/{id}")
-	public String view(@PathVariable("id") Long logId, Model model, Authentication auth) {
+	public String view(@PathVariable("id") Long logId, Authentication auth, Model model) {
 		// selectLogById 호출
 		LogDto logDetail = logService.getLogById(logId);
 		model.addAttribute("log", logDetail);
-		if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+		if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }
-
 		return "logs/log-view"; // 로그 상세 페이지 (상세 팝업 등)
 	}
 }

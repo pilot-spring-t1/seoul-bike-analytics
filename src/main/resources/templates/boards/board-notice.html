@@ -140,6 +140,13 @@
                 }
             };
         });
+        
+        document.addEventListener("DOMContentLoaded", function () {
+    const memberId = document.getElementById("memberId")?.value;
+    if (memberId) {
+        initNotification(memberId);
+    }
+});
     </script>
 </body>
 </html>
