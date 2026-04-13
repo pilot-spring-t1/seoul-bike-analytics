@@ -94,10 +94,10 @@
                         <label class="form-label" th:text="#{boardwrite.file.previous}">기존 첨부파일</label>
                         <div class="existing-files">
                             <div th:each="file : ${files}" class="file-item">
-                                <span style="font-size: 0.95rem;" th:text="#{boardwrite.file.filename}">파일명.pdf</span>
+                                <span style="font-size: 0.95rem;" th:text="${file.fileName}">파일명.pdf</span>
                                 <label class="delete-label">
                                     <input type="checkbox" name="deleteFileIds" th:value="${file.fileId}">
-                                    삭제
+                                    <span th:text="#{boardview.delete}">삭제</span>
                                 </label>
                             </div>
                             <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px;" th:text="#{boardwrite.file.previous.message}">* 삭제를 체크한 파일은 수정 완료 후 영구 삭제됩니다.</p>
@@ -123,13 +123,14 @@
         </main>
     </div>
 
-    <script>
+    <script th:inline="javascript">
+    	const MSG_SELECTED_FILE = /*[[#{boardwrite.file.selected}]]*/ "선택된 파일";
         // 파일 선택 시 화면에 파일명 나열
         function updateFileName(input) {
             const fileListContainer = document.getElementById('fileList');
             if (input.files.length > 0) {
                 let fileNames = Array.from(input.files).map(file => file.name);
-                fileListContainer.innerHTML = "선택된 파일: " + fileNames.join(", ");
+                fileListContainer.innerHTML = MSG_SELECTED_FILE + fileNames.join(", ");
             } else {
                 fileListContainer.innerHTML = "";
             }

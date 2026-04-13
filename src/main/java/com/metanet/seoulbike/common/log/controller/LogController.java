@@ -51,7 +51,7 @@ public class LogController {
 	 * 로그 상세 정보 보기 (parameterData 및 errorMsg)
 	 */
 	@GetMapping("/view/{id}")
-	public String view(@PathVariable("id") Long logId, Authentication auth,Model model) {
+	public String view(@PathVariable("id") Long logId, Authentication auth, Model model) {
 		// selectLogById 호출
 		LogDto logDetail = logService.getLogById(logId);
 		model.addAttribute("log", logDetail);

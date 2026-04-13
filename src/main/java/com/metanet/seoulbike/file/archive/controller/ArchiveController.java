@@ -79,7 +79,7 @@ public class ArchiveController {
         } else {
             model.addAttribute("userName", "Guest");
         }
-        return "archive/archive-write";
+        return "archive/archive-upload";
     }
 
     /**
