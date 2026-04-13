@@ -21,7 +21,7 @@ public class FileStorageService {
     @Value("${file.storage.root-path}")
     private String rootPath;
 
-    // 첨부파일용 (MultipartFile → 디스크)
+    // 첨부파일용 (MultipartFile -> 디스크)
     public String uploadFile(MultipartFile file, String relativePath, String fileName) {
         Path dirPath = Paths.get(rootPath, relativePath);
         try {
@@ -36,20 +36,6 @@ public class FileStorageService {
         }
     }
 
-    // 아카이브용 (byte[] → 디스크)
-    public String writeFile(byte[] data, String relativePath, String fileName) {
-        Path dirPath = Paths.get(rootPath, relativePath);
-        try {
-            Files.createDirectories(dirPath);
-            Path filePath = dirPath.resolve(fileName);
-            Files.write(filePath, data);
-            log.info("[FileStorage] 저장 완료: {}", filePath);
-            return filePath.toString();
-        } catch (IOException e) {
-            log.error("[FileStorage] 저장 실패: {}", fileName, e);
-            throw new RuntimeException("파일 저장 실패: " + fileName, e);
-        }
-    }
 
     // 다운로드용
     public Resource loadFile(String storedFilePath) {

@@ -41,8 +41,21 @@
         FROM MEMBER WHERE LOGIN_ID = #{loginId}
     </select>
 
+    <select id="selectMemberByMemberId" resultType="com.metanet.seoulbike.member.model.Member">
+        SELECT MEMBER_ID as "memberId", LOGIN_ID as "loginId", NAME as "name", 
+               GENDER as "gender", AGE as "age", ROLE as "role", CREATED_AT as "createdAt"
+        FROM MEMBER WHERE MEMBER_ID = #{memberId}
+    </select>
+
     <update id="updateMember">
-        UPDATE MEMBER SET NAME = #{name}, AGE = #{age}, GENDER = #{gender}, ROLE = #{role}
+        UPDATE MEMBER 
+        <set>
+            <if test="name != null">NAME = #{name},</if>
+            <if test="age != null">AGE = #{age},</if>
+            <if test="gender != null">GENDER = #{gender},</if>
+            <if test="role != null">ROLE = #{role},</if>
+            <if test="lastLoginAt != null">LAST_LOGIN_AT = #{lastLoginAt}</if>
+        </set>
         WHERE MEMBER_ID = #{memberId}
     </update>
 

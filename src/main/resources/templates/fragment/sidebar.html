@@ -31,7 +31,7 @@
                 <a th:href="@{/members/list}">👥 <span th:text="#{dashboard.menu.users}">사용자 관리</span></a>
             </li>
             <li th:classappend="${activeMenu == 'logs'} ? 'active'">
-                <a th:href="@{/admin/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">시스템 로그</span></a>
+                <a th:href="@{/logs/list}">📜 <span th:text="#{dashboard.menu.logs}">시스템 로그</span></a>
             </li>
         </th:block>
 

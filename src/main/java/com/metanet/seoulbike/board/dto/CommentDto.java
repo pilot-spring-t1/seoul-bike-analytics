@@ -11,14 +11,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentDto {
-    private Long commentId;    // COMMENT_ID
-    private Long boardId;      // BOARD_ID
-    private Long parentId;     // PARENT_ID (null이면 원댓글, 값이 있으면 답글)
-    private String content;    // CONTENT
-    private String writer;     // WRITER
+    private Long commentId;
+    private Long boardId;
+    private Long parentId;
+    private String content;
+    private String writer;
+    private LocalDateTime createdAt;
     
-    // Oracle TIMESTAMP와 매핑될 Java 8 날짜 타입
-    private LocalDateTime createdAt; // CREATED_AT
-    
-    // 필요 시 작성자 이름이나 프로필 사진 경로 등 추가 가능
+    // 추가: 계층의 깊이를 나타내는 필드 (0: 원댓글, 1: 답글, 2: 대대댓글...)
+    private int depth; 
 }

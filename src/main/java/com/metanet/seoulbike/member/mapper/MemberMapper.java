@@ -11,9 +11,16 @@ import com.metanet.seoulbike.member.model.Member;
 @Mapper
 public interface MemberMapper {
 	void insertMember(Member member);
+
 	Member selectMemberByLoginId(String loginId);
+
+	Member selectMemberByMemberId(Long memberId);
+
 	List<Member> selectAllMembersByPage(@Param("dto") MemberSearchDto dto, @Param("offset") int offset);
+
 	int selectMemberCountBySearch(@Param("dto") MemberSearchDto dto);
+
 	void updateMember(Member member);
+
 	void deleteMember(Long memberId);
 }

@@ -4,7 +4,7 @@
 
 	<insert id="insertLog" parameterType="com.metanet.seoulbike.common.log.dto.LogDto">
 	    INSERT INTO SYSTEM_LOG (
-	        /* LOG_ID는 IDENTITY 설정에 의해 자동으로 생성되므로 생략합니다 */
+	        /* LOG_ID는 IDENTITY 설정에 의해 자동으로 생성되므로 생략 */
 	        LOG_LEVEL, 
 	        METHOD_NAME, 
 	        REQUEST_URI, 
@@ -30,33 +30,31 @@
 	</insert>
 
     <select id="selectLogList"
-        parameterType="com.metanet.seoulbike.common.log.dto.LogSearchDto"
-        resultType="com.metanet.seoulbike.common.log.dto.LogDto">
-        SELECT * FROM (
-            SELECT a.*, ROWNUM rnum FROM (
-                SELECT
-                    LOG_ID, LOG_LEVEL, METHOD_NAME, REQUEST_URI, HTTP_METHOD,
-                    EXECUTION_TIME, ACCESS_IP, LOGIN_ID, LOG_DATE
-                FROM SYSTEM_LOG
-                <where>
-                    <if test="logLevel != null and logLevel != ''">
-                        AND LOG_LEVEL = #{logLevel}
-                    </if>
-                    <if test="keyword != null and keyword != ''">
-                        <choose>
-                            <when test="searchType == 'loginId'">AND LOGIN_ID LIKE '%' || #{keyword} || '%'</when>
-                            <when test="searchType == 'requestUri'">AND REQUEST_URI LIKE '%' || #{keyword} || '%'</when>
-                            <when test="searchType == 'methodName'">AND METHOD_NAME LIKE '%' || #{keyword} || '%'</when>
-                            <otherwise>
-                                AND (LOGIN_ID LIKE '%' || #{keyword} || '%' OR REQUEST_URI LIKE '%' || #{keyword} || '%')
-                            </otherwise>
-                        </choose>
-                    </if>
-                </where>
-                ORDER BY LOG_ID DESC
-            ) a WHERE ROWNUM &lt;= #{offset} + #{size}
-        ) WHERE rnum &gt; #{offset}
-    </select>
+	    parameterType="com.metanet.seoulbike.common.log.dto.LogSearchDto"
+	    resultType="com.metanet.seoulbike.common.log.dto.LogDto">
+	    SELECT
+	        LOG_ID, LOG_LEVEL, METHOD_NAME, REQUEST_URI, HTTP_METHOD,
+	        EXECUTION_TIME, ACCESS_IP, LOGIN_ID, LOG_DATE
+	    FROM SYSTEM_LOG
+	    <where>
+	        <if test="logLevel != null and logLevel != ''">
+	            AND LOG_LEVEL = #{logLevel}
+	        </if>
+	        <if test="keyword != null and keyword != ''">
+	            <choose>
+	                <when test="searchType == 'loginId'">AND LOGIN_ID LIKE '%' || #{keyword} || '%'</when>
+	                <when test="searchType == 'requestUri'">AND REQUEST_URI LIKE '%' || #{keyword} || '%'</when>
+	                <when test="searchType == 'methodName'">AND METHOD_NAME LIKE '%' || #{keyword} || '%'</when>
+	                <!-- otherwise 는 loginId, requestUri, methodName 3중 하나라도 포함되면 -->
+	                <otherwise>
+	                    AND (LOGIN_ID LIKE '%' || #{keyword} || '%' OR REQUEST_URI LIKE '%' || #{keyword} || '%')
+	                </otherwise>
+	            </choose>
+	        </if>
+	    </where>
+	    ORDER BY LOG_ID DESC
+	    OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
 
     <select id="selectLogCount"
         parameterType="com.metanet.seoulbike.common.log.dto.LogSearchDto"
