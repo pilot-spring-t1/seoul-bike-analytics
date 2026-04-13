@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>관리자 전용 | 시스템 로그 센터</title>
+    <title th:text="#{log.page.title}">관리자 전용 | 시스템 로그 센터</title>
     
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
@@ -18,10 +18,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; overflow: hidden; }
-        .notice {
-			border-top: 2px solid rgba(255,255,255,0.12);
-			margin-top: 4px;
-		}
         
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
         header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -61,24 +57,24 @@
         <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
         <main class="container">
             <div class="user-mgmt-header">
-                <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;">
+                <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;" th:text="#{log.title}">
                     시스템 실행 로그
-                    <span class="subtitle-gray-font" th:text="'(전체 내역: ' + ${total} + '건)'"></span>
+                    <span class="subtitle-gray-font" th:text="#{log.total(${total})}"></span>
                 </h3>
                 
                 <form th:action="@{/logs/list}" method="get" class="search-bar">
                     <select name="logLevel">
-                        <option value="">레벨 전체</option>
+                        <option value="" th:text="#{log.search.level}">레벨 전체</option>
                         <option value="INFO" th:selected="${searchDto.logLevel == 'INFO'}">INFO</option>
                         <option value="ERROR" th:selected="${searchDto.logLevel == 'ERROR'}">ERROR</option>
                     </select>
                     <select name="searchType">
-                        <option value="requestUri" th:selected="${searchDto.searchType == 'requestUri'}">요청 URI</option>
-                        <option value="loginId" th:selected="${searchDto.searchType == 'loginId'}">사용자 ID</option>
-                        <option value="methodName" th:selected="${searchDto.searchType == 'methodName'}">메서드명</option>
+                        <option value="requestUri" th:selected="${searchDto.searchType == 'requestUri'}" th:text="#{log.search.requesturi}">요청 URI</option>
+                        <option value="loginId" th:selected="${searchDto.searchType == 'loginId'}" th:text="#{log.search.userid}">사용자 ID</option>
+                        <option value="methodName" th:selected="${searchDto.searchType == 'methodName'}" th:text="#{log.search.method}">메서드명</option>
                     </select>
-                    <input type="text" name="keyword" th:value="${searchDto.keyword}" placeholder="검색어 입력...">
-                    <button type="submit" class="ok-button" style="width: 80px; height: 38px; cursor: pointer;">조회</button>
+                    <input type="text" name="keyword" th:value="${searchDto.keyword}" th:placeholder="#{log.search.placeholder}">
+                    <button type="submit" class="ok-button" style="width: 80px; height: 38px; cursor: pointer;" th:text="#{log.search.button}">조회</button>
                 </form>
             </div>
 
@@ -86,19 +82,19 @@
                 <table class="user-table">
                     <thead>
                         <tr>
-                            <th width="70">번호</th>
-                            <th width="80">레벨</th>
+                            <th width="70" th:text="#{log.tablecontent.no}">번호</th>
+                            <th width="80" th:text="#{log.tablecontent.level}">레벨</th>
                             <th width="80">Method</th>
-                            <th width="250">요청 URI</th>
+                            <th width="250" th:text="#{log.search.requesturi}">요청 URI</th>
                             <th width="120">ID</th>
-                            <th width="180">접속 IP</th>
-                            <th width="100">소요시간</th>
-                            <th width="150">로그일시</th>
+                            <th width="180" th:text="#{log.tablecontent.ip}">접속 IP</th>
+                            <th width="100" th:text="#{log.tablecontent.timerequired}">소요시간</th>
+                            <th width="150" th:text="#{log.tablecontent.time}">로그일시</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr th:if="${#lists.isEmpty(list)}">
-                            <td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;">조회된 로그가 없습니다.</td>
+                            <td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;" th:text="#{log.tablecontent.empty}">조회된 로그가 없습니다.</td>
                         </tr>
                         <tr th:each="log : ${list}" 
                             th:onclick="|location.href='@{/logs/view/{id}(id=${log.logId})}'|">
@@ -124,7 +120,7 @@
 
             <div class="pagination-container" th:if="${total > 0}">
                 <a th:href="@{/logs/list(page=${startPage - 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
-                   class="page-btn" th:classappend="${startPage == 1} ? 'disabled' : ''">이전</a>
+                   class="page-btn" th:classappend="${startPage == 1} ? 'disabled' : ''" th:text="#{usermanagement.page.prev}">이전</a>
 
                 <th:block th:each="pageNum : ${#numbers.sequence(startPage, endPage)}">
                     <a th:href="@{/logs/list(page=${pageNum}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
@@ -133,7 +129,7 @@
                 </th:block>
 
                 <a th:href="@{/logs/list(page=${endPage + 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
-                   class="page-btn" th:classappend="${endPage == totalPages} ? 'disabled' : ''">다음</a>
+                   class="page-btn" th:classappend="${endPage == totalPages} ? 'disabled' : ''" th:text="#{usermanagement.page.next}">다음</a>
             </div>
         </main>
     </div>

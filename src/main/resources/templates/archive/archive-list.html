@@ -84,11 +84,11 @@
 
     <main class="container">
         <div class="action-row">
-            <h1 class="page-title" th:text=#{archive.title}>SYSTEM ARCHIVE</h1>
+            <h1 class="page-title" th:text="#{archive.title}">SYSTEM ARCHIVE</h1>
 
             <form th:action="@{/archive/list}" method="get" class="search-group">
                 <input type="text" name="keyword" th:value="${searchDto != null ? searchDto.keyword : ''}" th:placeholder="#{archive.search.placeholder}">
-                <button type="submit" class="btn-black" th:text=#{archive.search}>검색</button>
+                <button type="submit" class="btn-black" th:text="#{archive.search}">검색</button>
             </form>
         </div>
 
@@ -97,22 +97,22 @@
                 <thead>
                 <tr>
                     <th width="80">ID</th>
-                    <th width="100" th:text=#{archive.tablecontent.category}>구분</th>
-                    <th th:text=#{archive.tablecontent.category}>자료 제목 및 상세 설명</th>
-                    <th width="120" th:text=#{archive.tablecontent.date}>등록일</th>
-                    <th width="120" style="text-align: center;" th:text=#{archive.tablecontent.filesize}>파일 용량</th>
-                    <th width="180" style="text-align: center;" th:text=#{archive.tablecontent.action}>액션</th>
+                    <th width="120" th:text="#{archive.tablecontent.category}">구분</th>
+                    <th th:text="#{archive.tablecontent.title}">자료 제목 및 상세 설명</th>
+                    <th width="180" th:text="#{archive.tablecontent.date}">등록일</th>
+                    <th width="120" style="text-align: center;" th:text="#{archive.tablecontent.filesize}">파일 용량</th>
+                    <th width="180" style="text-align: center;" th:text="#{archive.tablecontent.action}">액션</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${#lists.isEmpty(list)}">
-                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 60px 0;" th:text=#{archive.tablecontent.empty}>
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 60px 0;" th:text="#{archive.tablecontent.empty}">
                         조회된 아카이브 자료가 없습니다.
                     </td>
                 </tr>
                 <tr th:each="file : ${list}">
                     <td th:text="${file.archiveId}"></td>
-                    <td><span class="badge-archive" th:text=#{archive.tablecontent.category.archive}>아카이브</span></td>
+                    <td><span class="badge-archive" th:text="#{archive.tablecontent.category.archive}">아카이브</span></td>
                     <td>
                         <div class="archive-title" th:text="${file.archiveTitle}"></div>
                         <div class="archive-desc" th:text="${file.archiveDesc}"></div>
@@ -130,7 +130,7 @@
                                   th:action="@{/archive/delete/{id}(id=${file.archiveId})}" 
                                   method="post" 
                                   th:onsubmit="|return confirm('#{archive.delete.confirm}');|">
-                                <button type="submit" class="btn-delete-sm" th:text=#{archive.delete}>삭제</button>
+                                <button type="submit" class="btn-delete-sm" th:text="#{archive.delete}">삭제</button>
                             </form>
                         </div>
                     </td>
