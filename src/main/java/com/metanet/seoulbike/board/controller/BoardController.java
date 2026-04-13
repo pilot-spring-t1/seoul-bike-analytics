@@ -113,9 +113,19 @@ public class BoardController {
     @GetMapping("/edit/{id}")
     @PreAuthorize("hasRole('ADMIN') or @boardService.getBoard(#id).writer == authentication.name")
     public String editForm(@PathVariable("id") Long id, Model model, Authentication auth) {
-        model.addAttribute("board", boardService.getBoard(id));
+        // 1. 게시글 정보를 가져와 변수에 할당
+        BoardDto board = boardService.getBoard(id);
+        model.addAttribute("board", board);
+        
+        // 2. 파일 목록 조회
         model.addAttribute("files", fileAttachmentService.getFileListByBoardId(id));
         
+        // 3. 사이드바 활성화를 위한 activeMenu 추가
+        if (board != null && board.getCategory() != null) {
+            model.addAttribute("activeMenu", board.getCategory().toLowerCase());
+        }
+        
+        // 4. 사용자 정보 처리
         if (auth != null && auth.getPrincipal() instanceof Member) {
             Member member = (Member) auth.getPrincipal();
             model.addAttribute("userName", member.getLoginId());
@@ -123,6 +133,7 @@ public class BoardController {
         } else {
             model.addAttribute("userName", "Guest");
         }
+        
         return "boards/board-write";
     }
 

@@ -52,7 +52,7 @@
 </head>
 <body>
 	<input type="hidden" id="memberId" th:value="${memberId}">
-	<div th:replace="~{fragment/sidebar :: sidebar(${board.boardId == null} ? 'notice' : 'suggestion')}"></div>
+	<div th:replace="~{fragment/sidebar :: sidebar(${activeMenu})}"></div>
 
 	<div id="main-content">
 
