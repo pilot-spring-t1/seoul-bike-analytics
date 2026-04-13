@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>알림 발송 관리 | 운영 센터</title>
+    <title th:text=#{notification.form.page.title}>알림 발송 관리 | 운영 센터</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/color.css}">
     <link rel="stylesheet" th:href="@{/css/fonts.css}">
@@ -15,7 +15,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-        header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
+        header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 10; }
         .container { flex: 1; padding: 40px; overflow-y: auto; }
         .form-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); padding: 40px; max-width: 700px; margin: 0 auto; }
         .form-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 32px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
@@ -37,7 +37,7 @@
         .hidden { display: none; }
     </style>
 </head>
-<body>
+<body class="bg">
     <div th:replace="~{fragment/sidebar :: sidebar('notifications')}"></div>
 
     <div id="main-content">
@@ -46,47 +46,47 @@
 
         <main class="container">
             <div class="form-card">
-                <h1 class="form-title">시스템 알림 발송</h1>
+                <h1 class="form-title" th:text="#{notification.form.title}">시스템 알림 발송</h1>
 
                 <form id="notificationForm">
                     <div class="form-group">
-                        <label class="form-label">발송 방식</label>
+                        <label class="form-label" th:text="#{notification.form.method}">발송 방식</label>
                         <div class="type-group">
                             <label class="radio-item">
                                 <input type="radio" name="sendType" value="BROADCAST" checked onclick="toggleTargetInput(false)">
-                                전체 발송 (Broadcast)
+                                <span th:text="#{notification.form.method.broadcast}">전체 발송 (Broadcast)</span>
                             </label>
                             <label class="radio-item">
                                 <input type="radio" name="sendType" value="UNICAST" onclick="toggleTargetInput(true)">
-                                특정 사용자 (Unicast)
+                                <span th:text="#{notification.form.method.unicast}">특정 사용자 (Unicast)</span>
                             </label>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">알림 카테고리</label>
+                        <label class="form-label" th:text="#{notification.form.category}">알림 카테고리</label>
                         <select name="notiType" id="notiType" class="form-control" required>
-                            <option value="SYSTEM">시스템 알림</option>
-                            <option value="COMMENT">댓글 알림</option>
-                            <option value="LIKE">좋아요 알림</option>
-                            <option value="BOARD">공지 알림</option>
-                            <option value="RENTAL">대여/반납 안내</option>
+                            <option value="SYSTEM" th:text="#{notification.form.category.system}">시스템 알림</option>
+                            <option value="COMMENT" th:text="#{notification.form.category.comment}">댓글 알림</option>
+                            <option value="LIKE" th:text="#{notification.form.category.like}">좋아요 알림</option>
+                            <option value="BOARD" th:text="#{notification.form.category.notice}">공지 알림</option>
+                            <option value="RENTAL" th:text="#{notification.form.category.rent}">대여/반납 안내</option>
                         </select>
                     </div>
 
                     <div class="form-group hidden" id="targetInputSection">
-                        <label class="form-label">수신자 멤버 ID (PK)</label>
-                        <input type="number" name="targetUser" id="targetUser" class="form-control" placeholder="대상 사용자의 숫자 ID(MemberId)를 입력하세요">
+                        <label class="form-label" th:text="#{notification.form.memberid}">수신자 멤버 ID (PK)</label>
+                        <input type="number" name="targetUser" id="targetUser" class="form-control" th:placeholder="#{notification.form.memberid.placeholder}">
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">알림 내용 (Message)</label>
-                        <textarea name="message" id="message" class="form-control" placeholder="사용자에게 전달할 메시지를 입력하세요..." required></textarea>
+                        <label class="form-label" th:text="#{notification.form.content}">알림 내용 (Message)</label>
+                        <textarea name="message" id="message" class="form-control" th:placeholder="#{notification.form.content.placeholder}" required></textarea>
                     </div>
 
                     <div class="button-group">
-                        <button type="reset" class="btn btn-outline" onclick="toggleTargetInput(false)">초기화</button>
-                        <button type="submit" id="submitBtn" class="btn btn-emerald">즉시 발송하기</button>
+                        <button type="reset" class="btn btn-outline" onclick="toggleTargetInput(false)" th:text="#{notification.form.init}">초기화</button>
+                        <button type="submit" id="submitBtn" class="btn btn-emerald" th:text="#{notification.form.send}">즉시 발송하기</button>
                     </div>
                 </form>
             </div>
@@ -94,6 +94,17 @@
     </div>
 
     <script th:inline="javascript">
+    	const MSG = {
+            requiredTargetUser: /*[[#{notification.unicast.errormsg}]]*/,
+            confirmBroadcast: /*[[#{notification.broadcast.confirm}]]*/,
+            confirmUnicast: /*[[#{notification.confirm.unicast}]]*/,
+            sending: /*[[#{notification.status.sending}]]*/,
+            successSent: /*[[#{notification.status.success}]]*/,
+            sessionExpired: /*[[#{notification.status.sessionexpire}]]*/,
+            failed: /*[[#{notificatoin.status.fail}]]*/,
+            networkError: /*[[#{notification.status.networkerror}]]*/,
+            sendNow: /*[[#{notification.form.send}]]*/
+        };
         function toggleTargetInput(show) {
             const section = document.getElementById('targetInputSection');
             const input = document.getElementById('targetUser');
@@ -118,13 +129,13 @@
             const submitBtn = document.getElementById('submitBtn');
 
             if (sendType === 'UNICAST' && (!targetUser || targetUser.trim() === "")) {
-                alert("특정 사용자 발송을 위해 수신자 ID를 입력해주세요.");
+                alert(MSG.requiredTargetUser);
                 return;
             }
 
             const confirmMsg = sendType === 'BROADCAST' 
-                ? "⚠️ [주의] 본인을 제외한 모든 서비스 이용자에게 실시간 알림이 발송됩니다.\n진행하시겠습니까?" 
-                : `${targetUser}번 회원님에게 알림을 발송하시겠습니까?`;
+                ? MSG.confirmBroadcast
+                : MSG.confirmUnicast.replace("{0}", targetUser);
 
             if (!confirm(confirmMsg)) return;
 
@@ -138,7 +149,7 @@
 
             try {
                 submitBtn.disabled = true;
-                submitBtn.innerText = "발송 처리 중...";
+                submitBtn.innerText = MSG.sending;
 
                 // 엔드포인트를 실전용인 /api/notifications/send 로 변경
                 const response = await fetch('/api/notifications/send', {
@@ -151,26 +162,26 @@
                 });
 
                 if (response.ok) {
-                    alert("✅ 시스템 알림 발송이 완료되었습니다.");
+                    alert(MSG.successSent);
                     this.reset();
                     toggleTargetInput(false);
                 } else {
                     // 응답이 리다이렉트되거나 실패한 경우 처리
                     if (response.redirected || response.status === 401) {
-                        alert("❌ 인증 세션이 만료되었습니다. 다시 로그인해 주세요.");
+                        alert(MSG.sessionExpired);
                         window.location.href = "/members/login";
                         return;
                     }
                     
                     const errText = await response.text();
-                    alert("❌ 발송 실패: " + errText);
+                    alert(MSG.failed + errText);
                 }
             } catch (error) {
                 console.error("API Error:", error);
-                alert("🌐 서버와의 통신 중 오류가 발생했습니다.");
+                alert(MSG.networkError);
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerText = "즉시 발송하기";
+                submitBtn.innerText = MSG.sendNow;
             }
         });
     </script>
