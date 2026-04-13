@@ -20,7 +20,6 @@ public class DashboardController {
     @GetMapping
     public String dashboardPage(Model model, Authentication auth) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
-        model.addAttribute("memberId", 1L); // 테스트용
         model.addAttribute("summary", summary);
         model.addAttribute("userName", "관리자");
         model.addAttribute("memberId", 1L); // 테스트용

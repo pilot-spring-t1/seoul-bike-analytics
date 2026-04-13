@@ -18,8 +18,8 @@ public class BoardDto {
 	private String writer;
 	private LocalDateTime createdAt;
 	private int viewCount;
-	private int likeCount; // 추천수 (기능제안 투표용) 추가
+	private int likeCount;
 
-	// 첨부파일 처리를 위한 필드 (필요시)
+	// 첨부파일 처리를 위한 필드
 	private List<Long> fileIds;
 }

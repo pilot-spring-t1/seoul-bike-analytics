@@ -82,7 +82,7 @@ public class LogService {
 	 * 로그 저장
 	 */
 	@Transactional
-	public void insertLog(LogDto logDto) {
+	public void createLog(LogDto logDto) {
 		logMapper.insertLog(logDto);
 	}
 }

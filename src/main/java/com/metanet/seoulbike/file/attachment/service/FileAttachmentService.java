@@ -23,8 +23,8 @@ public class FileAttachmentService {
     private final FileAttachmentMapper fileAttachmentMapper;
 
     /**
-     * 파일 업로드 — 디스크 저장 후 DB insert
-     * 디스크 저장 성공 / DB 실패 시 → 디스크 파일 롤백 처리
+     * 파일 업로드 - 디스크 저장 후 DB insert
+     * 디스크 저장 성공 / DB 실패 시 디스크 파일 롤백 처리
      */
     @Transactional(rollbackFor = Exception.class)
     public FileAttachmentDto uploadFile(MultipartFile file, Long boardId, String uploaderId) {
@@ -72,13 +72,13 @@ public class FileAttachmentService {
      * DB에는 있는데 실제 파일이 없는 경우 경고 로그
      */
     @Transactional(readOnly = true)
-    public FileAttachmentDto selectFileById(Long fileId) {
+    public FileAttachmentDto getFile(Long fileId) {
         FileAttachmentDto dto = fileAttachmentMapper.selectFileById(fileId);
         if (dto == null) {
             throw new RuntimeException("파일 정보를 찾을 수 없습니다. ID: " + fileId);
         }
 
-        // DB ✅ / 디스크 ❌ 불일치 체크
+        // DB / 디스크 불일치 체크
         if (!fileStorageService.existsFile(dto.getFilePath())) {
             log.warn("[FileAttachment] DB에는 있으나 실제 파일 없음: {}", dto.getFilePath());
             throw new RuntimeException("실제 파일을 찾을 수 없습니다: " + dto.getFileName());
@@ -91,14 +91,14 @@ public class FileAttachmentService {
      * 게시글별 파일 목록 조회
      */
     @Transactional(readOnly = true)
-    public List<FileAttachmentDto> selectFilesByBoardId(Long boardId) {
+    public List<FileAttachmentDto> getFileListByBoardId(Long boardId) {
         return fileAttachmentMapper.selectFilesByBoardId(boardId);
     }
 
     /**
-     * 파일 삭제 — DB 먼저 삭제 후 디스크 삭제
-     * DB 삭제 실패 시 → 예외 던져서 롤백
-     * 디스크 삭제 실패 시 → 고아 파일로 남음, 로그만 기록
+     * 파일 삭제 - DB 먼저 삭제 후 디스크 삭제
+     * DB 삭제 실패 시 예외 던져서 롤백
+     * 디스크 삭제 실패 시 고아 파일로 남음, 로그만 기록
      */
     @Transactional(rollbackFor = Exception.class)
     public void deleteFile(Long fileId) {
@@ -112,7 +112,7 @@ public class FileAttachmentService {
             // 1. DB 삭제 먼저 (트랜잭션 보호)
             fileAttachmentMapper.deleteFile(fileId);
 
-            // 2. 디스크 삭제 (실패해도 DB는 이미 커밋됨 → 고아파일 로그)
+            // 2. 디스크 삭제 (실패해도 DB는 이미 커밋됨)
             fileStorageService.deleteFile(dto.getFilePath());
             log.info("[FileAttachment] 삭제 완료: {}", dto.getFileName());
 

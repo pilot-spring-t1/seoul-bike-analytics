@@ -27,21 +27,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/attachments")
 @RequiredArgsConstructor
+@RequestMapping("/attachments")
 public class FileAttachmentController {
 
     private final FileAttachmentService fileAttachmentService;
     private final FileStorageService fileStorageService;
 
-    
-    // 1. 업로드
+    /**
+     * 1. 파일 업로드 (upload)
+     */
     @PostMapping("/upload")
     public ResponseEntity<FileAttachmentDto> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam("boardId") Long boardId,
             Authentication auth) {
         try {
+            // Service에서도 uploadFile 그대로 사용 (행위 강조)
             FileAttachmentDto dto = fileAttachmentService.uploadFile(file, boardId, auth.getName());
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
@@ -50,12 +52,13 @@ public class FileAttachmentController {
         }
     }
 
-    
-    // 2. 다운로드
+    /**
+     * 2. 파일 다운로드 (download)
+     */
     @GetMapping("/download/{fileId}")
     public ResponseEntity<Resource> download(@PathVariable Long fileId) {
         try {
-            FileAttachmentDto dto = fileAttachmentService.selectFileById(fileId);
+            FileAttachmentDto dto = fileAttachmentService.getFile(fileId); 
             Resource resource = fileStorageService.loadFile(dto.getFilePath());
 
             String encodedFileName = UriUtils.encode(dto.getFileName(), StandardCharsets.UTF_8);
@@ -64,8 +67,7 @@ public class FileAttachmentController {
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + encodedFileName + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"")
                     .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(dto.getFileSize()))
                     .body(resource);
 
@@ -75,8 +77,9 @@ public class FileAttachmentController {
         }
     }
 
-    	
-    // 3. 삭제
+    /**
+     * 3. 파일 삭제 (delete)
+     */
     @PostMapping("/delete/{fileId}")
     public ResponseEntity<Void> delete(@PathVariable Long fileId) {
         try {

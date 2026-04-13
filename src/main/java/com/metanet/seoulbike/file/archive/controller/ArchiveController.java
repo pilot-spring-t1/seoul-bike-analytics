@@ -41,46 +41,36 @@ public class ArchiveController {
     private final FileStorageService fileStorageService;
 
     /**
-     * 1. 아카이브 목록 조회 (검색 및 페이징 포함)
+     * 1. 목록 조회 (getList)
      */
     @GetMapping("/list")
-    public String list(@ModelAttribute("searchDto") ArchiveSearchDto searchDto, Model model, Authentication auth) {
-        // 서비스에서 검색 조건에 맞는 리스트와 전체 페이지 수를 Map으로 반환한다고 가정
-        Map<String, Object> result = archiveService.selectArchiveList(searchDto);
+    public String getList(@ModelAttribute("searchDto") ArchiveSearchDto searchDto, Model model, Authentication auth) {
+        Map<String, Object> result = archiveService.getArchiveList(searchDto);
         
         model.addAttribute("list", result.get("list"));
         model.addAttribute("totalPages", result.get("totalPages"));
-        // searchDto는 @ModelAttribute에 의해 자동으로 모델에 담김
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
-        } else {
-            model.addAttribute("userName", "Guest");
-        }
+        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
         
         return "archive/archive-list";
     }
 
     /**
-     * 2. 아카이브 자료 등록 폼 (관리자 전용)
+     * 2. 등록 폼 (createForm)
      */
-    @GetMapping("/write")
+    @GetMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public String writeForm(Model model, Authentication auth) {
+    public String createForm(Model model, Authentication auth) {
         model.addAttribute("archive", new ArchiveDto());
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
-        } else {
-            model.addAttribute("userName", "Guest");
-        }
+        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
         return "archive/archive-write";
     }
 
     /**
-     * 3. 아카이브 자료 등록 실행 (관리자 전용)
+     * 3. 등록 실행 (upload)
      */
-    @PostMapping("/register")
+    @PostMapping("/upload")
     @PreAuthorize("hasRole('ADMIN')")
-    public String register(
+    public String upload(
             @RequestParam("uploadFile") MultipartFile file,
             @RequestParam("archiveTitle") String archiveTitle,
             @RequestParam(value = "archiveDesc", required = false) String archiveDesc,
@@ -90,10 +80,11 @@ public class ArchiveController {
         try {
             if (file.isEmpty()) {
                 rttr.addFlashAttribute("error", "파일은 필수입니다.");
-                return "redirect:/archive/write";
+                return "redirect:/archive/create";
             }
             
-            archiveService.uploadArchive(file, archiveTitle, archiveDesc, auth.getName());
+            // 서비스 메서드명을 createArchive 혹은 uploadArchive 중 선택한 규칙에 맞춥니다.
+            archiveService.createArchive(file, archiveTitle, archiveDesc, auth.getName());
             rttr.addFlashAttribute("message", "자료가 성공적으로 등록되었습니다.");
             
         } catch (Exception e) {
@@ -105,23 +96,19 @@ public class ArchiveController {
     }
 
     /**
-     * 4. 아카이브 파일 다운로드 (인증된 사용자 공통)
+     * 4. 파일 다운로드 (download)
      */
     @GetMapping("/download/{archiveId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Resource> download(@PathVariable Long archiveId) {
         try {
-            ArchiveDto dto = archiveService.selectArchiveById(archiveId);
+            // 상세 조회는 get으로 통일
+            ArchiveDto dto = archiveService.getArchive(archiveId);
             Resource resource = fileStorageService.loadFile(dto.getFilePath());
 
-            // 파일명 브라우저 인코딩 처리
             String encodedFileName = UriUtils.encode(dto.getFileName(), StandardCharsets.UTF_8);
-            
-            // 파일 Content-Type 추출
             String contentType = Files.probeContentType(Paths.get(dto.getFilePath()));
-            if (contentType == null) {
-                contentType = "application/octet-stream";
-            }
+            if (contentType == null) contentType = "application/octet-stream";
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
@@ -136,7 +123,7 @@ public class ArchiveController {
     }
 
     /**
-     * 5. 아카이브 자료 삭제 (관리자 전용)
+     * 5. 삭제 실행 (delete)
      */
     @PostMapping("/delete/{archiveId}")
     @PreAuthorize("hasRole('ADMIN')")

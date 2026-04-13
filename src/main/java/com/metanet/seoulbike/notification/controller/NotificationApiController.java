@@ -24,12 +24,13 @@ public class NotificationApiController {
      */
     @PreAuthorize("authentication.principal.memberId == #memberId or hasRole('ADMIN')")
     @GetMapping("/{memberId}")
-    public ResponseEntity<List<NotificationDto>> getNotifications(@PathVariable("memberId") Long memberId,
-                                                                 @AuthenticationPrincipal Member member) {
-        log.info("=> [API GET] 알림 목록 조회 요청 - Target MemberId: {}, Request Principal: {}", 
+    public ResponseEntity<List<NotificationDto>> getList(@PathVariable("memberId") Long memberId,
+                                                         @AuthenticationPrincipal Member member) {
+        log.info("API GET 알림 목록 조회 요청 - Target MemberId: {}, Request Principal: {}", 
                  memberId, (member != null ? member.getMemberId() : "Anonymous"));
         
-        return ResponseEntity.ok(notificationService.selectNotificationsByMemberId(memberId));
+        // select -> getNotificationList 호출
+        return ResponseEntity.ok(notificationService.getNotificationList(memberId));
     }
 
     /**
@@ -38,7 +39,8 @@ public class NotificationApiController {
     @PreAuthorize("authentication.principal.memberId == #memberId or hasRole('ADMIN')")
     @GetMapping("/{memberId}/unread-count")
     public ResponseEntity<Integer> getUnreadCount(@PathVariable("memberId") Long memberId) {
-        return ResponseEntity.ok(notificationService.selectUnreadCount(memberId));
+        // select -> getUnreadCount 호출
+        return ResponseEntity.ok(notificationService.getUnreadCount(memberId));
     }
 
     /**
@@ -48,7 +50,7 @@ public class NotificationApiController {
     @PatchMapping("/{notiId}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable("notiId") Long notiId, 
                                            @AuthenticationPrincipal Member member) {
-        log.info("=> [API PATCH] 알림 읽음 처리 - NotiId: {}, MemberId: {}", notiId, member.getMemberId());
+        log.info("API PATCH 알림 읽음 처리 - NotiId: {}, MemberId: {}", notiId, member.getMemberId());
         notificationService.markAsRead(notiId, member.getMemberId());
         return ResponseEntity.noContent().build();
     }
@@ -58,10 +60,11 @@ public class NotificationApiController {
      */
     @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{notiId}")
-    public ResponseEntity<Void> deleteNotification(@PathVariable("notiId") Long notiId, 
-                                                   @AuthenticationPrincipal Member member) {
-        log.info("=> [API DELETE] 알림 삭제 - NotiId: {}, MemberId: {}", notiId, member.getMemberId());
-        notificationService.removeNotification(notiId, member.getMemberId());
+    public ResponseEntity<Void> delete(@PathVariable("notiId") Long notiId, 
+                                       @AuthenticationPrincipal Member member) {
+        log.info("API DELETE 알림 삭제 - NotiId: {}, MemberId: {}", notiId, member.getMemberId());
+        // remove -> deleteNotification 호출
+        notificationService.deleteNotification(notiId, member.getMemberId());
         return ResponseEntity.noContent().build();
     }
 
@@ -70,28 +73,26 @@ public class NotificationApiController {
      */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/send")
-    public ResponseEntity<String> createNotification(@RequestBody NotificationDto dto,
-                                                     @AuthenticationPrincipal Member admin) {
+    public ResponseEntity<String> create(@RequestBody NotificationDto dto,
+                                         @AuthenticationPrincipal Member admin) {
         
-        // 1. 보안 체크: 인증된 관리자 정보가 없으면 거절
         if (admin == null) {
-            log.error("=> [API POST] 발송 실패: 인증된 관리자 정보가 없음");
+            log.error("API POST 발송 실패: 인증된 관리자 정보가 없음");
             return ResponseEntity.status(401).body("Unauthorized");
         }
 
-        log.info("=> [API POST] 시스템 알림 발송 시작 - Admin: {}({}), Type: {}", 
+        log.info("API POST 시스템 알림 발송 시작 - Admin: {}({}), Type: {}", 
                  admin.getName(), admin.getMemberId(), dto.getNotiType());
         
         try {
-            // 2. 인증 객체에서 관리자 ID(SenderId)를 추출하여 DTO에 세팅
             dto.setSenderId(admin.getMemberId());
             
-            // 3. 서비스 호출 (Service에서 SenderId를 사용하여 자기 자신 제외 로직 수행)
+            // createNotification 호출
             notificationService.createNotification(dto);
             
             return ResponseEntity.ok("success");
         } catch (Exception e) {
-            log.error("=> 발송 중 서버 오류 발생: {}", e.getMessage());
+            log.error("발송 중 서버 오류 발생: {}", e.getMessage());
             return ResponseEntity.internalServerError().body("fail: " + e.getMessage());
         }
     }
