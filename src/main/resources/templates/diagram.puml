@@ -1,0 +1,32 @@
+@startuml
+
+' 패키지로 감싸면 가로 배치가 더 명확해집니다
+package "Presentation Layer" {
+    class BoardController {
+        - boardService : BoardService
+        + list()
+        + view()
+        + editForm()
+    }
+}
+
+package "Service Layer" {
+    class BoardService {
+        - boardMapper : BoardMapper
+        + getBoardList()
+        + getBoard()
+    }
+}
+
+package "Data Access Layer" {
+    interface BoardMapper {
+        + selectBoardList()
+        + selectBoard()
+    }
+}
+
+' 방향 지시어(left to right)가 안 먹힐 때 사용하는 강제 방향 화살표
+BoardController -right-> BoardService : @RequiredArgsConstructor
+BoardService -right-> BoardMapper : @RequiredArgsConstructor
+
+@enduml

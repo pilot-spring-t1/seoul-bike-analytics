@@ -7,7 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import com.metanet.seoulbike.member.model.Member;
 import com.metanet.seoulbike.notification.dto.NotificationDto;
-import com.metanet.seoulbike.notification.service.NotificationService;
+import com.metanet.seoulbike.notification.service.INotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class NotificationApiController {
 
-    private final NotificationService notificationService;
+    private final INotificationService notificationService;
 
     /**
      * 알림 목록 조회 (본인 또는 관리자)

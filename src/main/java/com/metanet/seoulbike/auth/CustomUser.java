@@ -15,7 +15,7 @@ public class CustomUser extends User {
             String password,
             Collection<? extends GrantedAuthority> authorities) {
 
-        super(username, password, authorities); // 🔥 부모 생성자 호출
+        super(username, password, authorities); // 부모 생성자 호출
         this.memberId = memberId;
     }
 

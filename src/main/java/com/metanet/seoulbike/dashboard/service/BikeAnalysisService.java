@@ -1,46 +1,45 @@
 package com.metanet.seoulbike.dashboard.service;
 
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-
 import com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto;
 import com.metanet.seoulbike.dashboard.dto.DashboardSummaryDto;
 import com.metanet.seoulbike.dashboard.dto.DetailSummaryDto;
-import com.metanet.seoulbike.dashboard.mapper.SeoulBikeMapper;
-
+import com.metanet.seoulbike.dashboard.repository.IBikeAnalysisRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class BikeAnalysisService {
 
-    private final SeoulBikeMapper seoulBikeMapper;
+    private final IBikeAnalysisRepository bikeAnalysisRepository;
     
     public List<Map<String, Object>> getAgeGroupUsage(BikeAnalysisDto analysisDto) {
-        return seoulBikeMapper.getAgeGroupUsage(analysisDto);
+        return bikeAnalysisRepository.findAgeGroupUsage(analysisDto);
     }
     
     @Cacheable(value = "dashboardSummary")
     public DashboardSummaryDto getDashboardSummary() {
-        return seoulBikeMapper.getDashboardSummary();
+        // 서비스는 저장소의 인터페이스를 통해 데이터를 가져옴
+        return bikeAnalysisRepository.findDashboardSummary();
     }
     
     public List<String> searchOfficeNames(String keyword) {
-        return seoulBikeMapper.searchOfficeNames(keyword);
+        return bikeAnalysisRepository.findOfficeNames(keyword);
     }
     
     public DetailSummaryDto getDetailSummary(BikeAnalysisDto analysisDto) {
-        return seoulBikeMapper.getDetailSummary(analysisDto);
+        return bikeAnalysisRepository.findDetailSummary(analysisDto);
     }
     
     public List<Map<String, Object>> getGenderUsage(BikeAnalysisDto analysisDto) {
-        return seoulBikeMapper.getGenderUsage(analysisDto);
+        return bikeAnalysisRepository.findGenderUsage(analysisDto);
     }
     
     public List<Map<String, Object>> getRentalCodeUsage(BikeAnalysisDto analysisDto) {
-        return seoulBikeMapper.getRentalCodeUsage(analysisDto);
+        return bikeAnalysisRepository.findRentalCodeUsage(analysisDto);
     }
 }
