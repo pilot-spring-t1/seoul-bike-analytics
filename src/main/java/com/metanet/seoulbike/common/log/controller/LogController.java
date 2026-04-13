@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.core.Authentication;
 
 import com.metanet.seoulbike.common.log.dto.LogDto;
 import com.metanet.seoulbike.common.log.dto.LogSearchDto;
@@ -30,11 +31,16 @@ public class LogController {
 	 * 시스템 로그 목록 조회 및 검색 URI
 	 */
 	@GetMapping("/list")
-	public String list(@ModelAttribute("searchDto") LogSearchDto searchDto, Model model) {
+	public String list(@ModelAttribute("searchDto") LogSearchDto searchDto, Authentication auth, Model model) {
 	    // 서비스 호출 한 번으로 모든 계산된 데이터를 가져옴
 	    Map<String, Object> result = logService.getLogList(searchDto);
 	    
 	    model.addAllAttributes(result);
+	    if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
 	    return "logs/log-list";
 	}
 

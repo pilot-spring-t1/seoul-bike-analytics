@@ -33,7 +33,7 @@ public class BoardController {
 
     // 1. 리스트 조회 (공지사항/건의사항 통합)
     @GetMapping({ "/notice", "/suggestion" })
-    public String list(@ModelAttribute("searchDto") BoardSearchDto searchDto, Model model, HttpServletRequest request) {
+    public String list(@ModelAttribute("searchDto") BoardSearchDto searchDto, Model model, Authentication auth, HttpServletRequest request) {
         Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
         if (flashMap != null && flashMap.containsKey("searchDto")) {
             searchDto = (BoardSearchDto) flashMap.get("searchDto");
@@ -48,17 +48,27 @@ public class BoardController {
         model.addAttribute("totalPages", result.get("totalPages"));
         model.addAttribute("searchDto", searchDto);
         model.addAttribute("activeMenu", category.toLowerCase());
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         
         return category.equals("NOTICE") ? "boards/board-notice" : "boards/board-suggestion";
     }
 
     // 2. 상세 보기
     @GetMapping("/view/{id}")
-    public String view(@PathVariable("id") Long id, Model model) {
+    public String view(@PathVariable Long id, Authentication auth, Model model) {
         boardService.addViewCount(id);
         model.addAttribute("board", boardService.getBoardById(id));
         model.addAttribute("files", fileAttachmentService.selectFilesByBoardId(id));
         model.addAttribute("comments", boardService.getComments(id));
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "boards/board-view";
     }
 
@@ -72,6 +82,11 @@ public class BoardController {
         BoardDto dto = new BoardDto();
         dto.setCategory(category);
         model.addAttribute("board", dto);
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "boards/board-write";
     }
 
@@ -93,9 +108,14 @@ public class BoardController {
     // 5. 수정 폼
     @GetMapping("/edit/{id}")
     @PreAuthorize("hasRole('ADMIN') or @boardService.getBoardById(#id).writer == authentication.name")
-    public String editForm(@PathVariable("id") Long id, Model model) {
+    public String editForm(@PathVariable("id") Long id, Model model, Authentication auth) {
         model.addAttribute("board", boardService.getBoardById(id));
         model.addAttribute("files", fileAttachmentService.selectFilesByBoardId(id));
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "boards/board-write";
     }
 

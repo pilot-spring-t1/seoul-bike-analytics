@@ -2,9 +2,10 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="#{detail.page.title}">상세 보기</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title th:text="#{boardview.page.title}">콘텐츠 상세 보기 | 운영 센터</title>
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
@@ -177,7 +178,7 @@
                     <th:block th:if="${board.writer == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
                         <form th:action="@{/boards/delete/{id}(id=${board.boardId})}" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display:inline-flex;">
                             <input type="hidden" name="category" th:value="${board.category}">
-                            <button type="submit" class="btn btn-danger">삭제하기</button>
+                            <button type="submit" class="btn btn-danger" th:text="#{boardview.delete}">삭제하기</button>
                         </form>
                         <a th:href="@{/boards/edit/{id}(id=${board.boardId})}" class="btn btn-blue">수정하기</a>
                     </th:block>
