@@ -30,6 +30,28 @@
 		border-top: 2px solid rgba(255,255,255,0.12);
 		margin-top: 4px;
 	}
+	.chart-loader {
+    	display: flex;
+    	flex-direction: column;
+    	justify-content: center;
+    	align-items: center;
+    	height: 100%;
+    	gap: 15px;
+	}
+
+	.inner-spinner {
+    	width: 40px;
+    	height: 40px;
+    	border: 4px solid #f3f3f3;
+    	border-top: 4px solid #3498db; /* 따릉이 포인트 컬러로 변경 가능 */
+    	border-radius: 50%;
+    	animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+    	0% { transform: rotate(0deg); }
+    	100% { transform: rotate(360deg); }
+	}
 </style>
 </head>
 <body class="bg">
@@ -73,6 +95,7 @@
     const yAxisTitle = /*[[#{dashboard.chart.yAxis.uses}]]*/ '이용 건수';
     const seriesName = /*[[#{dashboard.chart.series.uses}]]*/ '이용 건수';
     const alertMessage = /*[[#{dashboard.chart.error.monthly}]]*/ '월별 데이터를 불러오지 못했습니다.';
+    const loadingMessage = /*[[#{dashboard.chart.loading.monthly}]]*/ '데이터를 불러오는 중...';
     const monthCategories = [
         /*[[#{dashboard.month.1}]]*/ '1월',
         /*[[#{dashboard.month.2}]]*/ '2월',
@@ -89,14 +112,21 @@
     ];
 
     $(function () {
+    	const $chartContainer = $('#monthlyUsageChart');
+
         $.ajax({
             url: '/api/bike/monthly-usage?year=2025',
             method: 'GET',
+            beforeSend: function() {
+            	$chartContainer.html(`
+                        <div class="chart-loader">
+                            <div class="inner-spinner"></div>
+                            <p th:text="" style="font-weight: 500; color: #666;">${loadingMessage}</p>
+                        </div>
+                `);
+            },
             success: function (response) {
-                console.log(response);
-
                 const monthData = new Array(12).fill(0);
-
                 response.forEach(item => {
                     monthData[item.month - 1] = item.totalUses;
                 });
@@ -116,18 +146,15 @@
                             text: yAxisTitle
                         }
                     },
-                    tooltip: {
-                        valueSuffix: ''
-                    },
                     series: [{
                         name: seriesName,
-                        data: monthData
+                        data: monthData 
                     }]
                 });
             },
             error: function (xhr, status, error) {
                 console.error("에러 발생:", error);
-                console.log(xhr.responseText);
+                $chartContainer.html('<div style="color:red; text-align:center; padding-top:150px;">데이터 로드 실패</div>');
                 alert(alertMessage);
             }
         });

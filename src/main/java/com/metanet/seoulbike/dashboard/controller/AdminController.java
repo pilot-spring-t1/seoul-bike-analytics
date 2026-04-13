@@ -39,7 +39,7 @@ public class AdminController {
     	return "admin-contents";
     }
     
-    @GetMapping("/admin/notifications")
+    @GetMapping("/notifications")
     public String adminNotificationPage() {
         return "notification/admin-notifications";
     }

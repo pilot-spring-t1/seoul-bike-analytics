@@ -263,6 +263,35 @@ header {
 	z-index: 5;
 }
 
+.chart-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(252, 252, 252, 0.8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    gap: 12px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #22bda9; /* 따릉이 포인트 컬러 */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 @media ( max-width : 1200px) {
 	.summary-row {
 		grid-template-columns: 1fr;
@@ -384,6 +413,7 @@ $(function () {
 		unitMinute: /*[[#{detail.unit.minute}]]*/ '분',
 		unitCount: /*[[#{detail.unit.count}]]*/ '건',
 		unitKmh: /*[[#{detail.unit.kmh}]]*/ 'km/h',
+		loadingData: /*[[#{detail.chart.loading}]]*/ '데이터 분석 중...',
 		searchNoResult: /*[[#{detail.search.noResult}]]*/ '검색 결과가 없습니다.',
 		alertInvalidDate: /*[[#{detail.alert.invalidDate}]]*/ '시작일은 종료일보다 클 수 없습니다.',
 		chartTitleAge: /*[[#{detail.chart.title.age}]]*/ '👤 연령대별 이용량 추이',
@@ -442,10 +472,10 @@ $(function () {
 	}
 
 	function renderSummary(summary) {
-		$('#avgDistanceValue').text(formatNumber(summary.avgDistance, 2) + ' ' + i18n.unitKm);
-		$('#avgUsageMinuteValue').text(formatNumber(summary.avgUsageMinute, 2) + ' ' + i18n.unitMinute);
-		$('#avgDailyUsesValue').text(formatNumber(summary.avgDailyUses, 2) + ' ' + i18n.unitCount);
-		$('#avgSpeedValue').text(formatNumber(summary.avgSpeed, 2) + ' ' + i18n.unitKmh);
+		animateNumber('avgDistanceValue', summary.avgDistance, 2);
+	    animateNumber('avgUsageMinuteValue', summary.avgUsageMinute, 2);
+	    animateNumber('avgDailyUsesValue', summary.avgDailyUses, 2);
+	    animateNumber('avgSpeedValue', summary.avgSpeed, 2);
 	}
 
 	function loadSummary() {
@@ -567,10 +597,20 @@ $(function () {
 
 	function requestChart(options) {
 		if (chartRequestXhr) chartRequestXhr.abort();
+		const $chartArea = $('#analysisChart');
 		chartRequestXhr = $.ajax({
 			url: options.url,
 			method: 'GET',
 			data: options.data,
+			beforeSend: function() {
+	            clearOverlayMessage();
+	            $chartArea.append(`
+	                <div class="chart-loading-overlay">
+	                    <div class="spinner"></div>
+	                    <p style="font-size: 14px; color: #61707d; font-weight: 600;">${i18n.loadingData}</p>
+	                </div>
+	            `);
+	        },
 			success: function (response) { options.onSuccess(response); },
 			error: function (xhr, status, error) {
 				if (status !== 'abort') showOverlayMessage(options.emptyMessage);
@@ -603,6 +643,35 @@ $(function () {
 			emptyMessage: i18n.chartEmptyTicket,
 			onSuccess: renderTicketChart
 		});
+	}
+	
+	function animateNumber(id, targetValue, fractionDigits = 0) {
+	    const $el = $('#' + id);
+	    const startValue = 0;
+	    const duration = 1000; 
+	    let startTime = null;
+
+	    function step(timestamp) {
+	        if (!startTime) startTime = timestamp;
+	        const progress = Math.min((timestamp - startTime) / duration, 1);
+	        
+	        const currentValue = progress * (targetValue - startValue) + startValue;
+	        
+	        $el.text(formatNumber(currentValue, fractionDigits) + ' ' + getUnit(id));
+
+	        if (progress < 1) {
+	            window.requestAnimationFrame(step);
+	        }
+	    }
+	    window.requestAnimationFrame(step);
+	}
+
+	function getUnit(id) {
+	    if (id.includes('Distance')) return i18n.unitKm;
+	    if (id.includes('Minute')) return i18n.unitMinute;
+	    if (id.includes('Uses')) return i18n.unitCount;
+	    if (id.includes('Speed')) return i18n.unitKmh;
+	    return '';
 	}
 
 	$('#officeKeyword').on('input', function () {
