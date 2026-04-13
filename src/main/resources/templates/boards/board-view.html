@@ -2,178 +2,184 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title th:text="#{detail.page.title}">콘텐츠 상세 보기 | 운영 센터</title>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{detail.page.title}">상세 보기</title>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/dist/stomp.min.js"></script>
-    <script src="/js/notification.js"></script>
-
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
-	<link rel="stylesheet" th:href="@{/css/color.css}">
-	<link rel="stylesheet" th:href="@{/css/fonts.css}">
-	<link rel="stylesheet" th:href="@{/css/card.css}">
-	<link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
 <style>
-    /* ... 기존 스타일 유지 ... */
+    /* 기초 레이아웃 */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
     body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
     #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
     header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
     .container { flex: 1; padding: 40px; overflow-y: auto; }
-    .content-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); }
+    
+    /* 콘텐츠 카드 스타일 */
+    .content-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
     .view-header { padding: 32px; border-bottom: 1px solid #f1f5f9; }
     .view-category { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 700; margin-bottom: 12px; }
-    .title-row { display: flex; justify-content: space-between; align-items: flex-start; }
-    .title-row h1 { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin-bottom: 16px; }
+    .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .title-row h1 { font-size: 1.75rem; font-weight: 800; color: #0f172a; }
     .meta-info { display: flex; gap: 24px; color: #64748b; font-size: 0.9rem; }
-    .meta-info b { color: #1e293b; margin-right: 4px; }
-    .view-body { padding: 32px; line-height: 1.7; color: #334155; min-height: 300px; font-size: 1.05rem; }
-    .comment-section { padding: 32px; }
-    .comment-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 8px; }
-    .comment-form { margin-bottom: 32px; }
-    .comment-form textarea { width: 100%; height: 100px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; resize: none; margin-bottom: 12px; outline: none; }
+    .view-body { padding: 32px; line-height: 1.8; min-height: 250px; font-size: 1.05rem; }
+
+    /* 첨부파일 및 액션 */
+    .header-actions { display: flex; gap: 12px; position: relative; }
+    .btn-file-toggle { cursor: pointer; padding: 8px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; font-weight: 700; font-size: 0.85rem; color: #475569; }
+    .file-dropdown { position: absolute; top: 45px; right: 0; width: 280px; background: white; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); z-index: 100; display: none; padding: 8px 0; }
+    .file-dropdown.show { display: block; }
+    .file-dropdown a { display: block; padding: 10px 16px; text-decoration: none; color: #1e293b; font-size: 0.85rem; }
+    .file-dropdown a:hover { background: #f0fdf4; }
+
+    /* 댓글 영역 디자인 */
+    .comment-area { padding: 32px; border-top: 1px solid #f1f5f9; background: #ffffff; border-radius: 0 0 12px 12px; }
+    .comment-form-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 24px; }
+    .comment-form-box textarea { width: 100%; border: none; background: transparent; outline: none; resize: none; min-height: 80px; font-size: 0.95rem; }
+    
     .comment-list { list-style: none; }
-    .comment-item { padding: 20px 0; border-top: 1px solid #f1f5f9; }
+    .comment-item { padding: 20px 0; border-bottom: 1px solid #f8fafc; }
     
-    /* depth 기반 여백 처리 */
-    .reply-item { margin-left: 50px; padding: 16px 20px; background-color: #f8fafc; border-radius: 8px; margin-top: 10px; border-top: none !important; }
+    /* 댓글/답글 레이아웃 및 정렬 */
+    .comment-item.reply { padding-left: 45px; } /* 전체 아이템 들여쓰기 */
+    .reply-header { display: flex; align-items: center; margin-bottom: 6px; }
+    .reply-symbol { color: #cbd5e1; font-size: 1.1rem; margin-right: 8px; }
+    .comment-writer { font-weight: 700; color: #1e293b; font-size: 0.95rem; margin-right: 12px; }
+    .comment-date { color: #94a3b8; font-size: 0.85rem; }
+    .comment-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
     
-    .reply-icon { color: #10b981; margin-right: 8px; font-weight: bold; }
-    .comment-meta { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; }
-    .comment-writer { font-weight: 700; color: #1e293b; }
-    .comment-date { color: #94a3b8; }
-    .comment-content { color: #475569; font-size: 0.95rem; line-height: 1.5; white-space: pre-wrap; }
-    .comment-actions { display: flex; gap: 12px; margin-top: 12px; justify-content: flex-end; }
-    .action-btn { background: none; border: none; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: #94a3b8; transition: 0.2s; }
-    .action-btn:hover { color: #0f172a; }
-    .action-btn.reply { color: #10b981; }
-    .action-btn.delete { color: #ef4444; }
-    
-    /* 폼 노출 설정 */
-    .inline-form { display: none; margin-top: 12px; padding: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; }
-    .inline-form textarea { width: 100%; height: 80px; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 8px; outline: none; resize: none; font-size: 0.9rem; }
-    
-    .button-group { display: flex; justify-content: space-between; margin-top: 32px; }
-    .btn { padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 0.9rem; border: none; }
-    .btn-outline { border: 1px solid #e2e8f0; background: white; color: #64748b; }
+    .btn-text { background: none; border: none; font-size: 0.8rem; color: #94a3b8; cursor: pointer; padding: 0; display: inline-flex; align-items: center; text-decoration: none; }
+    .btn-text:hover { color: #64748b; }
+    .btn-text.delete { color: #ef4444; }
+
+    /* 텍스트 및 폼 위치 조정 (수정 핵심) */
+    .comment-text { color: #475569; font-size: 0.95rem; line-height: 1.6; padding-left: 0; }
+    .comment-item.reply .comment-text { padding-left: 24px; color: #64748b; } /* 답글 기호(└) 자리 확보 */
+
+    .edit-form, .reply-form { margin: 15px 0 0 0; display: none; }
+    .comment-item.reply .edit-form, 
+    .comment-item.reply .reply-form { margin-left: 24px; } /* 답글 기호(└) 자리 확보 */
+
+    /* 공통 버튼 스타일 */
+    .button-group { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+    .btn { padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 0.9rem; border: none; transition: 0.2s; display: inline-flex; align-items: center; }
+    .btn-outline { border: 1px solid #cbd5e1; background: white; color: #64748b; }
+    .btn-blue { background: #3b82f6; color: white; }
     .btn-danger { background: #ef4444; color: white; }
     .btn-emerald { background: #10b981; color: white; }
-    .btn-blue { background: #3b82f6; color: white; }
     .bg-blue { background: #eff6ff; color: #2563eb; }
     .bg-orange { background: #fff7ed; color: #ea580c; }
 </style>
 </head>
 <body>
-    <input type="hidden" id="memberId" th:value="${memberId}">
-
     <div th:replace="~{fragment/sidebar :: sidebar(${board.category.toLowerCase()})}"></div>
 
-	<div id="main-content">
-        <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
+    <div id="main-content">
+        <header>
+            <span sec:authentication="name" style="font-size:0.9rem; color:#64748b; font-weight:600;">사용자</span>
+        </header>
         
         <main class="container">
             <div class="content-card">
                 <div class="view-header">
-                    <span th:if="${board.category == 'NOTICE'}" class="view-category bg-blue" th:text="#{dashboard.menu.notice}">공지사항</span> 
-                    <span th:if="${board.category == 'SUGGESTION'}" class="view-category bg-orange" th:text="#{dashboard.menu.suggestion}">건의사항</span>
+                    <span th:class="|view-category ${board.category == 'NOTICE' ? 'bg-blue' : 'bg-orange'}|" 
+                          th:text="${board.category == 'NOTICE' ? '공지사항' : '건의사항'}">구분</span>
                     <div class="title-row">
-                        <h1 th:text="${board.title}">게시글 제목</h1>
-                        <form th:action="@{/boards/like/{id}(id=${board.boardId})}" method="post">
-                            <button type="submit" class="btn btn-outline" style="color: #3b82f6; border-color: #3b82f6;">
-                                👍 <span th:text="#{detail.tab.ticket}">추천</span> <span th:text="${board.likeCount}">0</span>
-                            </button>
-                        </form>
+                        <h1 th:text="${board.title}">제목</h1>
+                        <div class="header-actions">
+                            <div th:if="${not #lists.isEmpty(files)}" style="position:relative;">
+                                <button type="button" class="btn-file-toggle" onclick="$('#fileDropdown').toggleClass('show')">📎 첨부파일 <span th:text="${#lists.size(files)}">0</span></button>
+                                <div class="file-dropdown" id="fileDropdown">
+                                    <a th:each="file : ${files}" th:href="@{/attachments/download/{id}(id=${file.fileId})}" th:text="${file.fileName}">파일명</a>
+                                </div>
+                            </div>
+                            <form th:action="@{/boards/like/{id}(id=${board.boardId})}" method="post" style="display:inline;">
+                                <button type="submit" class="btn btn-outline" style="color:#3b82f6; border-color:#3b82f6; padding:8px 16px;">👍 추천 <span th:text="${board.likeCount}">0</span></button>
+                            </form>
+                        </div>
                     </div>
                     <div class="meta-info">
-                        <span><b th:text="#{board.notice.writer}">작성자</b> <span th:text="${board.writer}">ADMIN</span></span>
-                        <span><b th:text="#{board.notice.date}">작성일</b> <span th:text="${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span></span>
-                        <span><b th:text="#{board.notice.view}">조회수</b> <span th:text="${board.viewCount}">0</span></span>
+                        <span><b>작성자</b> [[${board.writer}]]</span>
+                        <span><b>작성일</b> [[${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}]]</span>
+                        <span><b>조회수</b> [[${board.viewCount}]]</span>
                     </div>
                 </div>
-                <div class="view-body" th:utext="${board.content}">본문 내용</div>
 
-                <div class="comment-section">
-                    <div class="comment-title">
-                        💬 <span th:text="#{dashboard.menu.notifications}">댓글</span> 
-                        <span th:text="${#lists.size(comments)}" style="color: #10b981;">0</span>
-                    </div>
+                <div class="view-body" th:utext="${board.content}">본문</div>
 
-                    <form th:action="@{/boards/comment/register}" method="post" class="comment-form">
+                <div class="comment-area">
+                    <div style="font-weight:800; margin-bottom:20px;">💬 댓글 <span style="color:#10b981;">[[${#lists.size(comments)}]]</span></div>
+                    
+                    <form th:action="@{/boards/comment/register}" method="post" class="comment-form-box">
                         <input type="hidden" name="boardId" th:value="${board.boardId}">
-                        <textarea name="content" th:placeholder="#{detail.filter.officePlaceholder}" required></textarea>
-                        <div style="text-align: right;">
-                            <button type="submit" class="btn btn-emerald" th:text="#{detail.filter.apply}">댓글 등록</button>
+                        <textarea name="content" placeholder="댓글을 입력해 주세요." required></textarea>
+                        <div style="display:flex; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:12px;">
+                            <button type="submit" class="btn btn-emerald">댓글 등록</button>
                         </div>
                     </form>
                     
                     <ul class="comment-list">
-                        <th:block th:each="comment : ${comments}">
-                            <li class="comment-item" th:id="'comment-block-' + ${comment.commentId}"
-                                th:classappend="${comment.depth > 0} ? 'reply-item' : ''">
-                                
-                                <div class="comment-meta">
-                                    <span class="comment-writer"> 
-                                        <span th:if="${comment.depth > 0}" class="reply-icon">ㄴ</span>
-                                        <span th:text="${comment.writer}">작성자</span>
-                                    </span> 
-                                    <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">날짜</span>
-                                </div>
-                                
-                                <div class="comment-content" th:id="'comment-text-' + ${comment.commentId}" th:text="${comment.content}">내용</div>
+                        <li th:each="comment : ${comments}" class="comment-item" th:classappend="${comment.depth > 0} ? 'reply' : ''" th:id="|comment-li-${comment.commentId}|">
+                            <div class="reply-header">
+                                <span th:if="${comment.depth > 0}" class="reply-symbol">└</span>
+                                <span class="comment-writer" th:text="${comment.writer}">작성자</span>
+                                <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">시간</span>
                                 
                                 <div class="comment-actions">
-                                    <button th:if="${comment.depth == 0}" class="action-btn reply" 
-                                            th:onclick="toggleForm('reply', [[${comment.commentId}]])">답글</button>
+                                    <button th:if="${comment.depth == 0}" type="button" class="btn-text" th:onclick="|toggleReplyForm('${comment.commentId}')|">답글</button>
                                     
-                                    <th:block th:if="${comment.writer == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
-                                        <button class="action-btn" th:onclick="toggleForm('edit', [[${comment.commentId}]])">수정</button>
-                                        <form th:action="@{/boards/comment/delete}" method="post" style="display: inline;" onsubmit="return confirm('댓글을 삭제하시겠습니까?');">
-                                            <input type="hidden" name="commentId" th:value="${comment.commentId}"> 
+                                    <th:block th:if="${comment.writer == #authentication.name}">
+                                        <button type="button" class="btn-text" th:onclick="|toggleEditForm('${comment.commentId}')|">수정</button>
+                                        <form th:action="@{/boards/comment/delete}" method="post" onsubmit="return confirm('댓글을 삭제할까요?');" style="display:inline-flex;">
                                             <input type="hidden" name="boardId" th:value="${board.boardId}">
-                                            <button type="submit" class="action-btn delete">삭제</button>
+                                            <input type="hidden" name="commentId" th:value="${comment.commentId}">
+                                            <button type="submit" class="btn-text delete">삭제</button>
                                         </form>
                                     </th:block>
                                 </div>
+                            </div>
+                            
+                            <div th:id="|comment-text-${comment.commentId}|" class="comment-text" th:text="${comment.content}" th:style="${comment.depth > 0 ? 'color:#64748b;' : ''}">내용</div>
+                            
+                            <div th:id="|edit-form-${comment.commentId}|" class="edit-form">
+                                <form th:action="@{/boards/comment/modify}" method="post" class="comment-form-box">
+                                    <input type="hidden" name="boardId" th:value="${board.boardId}">
+                                    <input type="hidden" name="commentId" th:value="${comment.commentId}">
+                                    <textarea name="content" th:text="${comment.content}" required></textarea>
+                                    <div style="display:flex; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:12px;">
+                                        <button type="button" class="btn btn-outline" style="margin-right:8px; padding:6px 16px;" th:onclick="|toggleEditForm('${comment.commentId}')|">취소</button>
+                                        <button type="submit" class="btn btn-blue" style="padding:6px 16px;">수정 완료</button>
+                                    </div>
+                                </form>
+                            </div>
 
-                                <div class="inline-form" th:id="'form-reply-' + ${comment.commentId}">
-                                    <form th:action="@{/boards/comment/register}" method="post">
-                                        <input type="hidden" name="boardId" th:value="${board.boardId}">
-                                        <input type="hidden" name="parentId" th:value="${comment.commentId}">
-                                        <textarea name="content" placeholder="답글 내용을 입력하세요" required></textarea>
-                                        <div style="text-align: right;">
-                                            <button type="submit" class="btn btn-emerald">답글 등록</button>
-                                        </div>
-                                    </form>
-                                </div>
-
-                                <div class="inline-form" th:id="'form-edit-' + ${comment.commentId}">
-                                    <form th:action="@{/boards/comment/modify}" method="post">
-                                        <input type="hidden" name="commentId" th:value="${comment.commentId}">
-                                        <input type="hidden" name="boardId" th:value="${board.boardId}">
-                                        <textarea name="content" th:text="${comment.content}" required></textarea>
-                                        <div style="text-align: right;">
-                                            <button type="submit" class="btn btn-blue">수정 완료</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </li>
-                        </th:block>
+                            <div th:if="${comment.depth == 0}" th:id="|reply-form-${comment.commentId}|" class="reply-form">
+                                <form th:action="@{/boards/comment/register}" method="post" class="comment-form-box">
+                                    <input type="hidden" name="boardId" th:value="${board.boardId}">
+                                    <input type="hidden" name="parentId" th:value="${comment.commentId}">
+                                    <textarea name="content" th:placeholder="|${comment.writer}님께 답글 쓰기...|" required></textarea>
+                                    <div style="display:flex; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:12px;">
+                                        <button type="button" class="btn btn-outline" style="margin-right:8px; padding:6px 16px;" th:onclick="|toggleReplyForm('${comment.commentId}')|">취소</button>
+                                        <button type="submit" class="btn btn-emerald" style="padding:6px 16px;">답글 등록</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </li>
                     </ul>
                 </div>
             </div>
 
             <div class="button-group">
                 <a th:href="@{/boards/{category}(category=${#strings.toLowerCase(board.category)})}" class="btn btn-outline">목록으로 돌아가기</a>
-                <div style="display: flex; gap: 8px;">
-                    <th:block th:if="${(board.category == 'NOTICE' and #authorization.expression('hasRole(''ADMIN'')')) or (board.category == 'SUGGESTION')}">
-                        <form th:action="@{/boards/delete/{id}(id=${board.boardId})}" method="post" onsubmit="return confirm('게시글을 삭제하시겠습니까?');">
+                
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <th:block th:if="${board.writer == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
+                        <form th:action="@{/boards/delete/{id}(id=${board.boardId})}" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display:inline-flex;">
                             <input type="hidden" name="category" th:value="${board.category}">
                             <button type="submit" class="btn btn-danger">삭제하기</button>
                         </form>
-                        <button class="btn btn-blue" th:onclick="|location.href='@{/boards/edit/{id}(id=${board.boardId})}'|">수정하기</button>
+                        <a th:href="@{/boards/edit/{id}(id=${board.boardId})}" class="btn btn-blue">수정하기</a>
                     </th:block>
                 </div>
             </div>
@@ -181,36 +187,45 @@
     </div>
 
     <script th:inline="javascript">
-        $(function() {
-            const memberId = $('#memberId').val();
-            if (memberId && typeof initNotification === 'function') {
-                initNotification(memberId);
+        // 파일 드롭다운 토글 및 외부 클릭 처리
+        $(document).click(function(e) {
+            if (!$(e.target).closest('.header-actions').length) {
+                $('#fileDropdown').removeClass('show');
             }
         });
 
-        // 폼 토글 함수 (답글/수정 창 열고 닫기)
-        function toggleForm(type, id) {
-            const formId = 'form-' + type + '-' + id;
-            const form = document.getElementById(formId);
+        // 답글 작성 폼 토글 기능
+        function toggleReplyForm(commentId) {
+            const rForm = $('#reply-form-' + commentId);
+            const eForm = $('#edit-form-' + commentId);
             
-            if (!form) return;
-
-            // 이미 열려있으면 닫고, 닫혀있으면 열기
-            if (form.style.display === 'block') {
-                form.style.display = 'none';
-            } else {
-                // 다른 열려있는 인라인 폼들 닫기
-                document.querySelectorAll('.inline-form').forEach(f => f.style.display = 'none');
-                form.style.display = 'block';
-                form.querySelector('textarea').focus();
-            }
+            // 수정창이 열려있으면 닫기
+            eForm.hide(); 
+            $('#comment-text-' + commentId).show();
+            
+            // 다른 모든 답글창 닫고 현재 것만 토글
+            $('.reply-form').not(rForm).hide();
+            rForm.slideToggle(200);
         }
 
-        window.onpageshow = function(event) {
-            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-                window.location.reload();
+        // 댓글 수정 폼 (인라인) 토글 기능
+        function toggleEditForm(commentId) {
+            const textDiv = $('#comment-text-' + commentId);
+            const eForm = $('#edit-form-' + commentId);
+            const rForm = $('#reply-form-' + commentId);
+            
+            // 답글창이 열려있으면 닫기
+            if(rForm.length) rForm.hide();
+            
+            if (eForm.is(':visible')) {
+                eForm.hide();
+                textDiv.show();
+            } else {
+                eForm.show();
+                textDiv.hide();
+                eForm.find('textarea').focus();
             }
-        };
+        }
     </script>
 </body>
 </html>

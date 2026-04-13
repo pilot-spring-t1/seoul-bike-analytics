@@ -1,12 +1,11 @@
 package com.metanet.seoulbike.notification.service;
 
 import java.util.List;
-
 import com.metanet.seoulbike.notification.dto.NotificationDto;
 
 public interface NotificationService {
 
-    // 알림 생성
+    // 알림 생성 (유니캐스트/브로드캐스트)
     void createNotification(NotificationDto notificationDto);
 
     // 특정 회원의 전체 알림 조회
@@ -15,14 +14,14 @@ public interface NotificationService {
     // 안 읽은 알림 개수 조회
     int selectUnreadCount(Long memberId);
 
-    // 알림 1건 읽음 처리
-    void markAsRead(Long notiId);
+    // 알림 1건 읽음 처리 (인가를 위해 memberId 추가)
+    void markAsRead(Long notiId, Long memberId);
 
     // 특정 회원의 전체 알림 읽음 처리
     void markAllAsRead(Long memberId);
 
-    // 알림 삭제
-    void removeNotification(Long notiId);
+    // 알림 삭제 (인가를 위해 memberId 추가)
+    void removeNotification(Long notiId, Long memberId);
 
     // 오래된 알림 삭제
     void removeOldNotifications(int days);

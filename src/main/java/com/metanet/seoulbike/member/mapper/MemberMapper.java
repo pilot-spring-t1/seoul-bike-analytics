@@ -15,6 +15,8 @@ public interface MemberMapper {
 	Member selectMemberByLoginId(String loginId);
 
 	Member selectMemberByMemberId(Long memberId);
+	
+	List<Member> selectAllMembers();
 
 	List<Member> selectAllMembersByPage(@Param("dto") MemberSearchDto dto, @Param("offset") int offset);
 

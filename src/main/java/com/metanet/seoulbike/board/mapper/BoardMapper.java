@@ -13,7 +13,8 @@ import com.metanet.seoulbike.board.dto.CommentDto;
 @Mapper
 public interface BoardMapper {
 
-	// 게시글 관련
+	// --- 게시글 관련 ---
+	
 	List<BoardDto> selectBoardList(@Param("dto") BoardSearchDto dto, @Param("offset") int offset);
 
 	int selectBoardCount(@Param("dto") BoardSearchDto dto);
@@ -30,9 +31,26 @@ public interface BoardMapper {
 
 	int updateViewCount(Long boardId);
 
+	// --- 추천(좋아요) 관련 ---
+
+	/**
+	 * 특정 게시글에 대한 특정 사용자의 추천 여부 확인
+	 * @return 추천 기록이 있으면 1, 없으면 0
+	 */
+	int checkLike(@Param("boardId") Long boardId, @Param("memberId") Long memberId);
+
+	/**
+	 * 추천 이력 테이블(board_likes)에 기록 추가
+	 */
+	int insertLike(@Param("boardId") Long boardId, @Param("memberId") Long memberId);
+
+	/**
+	 * 게시글 테이블(board)의 총 추천수(like_count) 증가
+	 */
 	int updateLikeCount(Long boardId);
 
-	// 댓글 관련
+	// --- 댓글 관련 ---
+
 	int insertComment(@Param("boardId") Long boardId, @Param("parentId") Long parentId,
 			@Param("content") String content, @Param("writer") String writer);
 

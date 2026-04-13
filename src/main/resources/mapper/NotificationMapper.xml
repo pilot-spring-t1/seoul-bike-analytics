@@ -1,67 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper
-	namespace="com.metanet.seoulbike.notification.mapper.NotificationMapper">
+<mapper namespace="com.metanet.seoulbike.notification.mapper.NotificationMapper">
 
-	<insert id="insertNotification"
-		parameterType="com.metanet.seoulbike.notification.dto.NotificationDto">
-		INSERT INTO NOTIFICATION (
-		NOTI_ID, MEMBER_ID, NOTI_TYPE,
-		MESSAGE, IS_READ, CREATED_AT
-		) VALUES (
-		SEQ_NOTI_ID.NEXTVAL,
-		#{memberId}, #{notiType}, #{message}, 'N', SYSDATE
-		)
-	</insert>
+    <insert id="insertNotification" parameterType="com.metanet.seoulbike.notification.dto.NotificationDto">
+        INSERT INTO NOTIFICATION (
+            SENDER_ID, MEMBER_ID, NOTI_TYPE, MESSAGE, IS_READ, CREATED_AT
+        ) VALUES (
+            #{senderId}, #{memberId}, #{notiType}, #{message}, 'N', SYSDATE
+        )
+    </insert>
 
-	<select id="selectNotificationsByMemberId"
-		resultType="com.metanet.seoulbike.notification.dto.NotificationDto">
-		SELECT
-		NOTI_ID, MEMBER_ID, NOTI_TYPE, MESSAGE, IS_READ,
-		CREATED_AT
-		FROM NOTIFICATION
-		WHERE MEMBER_ID = #{memberId}
-		ORDER BY
-		IS_READ ASC, CREATED_AT DESC
-	</select>
+    <insert id="insertNotifications" parameterType="java.util.List">
+        INSERT INTO NOTIFICATION (
+            SENDER_ID, MEMBER_ID, NOTI_TYPE, MESSAGE, IS_READ, CREATED_AT
+        )
+        <foreach collection="list" item="item" separator="UNION ALL">
+            SELECT 
+                #{item.senderId}, 
+                #{item.memberId}, 
+                #{item.notiType}, 
+                #{item.message}, 
+                'N', 
+                SYSDATE 
+            FROM DUAL
+        </foreach>
+    </insert>
 
-	<select id="selectUnreadCount" resultType="int">
-		SELECT COUNT(*)
-		FROM
-		NOTIFICATION
-		WHERE MEMBER_ID = #{memberId} AND IS_READ = 'N'
-	</select>
-	
-	<select id="selectAllMemberIdsExceptSender" parameterType="long" resultType="long">
-    SELECT MEMBER_ID
-    FROM MEMBER
-    WHERE MEMBER_ID !=  0              <!-- #{senderId} -->
-	</select>
+    <select id="selectNotificationsByMemberId" resultType="com.metanet.seoulbike.notification.dto.NotificationDto">
+        SELECT
+            NOTI_ID, SENDER_ID, MEMBER_ID, NOTI_TYPE, MESSAGE, IS_READ, CREATED_AT
+        FROM NOTIFICATION
+        WHERE MEMBER_ID = #{memberId}
+        ORDER BY IS_READ ASC, CREATED_AT DESC
+    </select>
 
-	<update id="updateReadStatus">
-		UPDATE NOTIFICATION
-		SET IS_READ = 'Y'
-		WHERE NOTI_ID =
-		#{notiId}
-	</update>
+    <select id="selectUnreadCount" resultType="int">
+        SELECT COUNT(*)
+        FROM NOTIFICATION
+        WHERE MEMBER_ID = #{memberId} AND IS_READ = 'N'
+    </select>
 
-	<update id="updateAllReadStatus">
-		UPDATE NOTIFICATION
-		SET IS_READ = 'Y'
-		WHERE MEMBER_ID =
-		#{memberId} AND IS_READ = 'N'
-	</update>
+    <update id="updateReadStatus">
+        UPDATE NOTIFICATION 
+        SET IS_READ = 'Y'
+        WHERE NOTI_ID = #{notiId} 
+          AND MEMBER_ID = #{memberId}  
+    </update>
 
-	<delete id="deleteNotification">
-		DELETE FROM NOTIFICATION
-		WHERE NOTI_ID = #{notiId}
-	</delete>
+    <update id="updateAllReadStatus">
+        UPDATE NOTIFICATION
+        SET IS_READ = 'Y'
+        WHERE MEMBER_ID = #{memberId} 
+          AND IS_READ = 'N'
+    </update>
 
-	<delete id="deleteOldNotifications">
-		DELETE FROM NOTIFICATION
-		WHERE CREATED_AT &lt; SYSDATE
-		- #{days}
-	</delete>
+    <delete id="deleteNotification">
+        DELETE FROM NOTIFICATION 
+        WHERE NOTI_ID = #{notiId} 
+          AND MEMBER_ID = #{memberId}  
+    </delete>
+
+    <delete id="deleteOldNotifications">
+        DELETE FROM NOTIFICATION
+        WHERE CREATED_AT &lt; SYSDATE - #{days}
+    </delete>
 
 </mapper>

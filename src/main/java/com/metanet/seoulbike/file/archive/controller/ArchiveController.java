@@ -62,7 +62,7 @@ public class ArchiveController {
     @PreAuthorize("hasRole('ADMIN')")
     public String writeForm(Model model) {
         model.addAttribute("archive", new ArchiveDto());
-        return "archive/archive-write";
+        return "archive/archive-upload";
     }
 
     /**
