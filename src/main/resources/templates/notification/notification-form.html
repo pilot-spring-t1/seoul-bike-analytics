@@ -94,17 +94,18 @@
     </div>
 
     <script th:inline="javascript">
-    	const MSG = {
-            requiredTargetUser: /*[[#{notification.unicast.errormsg}]]*/,
-            confirmBroadcast: /*[[#{notification.broadcast.confirm}]]*/,
-            confirmUnicast: /*[[#{notification.confirm.unicast}]]*/,
-            sending: /*[[#{notification.status.sending}]]*/,
-            successSent: /*[[#{notification.status.success}]]*/,
-            sessionExpired: /*[[#{notification.status.sessionexpire}]]*/,
-            failed: /*[[#{notificatoin.status.fail}]]*/,
-            networkError: /*[[#{notification.status.networkerror}]]*/,
-            sendNow: /*[[#{notification.form.send}]]*/
-        };
+		const MSG = {
+		    requiredTargetUser: /*[[#{notification.unicast.errormsg}]]*/ "default",
+		    confirmBroadcast: /*[[#{notification.broadcast.confirm}]]*/ "default",
+		    confirmUnicast: /*[[#{notification.confirm.unicast}]]*/ "default",
+		    sending: /*[[#{notification.status.sending}]]*/ "default",
+		    successSent: /*[[#{notification.status.success}]]*/ "default",
+		    sessionExpired: /*[[#{notification.status.sessionexpire}]]*/ "default",
+		    failed: /*[[#{notification.status.fail}]]*/ "default",
+		    networkError: /*[[#{notification.status.networkerror}]]*/ "default",
+		    sendNow: /*[[#{notification.form.send}]]*/ "default"
+		};
+		/*]]>*/
         function toggleTargetInput(show) {
             const section = document.getElementById('targetInputSection');
             const input = document.getElementById('targetUser');

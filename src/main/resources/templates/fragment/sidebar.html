@@ -7,9 +7,6 @@
         <li th:classappend="${activeMenu == 'detail'} ? 'active'">
             <a th:href="@{/dashboard/detail}">🔍 <span th:text="#{dashboard.menu.detail}">상세 분석</span></a>
         </li>
-        <li th:classappend="${activeMenu == 'map'} ? 'active'">
-            <a th:href="@{/dashboard-map}">🗺️ <span th:text="#{dashboard.menu.map}">지역별 지도</span></a>
-        </li>
 
         <div class="sidebar-divider"></div> 
         

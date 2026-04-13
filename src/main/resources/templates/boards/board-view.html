@@ -136,7 +136,7 @@
                                     <button th:if="${comment.depth == 0}" type="button" class="btn-text" th:onclick="|toggleReplyForm('${comment.commentId}')|"
                                     th:text="#{boardview.comment.reply}">답글</button>
                                     
-                                    <th:block th:if="${comment.writer == #authentication.name}">
+                                    <th:block th:if="${comment.writer == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
                                         <button type="button" class="btn-text" th:onclick="|toggleEditForm('${comment.commentId}')|" th:text="#{boardview.comment.modify}">수정</button>
                                         <form th:action="@{/boards/comment/delete}" method="post" th:onsubmit="|return confirm('#{boardview.comment.delete.confirm}');|" style="display:inline-flex;">
                                             <input type="hidden" name="boardId" th:value="${board.boardId}">

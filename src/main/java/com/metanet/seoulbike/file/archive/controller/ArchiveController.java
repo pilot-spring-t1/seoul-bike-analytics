@@ -13,12 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.util.UriUtils;
@@ -42,20 +37,16 @@ public class ArchiveController {
     private final FileStorageService fileStorageService;
 
     /**
-     * 1. 아카이브 목록 조회 (검색 및 페이징 포함)
+     * 1. 아카이브 목록 조회
      */
     @GetMapping("/list")
     public String list(@ModelAttribute("searchDto") ArchiveSearchDto searchDto, Model model, Authentication auth) {
-        // 서비스에서 검색 조건에 맞는 리스트와 전체 페이지 수를 Map으로 반환한다고 가정
         Map<String, Object> result = archiveService.getArchiveList(searchDto);
         
         model.addAttribute("list", result.get("list"));
         model.addAttribute("totalPages", result.get("totalPages"));
-        // searchDto는 @ModelAttribute에 의해 자동으로 모델에 담김
-		/*
-		 * if (auth != null) { model.addAttribute("userName", auth.getName()); } else {
-		 * model.addAttribute("userName", "Guest"); }
-		 */
+
+        // 사용자 커스텀 로직 유지
         if (auth != null && auth.getPrincipal() instanceof Member) {
             Member member = (Member) auth.getPrincipal();
             model.addAttribute("userName", member.getLoginId());
@@ -68,7 +59,7 @@ public class ArchiveController {
     }
 
     /**
-     * 2. 아카이브 자료 등록 폼 (관리자 전용)
+     * 2. 아카이브 자료 등록 폼
      */
     @GetMapping("/upload-form")
     @PreAuthorize("hasRole('ADMIN')")
@@ -83,7 +74,7 @@ public class ArchiveController {
     }
 
     /**
-     * 3. 아카이브 자료 등록 실행 (관리자 전용)
+     * 3. 아카이브 자료 등록 실행
      */
     @PostMapping("/upload")
     @PreAuthorize("hasRole('ADMIN')")
@@ -97,9 +88,11 @@ public class ArchiveController {
         try {
             if (file.isEmpty()) {
                 rttr.addFlashAttribute("error", "파일은 필수입니다.");
-                return "redirect:/archive/write";
+                // 폼 경로에 맞게 리다이렉트 주소 확인 필요 (기존 코드가 /write라면 수정 권장)
+                return "redirect:/archive/upload-form"; 
             }
             
+            // 서비스 메서드 명칭 확인: uploadArchive
             archiveService.uploadArchive(file, archiveTitle, archiveDesc, auth.getName());
             rttr.addFlashAttribute("message", "자료가 성공적으로 등록되었습니다.");
             
@@ -112,19 +105,18 @@ public class ArchiveController {
     }
 
     /**
-     * 4. 아카이브 파일 다운로드 (인증된 사용자 공통)
+     * 4. 아카이브 파일 다운로드
      */
     @GetMapping("/download/{archiveId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Resource> download(@PathVariable Long archiveId) {
         try {
+            // 서비스 메서드 명칭 확인: getArchiveById
             ArchiveDto dto = archiveService.getArchiveById(archiveId);
             Resource resource = fileStorageService.loadFile(dto.getFilePath());
 
-            // 파일명 브라우저 인코딩 처리
             String encodedFileName = UriUtils.encode(dto.getFileName(), StandardCharsets.UTF_8);
             
-            // 파일 Content-Type 추출
             String contentType = Files.probeContentType(Paths.get(dto.getFilePath()));
             if (contentType == null) {
                 contentType = "application/octet-stream";
@@ -143,7 +135,7 @@ public class ArchiveController {
     }
 
     /**
-     * 5. 아카이브 자료 삭제 (관리자 전용)
+     * 5. 아카이브 자료 삭제
      */
     @PostMapping("/delete/{archiveId}")
     @PreAuthorize("hasRole('ADMIN')")
