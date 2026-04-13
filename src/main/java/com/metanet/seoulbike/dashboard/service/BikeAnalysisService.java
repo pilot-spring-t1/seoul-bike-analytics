@@ -3,6 +3,7 @@ package com.metanet.seoulbike.dashboard.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.metanet.seoulbike.dashboard.dto.BikeAnalysisDto;
@@ -18,12 +19,11 @@ public class BikeAnalysisService {
 
     private final SeoulBikeMapper seoulBikeMapper;
     
-    //@Cacheable("getAgeGroupUsage")
     public List<Map<String, Object>> getAgeGroupUsage(BikeAnalysisDto analysisDto) {
         return seoulBikeMapper.getAgeGroupUsage(analysisDto);
     }
     
-    //@Cacheable("dashboardSummary")
+    @Cacheable(value = "dashboardSummary")
     public DashboardSummaryDto getDashboardSummary() {
         return seoulBikeMapper.getDashboardSummary();
     }
