@@ -16,129 +16,38 @@
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     
     <style>
-	    /* 기본 레이아웃 가독성 강화 */
+	    /* 기존 스타일 유지 */
 	    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
 	    body { display: flex; height: 100vh; overflow: hidden; background-color: #f1f5f9; }
-	
-	    /* 메인 영역 */
 	    #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-	    
-	    header { 
-	        height: 60px; 
-	        background: white; 
-	        display: flex; 
-	        align-items: center; 
-	        justify-content: flex-end; 
-	        padding: 0 30px; 
-	        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
-	        z-index: 10;
-	    }
-	
+	    header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 10; }
 	    .container { flex: 1; padding: 30px; overflow-y: auto; }
-	
-	    /* 헤더 및 검색바 */
 	    .user-mgmt-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-	    
-	    .search-bar { 
-	        display: flex; 
-	        gap: 8px; 
-	        background: white; 
-	        padding: 8px 12px; 
-	        border-radius: 10px; 
-	        box-shadow: 0 2px 10px rgba(0,0,0,0.03); 
-	    }
-	    
-	    .search-bar select, .search-bar input { 
-	        border: 1px solid #e2e8f0; 
-	        padding: 8px 12px; 
-	        border-radius: 6px; 
-	        outline: none; 
-	        font-size: 0.9rem;
-	        transition: border-color 0.2s;
-	    }
-	
+	    .search-bar { display: flex; gap: 8px; background: white; padding: 8px 12px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+	    .search-bar select, .search-bar input { border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 6px; outline: none; font-size: 0.9rem; transition: border-color 0.2s; }
 	    .search-bar select:focus, .search-bar input:focus { border-color: #1abc9c; }
-	
-	    /* 카드 및 테이블 디자인 상세화 */
-	    .card { 
-	        background: white; 
-	        border-radius: 12px; 
-	        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
-	        overflow: hidden; 
-	    }
-	
+	    .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); overflow: hidden; }
 	    .user-table { width: 100%; border-collapse: collapse; }
-	    
-	    .user-table th { 
-	        background: #f8fafc; 
-	        padding: 16px; 
-	        text-align: left; 
-	        color: #475569; 
-	        font-size: 0.85rem; 
-	        font-weight: 600;
-	        border-bottom: 1px solid #e2e8f0;
-	    }
-	    
-	    .user-table td { 
-	        padding: 14px 16px; 
-	        border-bottom: 1px solid #f1f5f9; 
-	        font-size: 0.9rem; 
-	        color: #1e293b;
-	        vertical-align: middle; 
-	    }
-	
-	    .user-table tr:last-child td { border-bottom: none; }
+	    .user-table th { background: #f8fafc; padding: 16px; text-align: left; color: #475569; font-size: 0.85rem; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
+	    .user-table td { padding: 14px 16px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; color: #1e293b; vertical-align: middle; }
 	    .user-table tr:hover { background-color: #fbfcfe; }
-	
-	    /* 뱃지 및 액션 버튼 */
 	    .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
 	    .badge-admin { background: #fee2e2; color: #ef4444; }
 	    .badge-user { background: #dcfce7; color: #16a34a; }
-	
-	    .table-action-btn { 
-	        padding: 6px 12px; 
-	        border: 1px solid #e2e8f0; 
-	        background: white; 
-	        border-radius: 6px; 
-	        cursor: pointer; 
-	        font-size: 0.8rem; 
-	        transition: all 0.2s;
-	    }
-	    
+	    .table-action-btn { padding: 6px 12px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
 	    .table-btn-delete:hover { background: #ef4444; color: white; border-color: #ef4444; }
-	
-	    /* 페이지네이션 */
 	    .pagination-container { display: flex; justify-content: center; margin-top: 30px; gap: 6px; }
-	    
-	    .page-btn { 
-	        padding: 8px 16px; 
-	        border: 1px solid #e2e8f0; 
-	        background: white; 
-	        border-radius: 6px; 
-	        text-decoration: none; 
-	        color: #64748b; 
-	        font-size: 0.9rem;
-	        transition: 0.2s;
-	    }
-	
+	    .page-btn { padding: 8px 16px; border: 1px solid #e2e8f0; background: white; border-radius: 6px; text-decoration: none; color: #64748b; font-size: 0.9rem; transition: 0.2s; }
 	    .page-btn:hover:not(.active) { background: #f1f5f9; border-color: #cbd5e1; }
-	
-	    .page-btn.active { 
-	        background: #1abc9c; 
-	        color: white; 
-	        border-color: #1abc9c; 
-	        font-weight: 600; 
-	        box-shadow: 0 2px 4px rgba(26, 188, 156, 0.3);
-	    }
+	    .page-btn.active { background: #1abc9c; color: white; border-color: #1abc9c; font-weight: 600; box-shadow: 0 2px 4px rgba(26, 188, 156, 0.3); }
 	</style>
 </head>
 <body class="bg-admin">
-	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
+	<input type="hidden" id="memberId" th:value="${memberId}">
 	
 	<div th:replace="~{fragment/sidebar :: sidebar('users')}"></div>
 
     <div id="main-content">
-
         <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
 
         <main class="container">
@@ -148,7 +57,7 @@
                     <span class="subtitle-gray-font" th:text="'(검색 결과: ' + ${total} + '명)'"></span>
                 </h3>
                 
-                <form th:action="@{/admin/members/search}" th:object="${searchDto}" method="post" class="search-bar">
+                <form th:action="@{/members/list}" th:object="${searchDto}" method="get" class="search-bar">
                     <input type="hidden" name="page" th:value="1"> 
                     <select th:field="*{searchType}">
                         <option value="loginId">아이디</option>
@@ -185,10 +94,10 @@
                             <td th:text="${member.createdAt != null ? #temporals.format(member.createdAt, 'yyyy-MM-dd') : '-'}"></td>
                             <td>
                                 <button class="table-action-btn" 
-                                        th:onclick="|location.href='@{/admin/members/edit/{id}(id=${member.memberId})}'|">수정</button>
+                                        th:onclick="|location.href='@{/members/edit/{id}(id=${member.memberId})}'|">수정</button>
                                 
                                 <button class="table-action-btn table-btn-delete" 
-                                        th:onclick="|if(confirm('정말 삭제하시겠습니까?')) location.href='@{/admin/members/delete/{id}(id=${member.memberId})}'|">
+                                        th:onclick="|if(confirm('정말 삭제하시겠습니까?')) location.href='@{/members/delete/{id}(id=${member.memberId})}'|">
                                     삭제
                                 </button>
                             </td>
@@ -198,18 +107,19 @@
             </div>
 
             <div class="pagination-container" th:if="${total > 0}">
-                <a th:if="${searchDto.page > 1}" 
-                   th:href="@{/admin/members/search(page=${searchDto.page - 1}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
+                
+                <a th:if="${startPage > 1}" 
+                   th:href="@{/members/list(page=${startPage - 1}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
                    class="page-btn">이전</a>
 
-                <th:block th:each="pageNum : ${#numbers.sequence(1, totalPages ?: 1)}">
-                    <a th:href="@{/admin/members/search(page=${pageNum}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
+                <th:block th:each="pageNum : ${#numbers.sequence(startPage, endPage)}">
+                    <a th:href="@{/members/list(page=${pageNum}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
                        th:text="${pageNum}" 
                        th:classappend="${pageNum == searchDto.page ? 'page-btn active' : 'page-btn'}"></a>
                 </th:block>
 
-                <a th:if="${searchDto.page < (totalPages ?: 0)}" 
-                   th:href="@{/admin/members/search(page=${searchDto.page + 1}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
+                <a th:if="${endPage < totalPages}" 
+                   th:href="@{/members/list(page=${endPage + 1}, keyword=${searchDto.keyword}, searchType=${searchDto.searchType}, gender=${searchDto.gender})}" 
                    class="page-btn">다음</a>
             </div>
         </main>

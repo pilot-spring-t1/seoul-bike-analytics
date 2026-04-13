@@ -66,7 +66,7 @@
                     <span class="subtitle-gray-font" th:text="'(전체 내역: ' + ${total} + '건)'"></span>
                 </h3>
                 
-                <form th:action="@{/admin/logs/list}" method="get" class="search-bar">
+                <form th:action="@{/logs/list}" method="get" class="search-bar">
                     <select name="logLevel">
                         <option value="">레벨 전체</option>
                         <option value="INFO" th:selected="${searchDto.logLevel == 'INFO'}">INFO</option>
@@ -101,7 +101,7 @@
                             <td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;">조회된 로그가 없습니다.</td>
                         </tr>
                         <tr th:each="log : ${list}" 
-                            th:onclick="|location.href='@{/admin/logs/view/{id}(id=${log.logId})}'|">
+                            th:onclick="|location.href='@{/logs/view/{id}(id=${log.logId})}'|">
                             <td th:text="${log.logId}"></td>
                             <td>
                                 <span th:classappend="${log.logLevel == 'ERROR' ? 'badge badge-error' : 'badge badge-info'}" 
@@ -123,16 +123,16 @@
             </div>
 
             <div class="pagination-container" th:if="${total > 0}">
-                <a th:href="@{/admin/logs/list(page=${startPage - 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                <a th:href="@{/logs/list(page=${startPage - 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
                    class="page-btn" th:classappend="${startPage == 1} ? 'disabled' : ''">이전</a>
 
                 <th:block th:each="pageNum : ${#numbers.sequence(startPage, endPage)}">
-                    <a th:href="@{/admin/logs/list(page=${pageNum}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                    <a th:href="@{/logs/list(page=${pageNum}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
                        th:text="${pageNum}" 
                        th:classappend="${pageNum == searchDto.page ? 'page-btn active' : 'page-btn'}"></a>
                 </th:block>
 
-                <a th:href="@{/admin/logs/list(page=${endPage + 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
+                <a th:href="@{/logs/list(page=${endPage + 1}, keyword=${searchDto.keyword}, logLevel=${searchDto.logLevel}, searchType=${searchDto.searchType})}" 
                    class="page-btn" th:classappend="${endPage == totalPages} ? 'disabled' : ''">다음</a>
             </div>
         </main>

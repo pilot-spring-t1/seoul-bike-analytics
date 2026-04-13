@@ -13,10 +13,10 @@ public interface NotificationMapper {
 	// 1. 알림 생성
 	void insertNotification(NotificationDto notification);
 
-	// 2. 특정 회원의 전체 알림 조회 (최신순) - select로 통일
+	// 2. 특정 회원의 전체 알림 조회 (최신순)
 	List<NotificationDto> selectNotificationsByMemberId(Long memberId);
 
-	// 3. 안 읽은 알림 개수 조회 - select로 통일
+	// 3. 안 읽은 알림 개수 조회
 	int selectUnreadCount(Long memberId);
 
 	// 4. 알림 단건 읽음 상태 수정

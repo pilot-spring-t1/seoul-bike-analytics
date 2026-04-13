@@ -20,7 +20,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
         
-        // 1. 요청에서 토큰을 추출해봅니다.
+        // 1. 요청에서 토큰을 추출
         String token = jwtTokenProvider.resolveToken(request);
 
         // 2. 토큰이 존재하고 유효하다면? (이미 로그인된 상태인데 인증 에러가 난 경우)

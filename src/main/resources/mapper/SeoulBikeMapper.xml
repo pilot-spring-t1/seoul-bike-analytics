@@ -177,7 +177,7 @@
 			<if test="endDate != null and endDate != ''">
 				AND RENTAL_DATE &lt;= TO_DATE(#{endDate}, 'YYYY-MM-DD')
 			</if>
-			/* [수정] 필터링 시에도 DB 값을 UPPER로 변환하여 파라미터(F/M)와 비교 */
+			/* 필터링 시에도 DB 값을 UPPER로 변환하여 파라미터(F/M)와 비교 */
 			<if test="gender != null and gender != ''">
 				AND UPPER(GENDER) = UPPER(#{gender})
 			</if>
