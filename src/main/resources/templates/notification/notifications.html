@@ -85,6 +85,62 @@
             text-align: center; padding: 60px; background: white; border-radius: 16px; 
             border: 2px dashed #e2e8f0; color: #94a3b8;
         }
+        /* 액션 버튼 공통 */
+.noti-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 12px;
+}
+
+.btn-icon {
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #f8fafc;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+.btn-icon:hover {
+    transform: translateY(-1px);
+}
+
+/* 읽음 버튼 */
+.btn-read {
+    background: #ecfdf5;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.btn-read:hover {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #86efac;
+}
+
+/* 삭제 버튼 */
+.btn-delete {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.btn-delete:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+    border-color: #fca5a5;
+}
+
+/* 비활성/클릭 중 상태까지 고려하고 싶으면 */
+.btn-icon:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
 
         /* 관리자용 플로팅 버튼 */
         .admin-floating-action { position: fixed; bottom: 40px; right: 40px; z-index: 1000; }
@@ -216,7 +272,7 @@
                     <div class="noti-time">${formatDate(noti.createdAt)}</div>
                 </div>
                 <div class="noti-actions">
-                    ${isUnread ? `<button class="btn-icon" onclick="markAsRead(${noti.notiId}, this)">${i18n.read}</button>` : ''}
+                    ${isUnread ? `<button class="btn-icon btn-read" onclick="markAsRead(${noti.notiId}, this)">${i18n.read}</button>` : ''}
 <button class="btn-icon btn-delete" onclick="deleteNoti(${noti.notiId}, this)">${i18n.delete}</button>
                 </div>
             `;
