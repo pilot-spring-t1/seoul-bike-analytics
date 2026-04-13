@@ -3,6 +3,7 @@ package com.metanet.seoulbike.stats.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.metanet.seoulbike.stats.dto.BikeAnalysisDto;
@@ -23,8 +24,9 @@ public class BikeAnalysisService {
         return seoulBikeMapper.getAgeGroupUsage(analysisDto);
     }
     
-    //@Cacheable("dashboardSummary")
+    @Cacheable(value = "dashboardSummary")
     public DashboardSummaryDto getDashboardSummary() {
+    	System.out.println("🔥 DB 조회 실행 (summary)");
         return seoulBikeMapper.getDashboardSummary();
     }
     
