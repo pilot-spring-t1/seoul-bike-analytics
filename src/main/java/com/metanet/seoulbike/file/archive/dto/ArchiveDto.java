@@ -1,7 +1,6 @@
 package com.metanet.seoulbike.file.archive.dto;
 
 import java.time.LocalDateTime;
-
 import lombok.Data;
 
 @Data
@@ -13,6 +12,8 @@ public class ArchiveDto {
     private String fileName;
     private String filePath;
     private long fileSize;
-    private LocalDateTime uploadDate;
+    
+    private LocalDateTime createdAt; 
+    
     private String uploaderId;
 }

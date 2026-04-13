@@ -19,7 +19,6 @@
             keyProperty="archiveId"
             keyColumn="ARCHIVE_ID">
         INSERT INTO FILE_ARCHIVE (
-            ARCHIVE_ID,
             ARCHIVE_TITLE,
             ARCHIVE_DESC,
             FILE_UUID,
@@ -27,9 +26,7 @@
             FILE_PATH,
             FILE_SIZE,
             UPLOADER_ID,
-            UPLOAD_DATE
-        ) VALUES (
-            SEQ_ARCHIVE.NEXTVAL, -- 오라클 시퀀스 가정
+            CREATED_AT  ) VALUES (
             #{archiveTitle},
             #{archiveDesc},
             #{fileUuid},
@@ -45,15 +42,14 @@
             parameterType="com.metanet.seoulbike.file.archive.dto.ArchiveSearchDto"
             resultType="com.metanet.seoulbike.file.archive.dto.ArchiveDto">
         SELECT
-            ARCHIVE_ID    AS "archiveId",
-            ARCHIVE_TITLE AS "archiveTitle",
-            ARCHIVE_DESC  AS "archiveDesc",
-            FILE_UUID     AS "fileUuid",
-            FILE_NAME     AS "fileName",
-            FILE_PATH     AS "filePath",
-            FILE_SIZE     AS "fileSize",
-            UPLOAD_DATE   AS "createdAt", -- HTML과 맞추기 위해 Alias 변경
-            UPLOADER_ID   AS "uploaderId"
+            ARCHIVE_ID,
+            ARCHIVE_TITLE,
+            ARCHIVE_DESC,
+            FILE_UUID,
+            FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            CREATED_AT, UPLOADER_ID
         FROM FILE_ARCHIVE
         WHERE 1=1
         <include refid="searchCondition" />
@@ -73,15 +69,15 @@
     <select id="selectArchiveById"
             resultType="com.metanet.seoulbike.file.archive.dto.ArchiveDto">
         SELECT
-            ARCHIVE_ID    AS "archiveId",
-            ARCHIVE_TITLE AS "archiveTitle",
-            ARCHIVE_DESC  AS "archiveDesc",
-            FILE_UUID     AS "fileUuid",
-            FILE_NAME     AS "fileName",
-            FILE_PATH     AS "filePath",
-            FILE_SIZE     AS "fileSize",
-            UPLOAD_DATE   AS "createdAt",
-            UPLOADER_ID   AS "uploaderId"
+            ARCHIVE_ID,
+            ARCHIVE_TITLE,
+            ARCHIVE_DESC,
+            FILE_UUID,
+            FILE_NAME,
+            FILE_PATH,
+            FILE_SIZE,
+            CREATED_AT,
+            UPLOADER_ID
         FROM FILE_ARCHIVE
         WHERE ARCHIVE_ID = #{archiveId}
     </select>
