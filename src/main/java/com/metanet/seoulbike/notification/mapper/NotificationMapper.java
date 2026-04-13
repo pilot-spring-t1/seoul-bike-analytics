@@ -30,4 +30,7 @@ public interface NotificationMapper {
 
 	// 7. 기간 만료된 알림 일괄 삭제
 	void deleteOldNotifications(int days);
+	
+	// 8. broadcast를 위해 사용자 ID 가져오기
+	List<Long> selectAllMemberIdsExceptSender();
 }

@@ -32,6 +32,12 @@
 		NOTIFICATION
 		WHERE MEMBER_ID = #{memberId} AND IS_READ = 'N'
 	</select>
+	
+	<select id="selectAllMemberIdsExceptSender" parameterType="long" resultType="long">
+    SELECT MEMBER_ID
+    FROM MEMBER
+    WHERE MEMBER_ID !=  0              <!-- #{senderId} -->
+	</select>
 
 	<update id="updateReadStatus">
 		UPDATE NOTIFICATION
