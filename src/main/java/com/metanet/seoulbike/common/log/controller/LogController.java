@@ -21,43 +21,32 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-@RequestMapping("/admin/logs")
+@RequestMapping("/logs")
 public class LogController {
 
 	private final LogService logService;
 
 	/**
-	 * 시스템 로그 목록 조회 및 검색 URI: /admin/logs/list
+	 * 시스템 로그 목록 조회 및 검색 URI
 	 */
 	@GetMapping("/list")
 	public String list(@ModelAttribute("searchDto") LogSearchDto searchDto, Model model) {
-	    Map<String, Object> result = logService.selectLogList(searchDto);
+	    // 서비스 호출 한 번으로 모든 계산된 데이터를 가져옴
+	    Map<String, Object> result = logService.getLogList(searchDto);
 	    
-	    int totalPages = (int) result.get("totalPages");
-	    int currentPage = searchDto.getPage();
-	    
-	    // 한 번에 보여줄 페이지 번호 개수 (예: 1~5, 6~10)
-	    int blockLimit = 5; 
-	    int startPage = (((int)(Math.ceil((double)currentPage / blockLimit))) - 1) * blockLimit + 1;
-	    int endPage = Math.min((startPage + blockLimit - 1), totalPages);
-
 	    model.addAllAttributes(result);
-	    model.addAttribute("startPage", startPage);
-	    model.addAttribute("endPage", endPage);
-	    model.addAttribute("memberId", 1L); // 테스트용
-	    
-	    return "admin/log-list";
+	    return "logs/log-list";
 	}
 
 	/**
-	 * 로그 상세 정보 보기 (parameterData 및 errorMsg 확인용) URI: /admin/logs/view/{id}
+	 * 로그 상세 정보 보기 (parameterData 및 errorMsg)
 	 */
 	@GetMapping("/view/{id}")
 	public String view(@PathVariable("id") Long logId, Model model) {
 		// selectLogById 호출
-		LogDto logDetail = logService.selectLogById(logId);
+		LogDto logDetail = logService.getLogById(logId);
 		model.addAttribute("log", logDetail);
 
-		return "admin/log-view"; // 로그 상세 페이지 (상세 팝업 등)
+		return "logs/log-view"; // 로그 상세 페이지 (상세 팝업 등)
 	}
 }

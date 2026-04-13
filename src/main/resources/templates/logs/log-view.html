@@ -57,7 +57,7 @@
 <body class="bg-admin">
 	<input type="hidden" id="memberId" th:value="${memberId}"> <!-- 멤버 지정 -->
  	
- 	<div th:replace="~{fragment/sidebar :: sidebar('overview')}"></div>
+ 	<div th:replace="~{fragment/sidebar :: sidebar('logs')}"></div>
 
     <div id="main-content">
         <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>

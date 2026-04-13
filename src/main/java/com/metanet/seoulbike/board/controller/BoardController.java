@@ -98,6 +98,7 @@ public class BoardController {
     }
 
     // 6. 수정 실행
+    // 관리자이거나 회원가입시 ID와 글쓴이 ID(Writer)가 같다면
     @PostMapping("/modify")
     @PreAuthorize("hasRole('ADMIN') or @boardService.getBoardById(#dto.boardId).writer == authentication.name")
     public String modify(@ModelAttribute BoardDto dto,
