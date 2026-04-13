@@ -51,6 +51,8 @@ public class SecurityConfig {
 
                 // 인증필요
                 .requestMatchers("/dashboard/**").authenticated() 
+                .requestMatchers("/archive/download/**", "/attachments/download/**").authenticated()
+                .requestMatchers("/api/notifications/**").authenticated()
                 .requestMatchers("/archive/download/**", "/boards/like/**", "/boards/comment/**").authenticated()
                 .requestMatchers("/boards/notice", "/boards/suggestion", "/boards/view/**").authenticated()
                 .requestMatchers("/archive/list").authenticated()

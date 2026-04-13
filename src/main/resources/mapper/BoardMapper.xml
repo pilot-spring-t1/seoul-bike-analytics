@@ -106,6 +106,16 @@
         SET LIKE_COUNT = LIKE_COUNT + 1 
         WHERE BOARD_ID = #{boardId}
     </update>
+    
+    <select id="checkLike" resultType="int">
+	    SELECT COUNT(*) FROM board_likes 
+	    WHERE board_id = #{boardId} AND member_id = #{memberId}
+	</select>
+	
+	<insert id="insertLike">
+	    INSERT INTO board_likes (board_id, member_id)
+	    VALUES (#{boardId}, #{memberId})
+	</insert>
 
     <!-- 댓글 리스트 -->
 	<select id="selectCommentsByBoardId" resultType="com.metanet.seoulbike.board.dto.CommentDto">

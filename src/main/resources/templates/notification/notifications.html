@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" 
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text=#{notification.pagetitle}>알림 센터 | SEOUL BIKE</title>
@@ -13,16 +15,16 @@
         /* 레이아웃 초기화 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; background-color: #f8fafc; overflow: hidden; }
-        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
+        #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
         header { height: 64px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; border-bottom: 1px solid #e2e8f0; }
         
         /* 알림 컨테이너 */
-        .container { flex: 1; padding: 40px; overflow-y: auto; display: flex; justify-content: center; }
+        .container { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
         .notification-wrapper { width: 100%; max-width: 800px; }
         .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
         .page-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
 
-        /* 알림 카드 스타일 */
+        /* 알림 카드 리스트 */
         #notificationList { display: flex; flex-direction: column; gap: 12px; }
         .noti-item { 
             background: white; border-radius: 12px; padding: 20px; 
@@ -32,28 +34,40 @@
         }
         .noti-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         
-        /* 읽지 않음 표시 */
+        /* 안 읽은 알림 스타일 보정 */
         .noti-item.unread { border-left: 4px solid #1abc9c; background: #f0fdfa; }
-        .noti-item.unread::after {
-            content: ''; position: absolute; top: 20px; right: 20px;
-            width: 8px; height: 8px; background: #1abc9c; border-radius: 50%;
-        }
 
-        /* 아이콘 */
+        /* 아이콘 & 안 읽음 점(Dot) 스타일 */
+        .noti-icon-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
         .noti-icon { 
             width: 48px; height: 48px; border-radius: 12px; background: #f1f5f9; 
             display: flex; align-items: center; justify-content: center; 
-            font-size: 1.2rem; flex-shrink: 0; 
+            font-size: 1.2rem; transition: all 0.2s;
         }
         .unread .noti-icon { background: #1abc9c; color: white; }
 
-        /* 텍스트 내용 */
+        /* 아이콘 우측 상단 민트 점 */
+        .unread-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 12px;
+            height: 12px;
+            background: #1abc9c;
+            border: 2px solid #f0fdfa; /* 배경색과 맞춘 테두리 */
+            border-radius: 50%;
+            display: none;
+        }
+        .unread .unread-dot { display: block; }
+
         .noti-main { flex: 1; }
         .noti-title { font-weight: 700; color: #1e293b; margin-bottom: 4px; font-size: 1rem; }
         .noti-msg { color: #64748b; font-size: 0.9rem; line-height: 1.5; margin-bottom: 8px; }
         .noti-time { font-size: 0.75rem; color: #94a3b8; }
 
-        /* 액션 버튼 */
         .noti-actions { display: flex; gap: 8px; margin-left: 12px; }
         .btn-icon { 
             border: none; background: #f8fafc; color: #64748b; 
@@ -63,11 +77,21 @@
         .btn-icon:hover { background: #e2e8f0; color: #0f172a; }
         .btn-delete:hover { background: #fee2e2; color: #ef4444; }
 
-        /* 빈 화면 */
         .empty-box { 
             text-align: center; padding: 60px; background: white; border-radius: 16px; 
             border: 2px dashed #e2e8f0; color: #94a3b8;
         }
+
+        /* 관리자용 플로팅 버튼 */
+        .admin-floating-action { position: fixed; bottom: 40px; right: 40px; z-index: 1000; }
+        .btn-admin-send { 
+            background: #10b981; color: white; text-decoration: none; 
+            padding: 16px 24px; border-radius: 50px; font-weight: 700; 
+            font-size: 1rem; transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .btn-admin-send:hover { background: #059669; transform: translateY(-5px); }
     </style>
 </head>
 <body>
@@ -84,31 +108,53 @@
                 </div>
                 
                 <div id="notificationList">
-                    <div class="empty-box" th:text=#{notification.content.empty}>알림이 비어있습니다.</div>
+                    <div class="empty-box">알림을 불러오는 중...</div>
                 </div>
             </div>
         </main>
+
+        <th:block sec:authorize="hasRole('ADMIN')">
+            <div class="admin-floating-action">
+                <a th:href="@{/notifications/form}" class="btn-admin-send">
+                    <i>📢</i>
+                    <span>알림 발송</span>
+                </a>
+            </div>
+        </th:block>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/dist/stomp.min.js"></script>
     <script src="/js/notification.js"></script>
 
     <script th:inline="javascript">
-        document.addEventListener("DOMContentLoaded", function () {
-            // 초기 로드 (서버 세션/토큰을 사용하여 내 알림 조회)
-            loadMyNotifications();
+        // 서버에서 전달받은 현재 로그인한 사용자의 ID
+		const currentMemberId = /*[[${memberId}]]*/ null;
 
-            // 실시간 알림 이벤트 리스너 (notification.js에서 트리거한다고 가정)
+        document.addEventListener("DOMContentLoaded", function () {
+            if (currentMemberId) {
+                loadMyNotifications();
+            } else {
+                document.getElementById("notificationList").innerHTML = 
+                    '<div class="empty-box">로그인이 필요한 서비스입니다.</div>';
+            }
+
+            // 실시간 수신 이벤트 핸들러
             document.addEventListener("notification-received", function (e) {
-                prependNotification(e.detail);
+                const container = document.getElementById("notificationList");
+                const emptyBox = container.querySelector('.empty-box');
+                if(emptyBox) emptyBox.remove();
+                container.prepend(createNotiElement(e.detail));
             });
         });
 
-        // 내 알림 목록 불러오기 (API 주소에서 ID 제거 - 서버가 토큰에서 식별)
+        // 1. 알림 목록 조회
         function loadMyNotifications() {
-            fetch('/api/notifications/me') // 관습에 따라 'me' 혹은 세션 기반 주소 사용
-                .then(res => res.json())
+            fetch(`/api/notifications/${currentMemberId}`) 
+                .then(res => {
+                    if (!res.ok) throw new Error("데이터 로드 실패");
+                    return res.json();
+                })
                 .then(data => {
                     const container = document.getElementById("notificationList");
                     container.innerHTML = "";
@@ -122,16 +168,24 @@
                         container.appendChild(createNotiElement(noti));
                     });
                 })
-                .catch(err => console.error("알림 로드 실패:", err));
+                .catch(err => {
+                    console.error("오류:", err);
+                    document.getElementById("notificationList").innerHTML = 
+                        '<div class="empty-box">알림을 불러오지 못했습니다.</div>';
+                });
         }
 
+        // 2. 알림 아이템 HTML 생성 (아이콘 위 점 포함)
         function createNotiElement(noti) {
             const item = document.createElement("div");
             const isUnread = noti.isRead === 'N';
             item.className = `noti-item ${isUnread ? 'unread' : ''}`;
             
             item.innerHTML = `
-                <div class="noti-icon">${getIcon(noti.notiType)}</div>
+                <div class="noti-icon-wrapper">
+                    <div class="noti-icon">${getIcon(noti.notiType)}</div>
+                    <div class="unread-dot"></div>
+                </div>
                 <div class="noti-main">
                     <div class="noti-title">${getTitle(noti.notiType)}</div>
                     <p class="noti-msg">${escapeHtml(noti.message)}</p>
@@ -145,35 +199,54 @@
             return item;
         }
 
-        // --- 기타 유틸리티 함수 (기존 코드와 동일) ---
+        // 3. 읽음 처리
         function markAsRead(id, btn) {
             fetch(`/api/notifications/${id}/read`, { method: 'PATCH' })
-                .then(() => {
-                    const card = btn.closest('.noti-item');
-                    card.classList.remove('unread');
-                    btn.remove();
-                    if(typeof refreshNotiBadge === 'function') refreshNotiBadge();
+                .then(res => {
+                    if(res.ok) {
+                        const card = btn.closest('.noti-item');
+                        card.classList.remove('unread'); // 점이 사라지고 배경색이 변경됨
+                        btn.remove(); // '읽음' 버튼 제거
+                        if(typeof updateNotificationBadge === 'function') updateNotificationBadge();
+                    }
                 });
         }
 
+        // 4. 삭제 처리
         function deleteNoti(id, btn) {
-            if(!confirm('삭제하시겠습니까?')) return;
+            if(!confirm('알림을 삭제하시겠습니까?')) return;
             fetch(`/api/notifications/${id}`, { method: 'DELETE' })
-                .then(() => btn.closest('.noti-item').remove());
+                .then(res => {
+                    if(res.ok) {
+                        btn.closest('.noti-item').remove();
+                        const container = document.getElementById("notificationList");
+                        if(container.children.length === 0) {
+                            container.innerHTML = '<div class="empty-box">새로운 알림이 없습니다.</div>';
+                        }
+                    }
+                });
         }
 
+        // 유틸리티 함수
         function getIcon(type) {
-            const icons = { 'SYSTEM': '⚙️', 'COMMENT': '💬', 'LIKE': '❤️', 'RENTAL': '🚲' };
+            const icons = { 'SYSTEM': '⚙️', 'COMMENT': '💬', 'LIKE': '❤️', 'RENTAL': '🚲', 'BOARD': '📢' };
             return icons[type] || '🔔';
         }
 
         function getTitle(type) {
-            const titles = { 'SYSTEM': '시스템 메시지', 'COMMENT': '새 댓글', 'LIKE': '좋아요', 'RENTAL': '대여/반납 안내' };
+            const titles = { 'SYSTEM': '시스템 메시지', 'COMMENT': '새 댓글', 'LIKE': '좋아요', 'RENTAL': '대여/반납 안내', 'BOARD': '공지사항' };
             return titles[type] || '알림';
         }
 
-        function formatDate(d) { return new Date(d).toLocaleString('ko-KR', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }); }
-        function escapeHtml(s) { return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+        function formatDate(d) { 
+            const date = new Date(d);
+            return date.toLocaleString('ko-KR', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }); 
+        }
+
+        function escapeHtml(s) { 
+            if(!s) return "";
+            return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); 
+        }
     </script>
 </body>
 </html>

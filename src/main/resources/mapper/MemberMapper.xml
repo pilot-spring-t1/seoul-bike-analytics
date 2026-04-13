@@ -34,6 +34,11 @@
             <if test="dto.role != null and dto.role != ''">AND ROLE = #{dto.role}</if>
         </where>
     </select>
+    
+    <select id="selectAllMembers" resultType="com.metanet.seoulbike.member.model.Member">
+	    SELECT MEMBER_ID as "memberId", LOGIN_ID as "loginId", NAME as "name"
+	    FROM MEMBER
+	</select>
 
     <select id="selectMemberByLoginId" resultType="com.metanet.seoulbike.member.model.Member">
         SELECT MEMBER_ID as "memberId", LOGIN_ID as "loginId", PASSWORD as "password", NAME as "name", 
