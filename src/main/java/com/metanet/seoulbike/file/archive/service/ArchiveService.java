@@ -26,7 +26,7 @@ public class ArchiveService {
     private final ArchiveMapper archiveMapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public ArchiveDto createArchive(MultipartFile file, String archiveTitle, String archiveDesc, String uploaderId) {
+    public ArchiveDto uploadArchive(MultipartFile file, String archiveTitle, String archiveDesc, String uploaderId) {
         if (file == null || file.isEmpty()) return null;
 
         String orgName = file.getOriginalFilename();
@@ -83,7 +83,7 @@ public class ArchiveService {
     }
 
     @Transactional(readOnly = true)
-    public ArchiveDto getArchive(Long archiveId) {
+    public ArchiveDto getArchiveById(Long archiveId) {
         ArchiveDto dto = archiveMapper.selectArchiveById(archiveId);
         if (dto == null) {
             throw new RuntimeException("아카이브를 찾을 수 없습니다. ID: " + archiveId);

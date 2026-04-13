@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그 상세 정보 | 시스템 관리</title>
+    <title th:text="#{logview.page.title}">로그 상세 정보 | 시스템 관리</title>
     
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
@@ -18,11 +18,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; overflow: hidden; }
-
-        .notice {
-			border-top: 2px solid rgba(255,255,255,0.12);
-			margin-top: 4px;
-		}
         
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
         header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -64,47 +59,50 @@
         
         <main class="container">
             <div class="detail-header">
-                <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;">
+                <h3 class="subtitle-dark-blue-font" style="font-size: 1.5rem;" th:text="#{logview.title}">
                     로그 상세 내역 <span class="subtitle-gray-font" th:text="'#' + ${log.logId}"></span>
                 </h3>
-                <a href="javascript:history.back();" class="btn-back">목록으로 돌아가기</a>
+                <a href="javascript:history.back();" class="btn-back" th:text="#{boardview.return}">목록으로 돌아가기</a>
             </div>
 
             <div class="card">
                 <div class="info-grid">
                     <div class="info-item">
-                        <div class="info-label">로그 레벨</div>
+                        <div class="info-label" th:text="#{log.tablecontent.level}">로그 레벨</div>
                         <div class="info-value">
                             <span th:classappend="${log.logLevel == 'ERROR' ? 'badge badge-error' : 'badge badge-info'}" 
                                   th:text="${log.logLevel}"></span>
                         </div>
                     </div>
                     <div class="info-item">
-                        <div class="info-label">발생 일시</div>
+                        <div class="info-label" th:text="#{log.tablecontent.time}">발생 일시</div>
                         <div class="info-value" th:text="${#temporals.format(log.logDate, 'yyyy-MM-dd HH:mm:ss')}"></div>
                     </div>
                     <div class="info-item">
-                        <div class="info-label">요청 URI</div>
+                        <div class="info-label" th:text="#{log.search.requesturi}">요청 URI</div>
                         <div class="info-value" style="color: #3b82f6;" th:text="${log.requestUri}"></div>
                     </div>
                     <div class="info-item">
-                        <div class="info-label">HTTP 메서드</div>
+                        <div class="info-label" th:text="#{logview.httpmethod}">HTTP 메서드</div>
                         <div class="info-value"><b th:text="${log.httpMethod}"></b></div>
                     </div>
                     <div class="info-item">
-                        <div class="info-label">사용자 ID</div>
-                        <div class="info-value" th:text="${log.loginId ?: '(비로그인)'}"></div>
+                        <div class="info-label" th:text="#{log.search.userid}">사용자 ID</div>
+                        <div class="info-value">
+	                        <span th:if="${log.loginId != null}" th:text="${log.loginId}"></span>
+	                        <span th:unless="${log.loginId != null}" th:text="#{logview.userid.nologin}"></span>
+	                    </div>
                     </div>
                     <div class="info-item">
-                        <div class="info-label">접속 IP</div>
+                        <div class="info-label" th:text="#{log.tablecontent.ip}">접속 IP</div>
                         <div class="info-value" th:text="${log.accessIp}"></div>
                     </div>
                     <div class="info-item">
-                        <div class="info-label">호출 메서드</div>
+                        <div class="info-label" th:text="#{logview.callmethod}">호출 메서드</div>
                         <div class="info-value" th:text="${log.methodName}"></div>
                     </div>
                     <div class="info-item">
-                        <div class="info-label">소요 시간</div>
+                        <div class="info-label" th:text="#{log.tablecontent.timerequired}">소요 시간</div>
                         <div class="info-value">
                             <span th:text="${log.executionTime} + ' ms'"
                                   th:style="${log.executionTime > 1000 ? 'color: #ef4444; font-weight: bold;' : ''}"></span>
@@ -113,14 +111,16 @@
                 </div>
 
                 <div class="data-section">
-                    <div class="data-label">📥 요청 파라미터 (Parameter Data)</div>
-                    <div class="code-block" th:text="${log.parameterData ?: '데이터가 없습니다.'}"></div>
+                    <div class="data-label" th:text="#{logview.requestparam}">📥 요청 파라미터 (Parameter Data)</div>
+                    <div class="code-block"><span th:if="${log.parameterData != null}" th:text="${log.parameterData}"></span><span th:unless="${log.parameterData != null}" th:text="#{logview.requestparam.empty}"></span></div>
                 </div>
 
                 <div class="data-section" th:if="${log.logLevel == 'ERROR'}">
-                    <div class="data-label" style="color: #ef4444;">⚠ 에러 로그 (Error Message)</div>
-                    <div class="code-block" style="border-left: 4px solid #ef4444;" 
-                         th:text="${log.errorMsg ?: '상세 에러 내용이 없습니다.'}"></div>
+                    <div class="data-label" style="color: #ef4444;" th:text="#{logview.errorlog}">⚠ 에러 로그 (Error Message)</div>
+                    <div class="code-block" style="border-left:4px solid red;">
+	                    <span th:if="${log.errorMsg != null}" th:text="${log.errorMsg}"></span>
+	                    <span th:unless="${log.errorMsg != null}" th:text="#{logview.errorlog.empty}"></span>
+	                </div>
                 </div>
             </div>
         </main>

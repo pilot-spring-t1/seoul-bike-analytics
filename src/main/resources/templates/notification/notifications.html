@@ -6,6 +6,10 @@
     <meta charset="UTF-8">
     <title th:text=#{notification.pagetitle}>알림 센터 | SEOUL BIKE</title>
     
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<script src="/js/notification.js"></script>
+	
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/color.css}">
     <link rel="stylesheet" th:href="@{/css/fonts.css}">
@@ -16,7 +20,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
         body { display: flex; height: 100vh; background-color: #f8fafc; overflow: hidden; }
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
-        header { height: 64px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; border-bottom: 1px solid #e2e8f0; }
+        header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 10; }
         
         /* 알림 컨테이너 */
         .container { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
@@ -94,7 +98,8 @@
         .btn-admin-send:hover { background: #059669; transform: translateY(-5px); }
     </style>
 </head>
-<body>
+<body class="bg">
+	<input type="hidden" id="memberId" th:value="${memberId}">
 
     <div th:replace="~{fragment/sidebar :: sidebar('notifications')}"></div>
 
@@ -108,7 +113,7 @@
                 </div>
                 
                 <div id="notificationList">
-                    <div class="empty-box">알림을 불러오는 중...</div>
+                    <div class="empty-box" th:text="#{notification.loading}">알림을 불러오는 중...</div>
                 </div>
             </div>
         </main>
@@ -117,7 +122,7 @@
             <div class="admin-floating-action">
                 <a th:href="@{/notifications/form}" class="btn-admin-send">
                     <i>📢</i>
-                    <span>알림 발송</span>
+                    <span th:text="#{notification.send}">알림 발송</span>
                 </a>
             </div>
         </th:block>
@@ -128,6 +133,23 @@
     <script src="/js/notification.js"></script>
 
     <script th:inline="javascript">
+    	const i18n = {
+    loginRequired: /*[[#{notification.loginRequired}]]*/ '로그인이 필요한 서비스입니다.',
+    empty: /*[[#{notification.empty}]]*/ '새로운 알림이 없습니다.',
+    loadFail: /*[[#{notification.loadFail}]]*/ '알림을 불러오지 못했습니다.',
+    loadDataFail: /*[[#{notification.loadDataFail}]]*/ '데이터 로드 실패',
+
+    read: /*[[#{notification.button.read}]]*/ '읽음',
+    delete: /*[[#{notification.button.delete}]]*/ '삭제',
+    confirmDelete: /*[[#{notification.confirm.delete}]]*/ '알림을 삭제하시겠습니까?',
+
+    typeSystem: /*[[#{notification.type.system}]]*/ '시스템 메시지',
+    typeComment: /*[[#{notification.type.comment}]]*/ '새 댓글',
+    typeLike: /*[[#{notification.type.like}]]*/ '좋아요',
+    typeRental: /*[[#{notification.type.rental}]]*/ '대여/반납 안내',
+    typeBoard: /*[[#{notification.type.board}]]*/ '공지사항',
+    typeDefault: /*[[#{notification.type.default}]]*/ '알림'
+};
         // 서버에서 전달받은 현재 로그인한 사용자의 ID
 		const currentMemberId = /*[[${memberId}]]*/ null;
 
@@ -135,16 +157,18 @@
             if (currentMemberId) {
                 loadMyNotifications();
             } else {
-                document.getElementById("notificationList").innerHTML = 
-                    '<div class="empty-box">로그인이 필요한 서비스입니다.</div>';
+                document.getElementById("notificationList").innerHTML =
+    `<div class="empty-box">${i18n.loginRequired}</div>`;
             }
 
             // 실시간 수신 이벤트 핸들러
             document.addEventListener("notification-received", function (e) {
+            	const noti = { ...e.detail, isRead: e.detail.isRead ?? 'N' };
                 const container = document.getElementById("notificationList");
                 const emptyBox = container.querySelector('.empty-box');
                 if(emptyBox) emptyBox.remove();
-                container.prepend(createNotiElement(e.detail));
+                //container.prepend(createNotiElement(e.detail));
+                container.prepend(createNotiElement(noti)); 
             });
         });
 
@@ -152,7 +176,7 @@
         function loadMyNotifications() {
             fetch(`/api/notifications/${currentMemberId}`) 
                 .then(res => {
-                    if (!res.ok) throw new Error("데이터 로드 실패");
+                    if (!res.ok) throw new Error(i18n.loadDataFail);
                     return res.json();
                 })
                 .then(data => {
@@ -160,7 +184,7 @@
                     container.innerHTML = "";
 
                     if (!data || data.length === 0) {
-                        container.innerHTML = '<div class="empty-box">새로운 알림이 없습니다.</div>';
+                        container.innerHTML = `<div class="empty-box">${i18n.empty}</div>`;
                         return;
                     }
 
@@ -170,8 +194,8 @@
                 })
                 .catch(err => {
                     console.error("오류:", err);
-                    document.getElementById("notificationList").innerHTML = 
-                        '<div class="empty-box">알림을 불러오지 못했습니다.</div>';
+                    document.getElementById("notificationList").innerHTML =
+    `<div class="empty-box">${i18n.loadFail}</div>`;
                 });
         }
 
@@ -192,8 +216,8 @@
                     <div class="noti-time">${formatDate(noti.createdAt)}</div>
                 </div>
                 <div class="noti-actions">
-                    ${isUnread ? `<button class="btn-icon" onclick="markAsRead(${noti.notiId}, this)">읽음</button>` : ''}
-                    <button class="btn-icon btn-delete" onclick="deleteNoti(${noti.notiId}, this)">삭제</button>
+                    ${isUnread ? `<button class="btn-icon" onclick="markAsRead(${noti.notiId}, this)">${i18n.read}</button>` : ''}
+<button class="btn-icon btn-delete" onclick="deleteNoti(${noti.notiId}, this)">${i18n.delete}</button>
                 </div>
             `;
             return item;
@@ -207,6 +231,7 @@
                         const card = btn.closest('.noti-item');
                         card.classList.remove('unread'); // 점이 사라지고 배경색이 변경됨
                         btn.remove(); // '읽음' 버튼 제거
+                        refreshUnreadCount(currentMemberId);
                         if(typeof updateNotificationBadge === 'function') updateNotificationBadge();
                     }
                 });
@@ -214,15 +239,16 @@
 
         // 4. 삭제 처리
         function deleteNoti(id, btn) {
-            if(!confirm('알림을 삭제하시겠습니까?')) return;
+            if (!confirm(i18n.confirmDelete)) return;
             fetch(`/api/notifications/${id}`, { method: 'DELETE' })
                 .then(res => {
                     if(res.ok) {
                         btn.closest('.noti-item').remove();
                         const container = document.getElementById("notificationList");
                         if(container.children.length === 0) {
-                            container.innerHTML = '<div class="empty-box">새로운 알림이 없습니다.</div>';
+                            container.innerHTML = `<div class="empty-box">${i18n.empty}</div>`;
                         }
+                        refreshUnreadCount(currentMemberId);
                     }
                 });
         }
@@ -234,19 +260,53 @@
         }
 
         function getTitle(type) {
-            const titles = { 'SYSTEM': '시스템 메시지', 'COMMENT': '새 댓글', 'LIKE': '좋아요', 'RENTAL': '대여/반납 안내', 'BOARD': '공지사항' };
-            return titles[type] || '알림';
-        }
+    const titles = {
+        'SYSTEM': i18n.typeSystem,
+        'COMMENT': i18n.typeComment,
+        'LIKE': i18n.typeLike,
+        'RENTAL': i18n.typeRental,
+        'BOARD': i18n.typeBoard
+    };
+    return titles[type] || i18n.typeDefault;
+}
 
-        function formatDate(d) { 
-            const date = new Date(d);
-            return date.toLocaleString('ko-KR', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }); 
-        }
+        const currentLocale = /*[[${#locale.language}]]*/ 'ko';
+
+function formatDate(d) {
+    const date = new Date(d);
+    const locale = currentLocale === 'en' ? 'en-US' : 'ko-KR';
+    return date.toLocaleString(locale, {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
 
         function escapeHtml(s) { 
             if(!s) return "";
             return s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); 
         }
+        
+        function refreshUnreadCount(memberId) {
+    fetch(`/api/notifications/${memberId}/unread-count`)
+        .then(res => {
+            if (!res.ok) throw new Error("안 읽은 알림 수 조회 실패");
+            return res.json();
+        })
+        .then(count => {
+            unreadCount = count;
+            updateBadge();
+        })
+        .catch(err => console.error(err));
+}
+        
+        document.addEventListener("DOMContentLoaded", function () {
+    const memberId = document.getElementById("memberId")?.value;
+    if (memberId) {
+        initNotification(memberId);
+    }
+});
     </script>
 </body>
 </html>

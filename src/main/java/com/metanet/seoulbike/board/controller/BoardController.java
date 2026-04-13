@@ -31,9 +31,8 @@ public class BoardController {
     private final BoardService boardService;
     private final FileAttachmentService fileAttachmentService;
 
-    // 1. 목록 조회
     @GetMapping({ "/notice", "/suggestion" })
-    public String getList(@ModelAttribute("searchDto") BoardSearchDto searchDto, Model model, Authentication auth, HttpServletRequest request) {
+    public String list(@ModelAttribute("searchDto") BoardSearchDto searchDto, Model model, Authentication auth, HttpServletRequest request) {
         Map<String, ?> flashMap = RequestContextUtils.getInputFlashMap(request);
         if (flashMap != null && flashMap.containsKey("searchDto")) {
             searchDto = (BoardSearchDto) flashMap.get("searchDto");
@@ -49,45 +48,59 @@ public class BoardController {
         model.addAttribute("searchDto", searchDto);
         model.addAttribute("activeMenu", category.toLowerCase());
         
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         
         return category.equals("NOTICE") ? "boards/board-notice" : "boards/board-suggestion";
     }
 
-    // 2. 상세 조회
     @GetMapping("/view/{id}")
-    public String getDetail(@PathVariable Long id, Authentication auth, Model model) {
+    public String view(@PathVariable Long id, Authentication auth, Model model) {
         boardService.increaseViewCount(id);
         model.addAttribute("board", boardService.getBoard(id));
-        
-        // [수정] 서비스 메서드명 getFileListByBoardId 와 일치시킴
         model.addAttribute("files", fileAttachmentService.getFileListByBoardId(id));
-        
         model.addAttribute("comments", boardService.getCommentList(id));
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
+        
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "boards/board-view";
     }
 
-    // 3. 등록 폼
-    @GetMapping("/create")
+    @GetMapping("/write")
     @PreAuthorize("isAuthenticated()")
-    public String createForm(@RequestParam(defaultValue = "SUGGESTION") String category, Model model, Authentication auth) {
+    public String writeForm(@RequestParam(defaultValue = "SUGGESTION") String category, Model model, Authentication auth) {
         if ("NOTICE".equals(category) && !auth.getAuthorities().toString().contains("ROLE_ADMIN")) {
             return "redirect:/boards/suggestion";
         }
         BoardDto dto = new BoardDto();
         dto.setCategory(category);
         model.addAttribute("board", dto);
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
+        
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "boards/board-write";
     }
 
-    // 4. 등록 실행
-    @PostMapping("/create")
+    @PostMapping("/register")
     @PreAuthorize("isAuthenticated()")
-    public String create(@ModelAttribute BoardDto dto,
-                         @RequestParam(value = "uploadFiles", required = false) List<MultipartFile> files, 
-                         Authentication auth) {
+    public String register(@ModelAttribute BoardDto dto,
+                           @RequestParam(value = "uploadFiles", required = false) List<MultipartFile> files, 
+                           Authentication auth) {
         if ("NOTICE".equals(dto.getCategory()) && !auth.getAuthorities().toString().contains("ROLE_ADMIN")) {
             return "redirect:/error/403";
         }
@@ -97,29 +110,31 @@ public class BoardController {
         return "redirect:/boards/" + dto.getCategory().toLowerCase();
     }
 
-    // 5. 수정 폼
-    @GetMapping("/update/{id}")
+    @GetMapping("/edit/{id}")
     @PreAuthorize("hasRole('ADMIN') or @boardService.getBoard(#id).writer == authentication.name")
-    public String updateForm(@PathVariable("id") Long id, Model model, Authentication auth) {
+    public String editForm(@PathVariable("id") Long id, Model model, Authentication auth) {
         model.addAttribute("board", boardService.getBoard(id));
-        
-        // [수정] 서비스 메서드명 getFileListByBoardId 와 일치시킴
         model.addAttribute("files", fileAttachmentService.getFileListByBoardId(id));
         
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "boards/board-write";
     }
 
-    // 6. 수정 실행
-    @PostMapping("/update")
+    @PostMapping("/modify")
     @PreAuthorize("hasRole('ADMIN') or @boardService.getBoard(#dto.boardId).writer == authentication.name")
-    public String update(@ModelAttribute BoardDto dto,
+    public String modify(@ModelAttribute BoardDto dto,
                          @RequestParam(value = "deleteFileIds", required = false) List<Long> deleteFileIds,
                          @RequestParam(value = "uploadFiles", required = false) List<MultipartFile> files, 
                          Authentication auth, RedirectAttributes rttr) {
 
         if (deleteFileIds != null) {
-            deleteFileIds.forEach(fileAttachmentService::deleteFile);
+            deleteFileIds.forEach(fileId -> fileAttachmentService.deleteFile(fileId));
         }
         boardService.updateBoard(dto);
         handleFileUpload(files, dto.getBoardId(), auth.getName());
@@ -128,7 +143,6 @@ public class BoardController {
         return "redirect:/boards/view/" + dto.getBoardId();
     }
 
-    // 7. 삭제 실행
     @PostMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN') or @boardService.getBoard(#id).writer == authentication.name")
     public String delete(@PathVariable("id") Long id, @RequestParam("category") String category) {
@@ -136,10 +150,9 @@ public class BoardController {
         return "redirect:/boards/" + category.toLowerCase();
     }
 
-    // 8. 게시글 추천
     @PostMapping("/like/{id}")
     @PreAuthorize("isAuthenticated()")
-    public String createLike(@PathVariable("id") Long id, Authentication auth, RedirectAttributes rttr) {
+    public String like(@PathVariable("id") Long id, Authentication auth, RedirectAttributes rttr) {
         Member member = (Member) auth.getPrincipal();
         boolean isLiked = boardService.createLike(id, member.getMemberId());
         
@@ -151,21 +164,19 @@ public class BoardController {
         return "redirect:/boards/view/" + id;
     }
 
-    // --- 댓글 CRUD ---
-
-    @PostMapping("/comment/create")
+    @PostMapping("/comment/register")
     @PreAuthorize("isAuthenticated()")
-    public String createComment(@RequestParam("boardId") Long boardId, 
-                                @RequestParam(value = "parentId", required = false) Long parentId,
-                                @RequestParam("content") String content, 
-                                Authentication auth) {
+    public String registerComment(@RequestParam("boardId") Long boardId, 
+                                  @RequestParam(value = "parentId", required = false) Long parentId,
+                                  @RequestParam("content") String content, 
+                                  Authentication auth) {
         boardService.createComment(boardId, parentId, content, auth.getName());
         return "redirect:/boards/view/" + boardId;
     }
 
-    @PostMapping("/comment/update")
+    @PostMapping("/comment/modify")
     @PreAuthorize("hasRole('ADMIN') or @boardService.getCommentWriter(#commentId) == authentication.name")
-    public String updateComment(@RequestParam("commentId") Long commentId, 
+    public String modifyComment(@RequestParam("commentId") Long commentId, 
                                 @RequestParam("boardId") Long boardId, 
                                 @RequestParam("content") String content) {
         boardService.updateComment(commentId, content);
@@ -184,7 +195,6 @@ public class BoardController {
         if (files != null) {
             files.stream().filter(f -> !f.isEmpty()).forEach(file -> {
                 try {
-                    // 서비스 메서드명 uploadFile 유지 확인
                     fileAttachmentService.uploadFile(file, boardId, writer);
                 } catch (Exception e) {
                     log.error("파일 업로드 실패: {}", file.getOriginalFilename());

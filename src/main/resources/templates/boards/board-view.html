@@ -7,6 +7,9 @@
 <title th:text="#{boardview.page.title}">콘텐츠 상세 보기 | 운영 센터</title>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<script src="/js/notification.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
 <style>
@@ -14,7 +17,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
     body { display: flex; height: 100vh; background-color: #f1f5f9; color: #1e293b; overflow: hidden; }
     #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-    header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
+    header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 10; }
     .container { flex: 1; padding: 40px; overflow-y: auto; }
     
     /* 콘텐츠 카드 스타일 */
@@ -73,50 +76,52 @@
     .bg-orange { background: #fff7ed; color: #ea580c; }
 </style>
 </head>
-<body>
+<body class="bg">
+	<input type="hidden" id="memberId" th:value="${memberId}">
     <div th:replace="~{fragment/sidebar :: sidebar(${board.category.toLowerCase()})}"></div>
 
     <div id="main-content">
-        <header>
-            <span sec:authentication="name" style="font-size:0.9rem; color:#64748b; font-weight:600;">사용자</span>
-        </header>
+        <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
         
         <main class="container">
             <div class="content-card">
                 <div class="view-header">
                     <span th:class="|view-category ${board.category == 'NOTICE' ? 'bg-blue' : 'bg-orange'}|" 
-                          th:text="${board.category == 'NOTICE' ? '공지사항' : '건의사항'}">구분</span>
+                          th:text="${board.category == 'NOTICE'} ? #{dashboard.menu.notice} : #{dashboard.menu.suggestion}">구분</span>
                     <div class="title-row">
                         <h1 th:text="${board.title}">제목</h1>
                         <div class="header-actions">
                             <div th:if="${not #lists.isEmpty(files)}" style="position:relative;">
-                                <button type="button" class="btn-file-toggle" onclick="$('#fileDropdown').toggleClass('show')">📎 첨부파일 <span th:text="${#lists.size(files)}">0</span></button>
+                                <button type="button" class="btn-file-toggle" onclick="$('#fileDropdown').toggleClass('show')">
+                                <span th:text="#{boardview.file}">📎 첨부파일 </span><span th:text="${#lists.size(files)}">0</span></button>
                                 <div class="file-dropdown" id="fileDropdown">
                                     <a th:each="file : ${files}" th:href="@{/attachments/download/{id}(id=${file.fileId})}" th:text="${file.fileName}">파일명</a>
                                 </div>
                             </div>
                             <form th:action="@{/boards/like/{id}(id=${board.boardId})}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-outline" style="color:#3b82f6; border-color:#3b82f6; padding:8px 16px;">👍 추천 <span th:text="${board.likeCount}">0</span></button>
+                                <button type="submit" class="btn btn-outline" style="color:#3b82f6; border-color:#3b82f6; padding:8px 16px;">
+                                <span><span th:text="#{boardview.recommend}">👍 추천 </span><span th:text="${board.likeCount}">0</span></span>
+                                </button>
                             </form>
                         </div>
                     </div>
                     <div class="meta-info">
-                        <span><b>작성자</b> [[${board.writer}]]</span>
-                        <span><b>작성일</b> [[${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}]]</span>
-                        <span><b>조회수</b> [[${board.viewCount}]]</span>
+                        <span><b th:text="#{board.notice.author}">작성자</b> [[${board.writer}]]</span>
+                        <span><b th:text="#{board.notice.date}">작성일</b> [[${#temporals.format(board.createdAt, 'yyyy-MM-dd HH:mm')}]]</span>
+                        <span><b th:text="#{board.notice.views}">조회수</b> [[${board.viewCount}]]</span>
                     </div>
                 </div>
 
                 <div class="view-body" th:utext="${board.content}">본문</div>
 
                 <div class="comment-area">
-                    <div style="font-weight:800; margin-bottom:20px;">💬 댓글 <span style="color:#10b981;">[[${#lists.size(comments)}]]</span></div>
+                    <div style="font-weight:800; margin-bottom:20px;" th:text="#{boardview.comment}">💬 댓글 <span style="color:#10b981;">[[${#lists.size(comments)}]]</span></div>
                     
                     <form th:action="@{/boards/comment/register}" method="post" class="comment-form-box">
                         <input type="hidden" name="boardId" th:value="${board.boardId}">
-                        <textarea name="content" placeholder="댓글을 입력해 주세요." required></textarea>
+                        <textarea name="content" th:placeholder="#{boardview.comment.placeholder}" required></textarea>
                         <div style="display:flex; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:12px;">
-                            <button type="submit" class="btn btn-emerald">댓글 등록</button>
+                            <button type="submit" class="btn btn-emerald" th:text="#{boardview.comment.register}">댓글 등록</button>
                         </div>
                     </form>
                     
@@ -128,14 +133,15 @@
                                 <span class="comment-date" th:text="${#temporals.format(comment.createdAt, 'yyyy-MM-dd HH:mm')}">시간</span>
                                 
                                 <div class="comment-actions">
-                                    <button th:if="${comment.depth == 0}" type="button" class="btn-text" th:onclick="|toggleReplyForm('${comment.commentId}')|">답글</button>
+                                    <button th:if="${comment.depth == 0}" type="button" class="btn-text" th:onclick="|toggleReplyForm('${comment.commentId}')|"
+                                    th:text="#{boardview.comment.reply}">답글</button>
                                     
                                     <th:block th:if="${comment.writer == #authentication.name}">
-                                        <button type="button" class="btn-text" th:onclick="|toggleEditForm('${comment.commentId}')|">수정</button>
-                                        <form th:action="@{/boards/comment/delete}" method="post" onsubmit="return confirm('댓글을 삭제할까요?');" style="display:inline-flex;">
+                                        <button type="button" class="btn-text" th:onclick="|toggleEditForm('${comment.commentId}')|" th:text="#{boardview.comment.modify}">수정</button>
+                                        <form th:action="@{/boards/comment/delete}" method="post" th:onsubmit="|return confirm('#{boardview.comment.delete.confirm}');|" style="display:inline-flex;">
                                             <input type="hidden" name="boardId" th:value="${board.boardId}">
                                             <input type="hidden" name="commentId" th:value="${comment.commentId}">
-                                            <button type="submit" class="btn-text delete">삭제</button>
+                                            <button type="submit" class="btn-text delete" th:text="#{boardview.comment.delete}">삭제</button>
                                         </form>
                                     </th:block>
                                 </div>
@@ -149,8 +155,9 @@
                                     <input type="hidden" name="commentId" th:value="${comment.commentId}">
                                     <textarea name="content" th:text="${comment.content}" required></textarea>
                                     <div style="display:flex; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:12px;">
-                                        <button type="button" class="btn btn-outline" style="margin-right:8px; padding:6px 16px;" th:onclick="|toggleEditForm('${comment.commentId}')|">취소</button>
-                                        <button type="submit" class="btn btn-blue" style="padding:6px 16px;">수정 완료</button>
+                                        <button type="button" class="btn btn-outline" style="margin-right:8px; padding:6px 16px;"
+                                        th:onclick="|toggleEditForm('${comment.commentId}')|" th:text="#{boardwrite.cancel}">취소</button>
+                                        <button type="submit" class="btn btn-blue" style="padding:6px 16px;" th:text="#{boardview.modify.complete}">수정 완료</button>
                                     </div>
                                 </form>
                             </div>
@@ -159,10 +166,11 @@
                                 <form th:action="@{/boards/comment/register}" method="post" class="comment-form-box">
                                     <input type="hidden" name="boardId" th:value="${board.boardId}">
                                     <input type="hidden" name="parentId" th:value="${comment.commentId}">
-                                    <textarea name="content" th:placeholder="|${comment.writer}님께 답글 쓰기...|" required></textarea>
+                                    <textarea name="content" th:placeholder="#{boardview.comment.reply.placeholder(${comment.writer})}" required></textarea>
                                     <div style="display:flex; justify-content:flex-end; border-top:1px solid #f1f5f9; padding-top:12px;">
-                                        <button type="button" class="btn btn-outline" style="margin-right:8px; padding:6px 16px;" th:onclick="|toggleReplyForm('${comment.commentId}')|">취소</button>
-                                        <button type="submit" class="btn btn-emerald" style="padding:6px 16px;">답글 등록</button>
+                                        <button type="button" class="btn btn-outline" style="margin-right:8px; padding:6px 16px;"
+                                        th:onclick="|toggleReplyForm('${comment.commentId}')|" th:text="#{boardview.comment.reply.cancel}">취소</button>
+                                        <button type="submit" class="btn btn-emerald" style="padding:6px 16px;" th:text="#{boardview.comment.reply.register}">답글 등록</button>
                                     </div>
                                 </form>
                             </div>
@@ -172,15 +180,15 @@
             </div>
 
             <div class="button-group">
-                <a th:href="@{/boards/{category}(category=${#strings.toLowerCase(board.category)})}" class="btn btn-outline">목록으로 돌아가기</a>
+                <a th:href="@{/boards/{category}(category=${#strings.toLowerCase(board.category)})}" class="btn btn-outline" th:text="#{boardview.return}">목록으로 돌아가기</a>
                 
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <th:block th:if="${board.writer == #authentication.name or #authorization.expression('hasRole(''ADMIN'')')}">
-                        <form th:action="@{/boards/delete/{id}(id=${board.boardId})}" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');" style="display:inline-flex;">
+                        <form th:action="@{/boards/delete/{id}(id=${board.boardId})}" method="post" th:onsubmit="|return confirm('#{boardview.delete.confirm}');|" style="display:inline-flex;">
                             <input type="hidden" name="category" th:value="${board.category}">
                             <button type="submit" class="btn btn-danger" th:text="#{boardview.delete}">삭제하기</button>
                         </form>
-                        <a th:href="@{/boards/edit/{id}(id=${board.boardId})}" class="btn btn-blue">수정하기</a>
+                        <a th:href="@{/boards/edit/{id}(id=${board.boardId})}" class="btn btn-blue" th:text="#{boardview.modify}">수정하기</a>
                     </th:block>
                 </div>
             </div>
@@ -227,6 +235,12 @@
                 eForm.find('textarea').focus();
             }
         }
+        document.addEventListener("DOMContentLoaded", function () {
+    const memberId = document.getElementById("memberId")?.value;
+    if (memberId) {
+        initNotification(memberId);
+    }
+});
     </script>
 </body>
 </html>

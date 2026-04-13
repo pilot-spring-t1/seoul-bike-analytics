@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.metanet.seoulbike.dashboard.dto.DashboardSummaryDto;
 import com.metanet.seoulbike.dashboard.service.BikeAnalysisService;
+import com.metanet.seoulbike.member.model.Member;
 
 @Controller
 @RequestMapping("/dashboard")
@@ -20,14 +21,22 @@ public class DashboardController {
     @GetMapping
     public String dashboardPage(Model model, Authentication auth) {
         DashboardSummaryDto summary = bikeAnalysisService.getDashboardSummary();
-        model.addAttribute("summary", summary);
-        model.addAttribute("userName", "관리자");
-        model.addAttribute("memberId", 1L); // 테스트용
-        if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+		/*
+		 * model.addAttribute("memberId", 1L); // 테스트용 model.addAttribute("summary",
+		 * summary); model.addAttribute("userName", "관리자");
+		 * model.addAttribute("memberId", 1L); // 테스트용 if (auth != null) {
+		 * model.addAttribute("userName", auth.getName()); } else {
+		 * model.addAttribute("userName", "Guest"); }
+		 */
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }
+
+        model.addAttribute("summary", summary);
         return "dashboard/user-dashboard";
     }
 
@@ -38,24 +47,45 @@ public class DashboardController {
 
     @GetMapping("/detail")
     public String detailAnalysisPage(Model model, Authentication auth) {
-    	model.addAttribute("memberId", 1L); // 테스트용
-    	if (auth != null) {
-            model.addAttribute("userName", auth.getName());
+		/*
+		 * model.addAttribute("memberId", 1L); // 테스트용 if (auth != null) {
+		 * model.addAttribute("userName", auth.getName()); } else {
+		 * model.addAttribute("userName", "Guest"); }
+		 */
+    	if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
         } else {
             model.addAttribute("userName", "Guest");
         }
+    	
         return "analysis/detail";
     }
 
     @GetMapping("/notifications")
-    public String notificationPage(Model model) {
-    	model.addAttribute("memberId", 1L); // 테스트용
+    public String notificationPage(Model model, Authentication auth) {
+
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
+
         return "notification/notifications";
     }
     
     @GetMapping("/admin/notifications")
-    public String adminNotificationPage(Model model) {
-    	model.addAttribute("memberId", 1L); // 테스트용
+    public String adminNotificationPage(Model model, Authentication auth) {
+    	if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         return "notification/admin-notifications";
     }
 
@@ -70,17 +100,14 @@ public class DashboardController {
     }
     
     // 사용자 dashboard
-    @GetMapping("/websocket-test")
-    public String websocketTestPage() {
-        return "notification/websocket-test";
-    }
-    
-    @GetMapping("/memory-monitor")
-    public String memoryMonitorPage() {
-        return "notification/memory-monitor";
-    }
-    @GetMapping("/monthly-usage")
-    public String monthlyUsagePage() {
-        return "monthly-usage";
-    }
+	/*
+	 * @GetMapping("/websocket-test") public String websocketTestPage() { return
+	 * "notification/websocket-test"; }
+	 * 
+	 * @GetMapping("/memory-monitor") public String memoryMonitorPage() { return
+	 * "notification/memory-monitor"; }
+	 * 
+	 * @GetMapping("/monthly-usage") public String monthlyUsagePage() { return
+	 * "monthly-usage"; }
+	 */
 }

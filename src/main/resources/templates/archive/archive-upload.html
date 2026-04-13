@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아카이브 자료 등록 | 운영 센터</title>
+    <title th:text="#{archivewrite.page.title}">아카이브 자료 등록 | 운영 센터</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     
@@ -44,44 +44,40 @@
 <div th:replace="~{fragment/sidebar :: sidebar('archive')}"></div>
 
 <div id="main-content">
-    <header>
-        <span style="font-size: 0.9rem; color: #64748b;">
-            <span sec:authentication="name">사용자</span> 님 접속 중
-        </span>
-    </header>
+    <div th:replace="~{fragment/header :: header('dashboard.welcome', ${userName})}"></div>
 
     <main class="container">
         <div class="form-card">
-            <h1 class="form-title">아카이브 자료 등록</h1>
+            <h1 class="form-title" th:text="#{archivewrite.title}">아카이브 자료 등록</h1>
             
             <form th:action="@{/archive/register}" method="post" enctype="multipart/form-data">
                 
                 <div class="form-group">
-                    <label class="form-label">자료 제목</label>
-                    <input type="text" name="archiveTitle" class="form-control" placeholder="목록에 표시될 제목을 입력하세요" required>
+                    <label class="form-label" th:text="#{archivewrite.writetitle}">자료 제목</label>
+                    <input type="text" name="archiveTitle" class="form-control" th:placeholder="#{archivewrite.writetitle.placeholder}" required>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">상세 설명</label>
-                    <textarea name="archiveDesc" class="form-control" placeholder="자료에 대한 상세 설명을 입력하세요"></textarea>
+                    <label class="form-label" th:text="#{archivewrite.description}">상세 설명</label>
+                    <textarea name="archiveDesc" class="form-control" th:placeholder="#{archivewrite.description.placeholder}"></textarea>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">파일 첨부</label>
+                    <label class="form-label" th:text="#{archivewrite.file}">파일 첨부</label>
                     <div class="file-drop-area" onclick="document.getElementById('fileInput').click()">
-                        <p style="font-size: 1rem; font-weight: 500;">📁 파일을 클릭하여 선택하세요</p>
-                        <p style="font-size: 0.8rem; margin-top: 8px; opacity: 0.7;">(최대 업로드 용량은 시스템 설정을 따릅니다)</p>
+                        <p style="font-size: 1rem; font-weight: 500;" th:text="#{archivewrite.file.description}">📁 파일을 클릭하여 선택하세요</p>
+                        <p style="font-size: 0.8rem; margin-top: 8px; opacity: 0.7;" th:text="#{archivewrite.file.subdescription}">(최대 업로드 용량은 시스템 설정을 따릅니다)</p>
                         <input type="file" id="fileInput" name="uploadFile" style="display:none" onchange="updateList(this)" required>
                     </div>
                     <div id="fileListDisplay" class="file-list-info"></div>
                 </div>
                 
                 <div class="button-group">
-                    <button type="button" class="btn btn-outline" 
+                    <button type="button" class="btn btn-outline" th:text="#{archivewrite.cancel}"
                             th:onclick="|location.href='@{/archive/list}'|">
                         취소
                     </button>
-                    <button type="submit" class="btn btn-black">
+                    <button type="submit" class="btn btn-black" th:text="#{archivewrite.register}">
                         등록 완료
                     </button>
                 </div>
@@ -90,7 +86,8 @@
     </main>
 </div>
 
-<script>
+<script th:inline="javascript">
+	const MSG_SELECTED_FILE = /*[[#{archivewrite.file.selected}]]*/ "선택된 파일";
     function updateList(input) {
         const display = document.getElementById('fileListDisplay');
         if (input.files.length > 0) {
@@ -104,7 +101,7 @@
                 fileSizeStr = (fileSizeRaw / 1024 / 1024).toFixed(2) + " MB";
             }
             
-            display.innerHTML = `<span>✔ 선택된 파일: ${fileName} (${fileSizeStr})</span>`;
+            display.innerHTML = `<span>✔ ${MSG_SELECTED_FILE}: ${fileName} (${fileSizeStr})</span>`;
         } else {
             display.innerHTML = "";
         }

@@ -14,6 +14,7 @@ import org.springframework.security.core.Authentication;
 import com.metanet.seoulbike.common.log.dto.LogDto;
 import com.metanet.seoulbike.common.log.dto.LogSearchDto;
 import com.metanet.seoulbike.common.log.service.LogService;
+import com.metanet.seoulbike.member.model.Member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,30 +26,42 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/logs")
 public class LogController {
 
-    private final LogService logService;
+	private final LogService logService;
 
-    /**
-     * 로그 목록 조회 (getList)
-     */
-    @GetMapping("/list")
-    public String getList(@ModelAttribute("searchDto") LogSearchDto searchDto, Authentication auth, Model model) {
-        Map<String, Object> result = logService.getLogList(searchDto);
-        model.addAllAttributes(result);
-        
-        // 일관된 userName 처리 (삼항 연산자로 깔끔하게)
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
-        
-        return "logs/log-list";
-    }
+	/**
+	 * 시스템 로그 목록 조회 및 검색 URI
+	 */
+	@GetMapping("/list")
+	public String list(@ModelAttribute("searchDto") LogSearchDto searchDto, Authentication auth, Model model) {
+	    // 서비스 호출 한 번으로 모든 계산된 데이터를 가져옴
+	    Map<String, Object> result = logService.getLogList(searchDto);
+	    
+	    model.addAllAttributes(result);
+	    if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
+	    return "logs/log-list";
+	}
 
-    /**
-     * 로그 상세 조회 (getDetail)
-     */
-    @GetMapping("/view/{id}")
-    public String getDetail(@PathVariable("id") Long logId, Authentication auth, Model model) {
-        model.addAttribute("log", logService.getLogById(logId)); // getLogById -> getLog
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
-
-        return "logs/log-view";
-    }
+	/**
+	 * 로그 상세 정보 보기 (parameterData 및 errorMsg)
+	 */
+	@GetMapping("/view/{id}")
+	public String view(@PathVariable("id") Long logId, Authentication auth, Model model) {
+		// selectLogById 호출
+		LogDto logDetail = logService.getLogById(logId);
+		model.addAttribute("log", logDetail);
+		if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
+		return "logs/log-view"; // 로그 상세 페이지 (상세 팝업 등)
+	}
 }

@@ -27,6 +27,7 @@ import com.metanet.seoulbike.file.archive.dto.ArchiveDto;
 import com.metanet.seoulbike.file.archive.dto.ArchiveSearchDto;
 import com.metanet.seoulbike.file.archive.service.ArchiveService;
 import com.metanet.seoulbike.file.service.FileStorageService;
+import com.metanet.seoulbike.member.model.Member;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,36 +42,52 @@ public class ArchiveController {
     private final FileStorageService fileStorageService;
 
     /**
-     * 1. 목록 조회 (getList)
+     * 1. 아카이브 목록 조회 (검색 및 페이징 포함)
      */
     @GetMapping("/list")
-    public String getList(@ModelAttribute("searchDto") ArchiveSearchDto searchDto, Model model, Authentication auth) {
+    public String list(@ModelAttribute("searchDto") ArchiveSearchDto searchDto, Model model, Authentication auth) {
+        // 서비스에서 검색 조건에 맞는 리스트와 전체 페이지 수를 Map으로 반환한다고 가정
         Map<String, Object> result = archiveService.getArchiveList(searchDto);
         
         model.addAttribute("list", result.get("list"));
         model.addAttribute("totalPages", result.get("totalPages"));
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
+        // searchDto는 @ModelAttribute에 의해 자동으로 모델에 담김
+		/*
+		 * if (auth != null) { model.addAttribute("userName", auth.getName()); } else {
+		 * model.addAttribute("userName", "Guest"); }
+		 */
+        if (auth != null && auth.getPrincipal() instanceof Member) {
+            Member member = (Member) auth.getPrincipal();
+            model.addAttribute("userName", member.getLoginId());
+            model.addAttribute("memberId", member.getMemberId());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
         
         return "archive/archive-list";
     }
 
     /**
-     * 2. 등록 폼 (createForm)
+     * 2. 아카이브 자료 등록 폼 (관리자 전용)
      */
-    @GetMapping("/create")
+    @GetMapping("/upload-form")
     @PreAuthorize("hasRole('ADMIN')")
-    public String createForm(Model model, Authentication auth) {
+    public String registerForm(Model model, Authentication auth) {
         model.addAttribute("archive", new ArchiveDto());
-        model.addAttribute("userName", (auth != null) ? auth.getName() : "Guest");
-        return "archive/archive-write";
+        if (auth != null) {
+            model.addAttribute("userName", auth.getName());
+        } else {
+            model.addAttribute("userName", "Guest");
+        }
+        return "archive/archive-upload";
     }
 
     /**
-     * 3. 등록 실행 (upload)
+     * 3. 아카이브 자료 등록 실행 (관리자 전용)
      */
     @PostMapping("/upload")
     @PreAuthorize("hasRole('ADMIN')")
-    public String upload(
+    public String register(
             @RequestParam("uploadFile") MultipartFile file,
             @RequestParam("archiveTitle") String archiveTitle,
             @RequestParam(value = "archiveDesc", required = false) String archiveDesc,
@@ -80,11 +97,10 @@ public class ArchiveController {
         try {
             if (file.isEmpty()) {
                 rttr.addFlashAttribute("error", "파일은 필수입니다.");
-                return "redirect:/archive/create";
+                return "redirect:/archive/write";
             }
             
-            // 서비스 메서드명을 createArchive 혹은 uploadArchive 중 선택한 규칙에 맞춥니다.
-            archiveService.createArchive(file, archiveTitle, archiveDesc, auth.getName());
+            archiveService.uploadArchive(file, archiveTitle, archiveDesc, auth.getName());
             rttr.addFlashAttribute("message", "자료가 성공적으로 등록되었습니다.");
             
         } catch (Exception e) {
@@ -96,19 +112,23 @@ public class ArchiveController {
     }
 
     /**
-     * 4. 파일 다운로드 (download)
+     * 4. 아카이브 파일 다운로드 (인증된 사용자 공통)
      */
     @GetMapping("/download/{archiveId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Resource> download(@PathVariable Long archiveId) {
         try {
-            // 상세 조회는 get으로 통일
-            ArchiveDto dto = archiveService.getArchive(archiveId);
+            ArchiveDto dto = archiveService.getArchiveById(archiveId);
             Resource resource = fileStorageService.loadFile(dto.getFilePath());
 
+            // 파일명 브라우저 인코딩 처리
             String encodedFileName = UriUtils.encode(dto.getFileName(), StandardCharsets.UTF_8);
+            
+            // 파일 Content-Type 추출
             String contentType = Files.probeContentType(Paths.get(dto.getFilePath()));
-            if (contentType == null) contentType = "application/octet-stream";
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
 
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
@@ -123,7 +143,7 @@ public class ArchiveController {
     }
 
     /**
-     * 5. 삭제 실행 (delete)
+     * 5. 아카이브 자료 삭제 (관리자 전용)
      */
     @PostMapping("/delete/{archiveId}")
     @PreAuthorize("hasRole('ADMIN')")

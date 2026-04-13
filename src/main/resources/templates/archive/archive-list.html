@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="#{archive.page.title}">시스템 아카이브 | 운영 센터</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+	<script src="/js/notification.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <style>
@@ -13,7 +16,7 @@
         body { display: flex; height: 100vh; background-color: #f8fafc; color: #1e293b; overflow: hidden; }
 
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
-        header { height: 64px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; }
+        header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 10; }
         
         .container { flex: 1; padding: 40px; overflow-y: auto; }
         .action-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
@@ -75,7 +78,8 @@
     </style>
 </head>
 
-<body>
+<body class="bg-admin">
+<input type="hidden" id="memberId" th:value="${memberId}">
 <div th:replace="~{fragment/sidebar :: sidebar('archive')}"></div>
 
 <div id="main-content">
@@ -84,11 +88,11 @@
 
     <main class="container">
         <div class="action-row">
-            <h1 class="page-title" th:text=#{archive.title}>SYSTEM ARCHIVE</h1>
+            <h1 class="page-title" th:text="#{archive.title}">SYSTEM ARCHIVE</h1>
 
             <form th:action="@{/archive/list}" method="get" class="search-group">
                 <input type="text" name="keyword" th:value="${searchDto != null ? searchDto.keyword : ''}" th:placeholder="#{archive.search.placeholder}">
-                <button type="submit" class="btn-black" th:text=#{archive.search}>검색</button>
+                <button type="submit" class="btn-black" th:text="#{archive.search}">검색</button>
             </form>
         </div>
 
@@ -97,22 +101,22 @@
                 <thead>
                 <tr>
                     <th width="80">ID</th>
-                    <th width="100" th:text=#{archive.tablecontent.category}>구분</th>
-                    <th th:text=#{archive.tablecontent.category}>자료 제목 및 상세 설명</th>
-                    <th width="120" th:text=#{archive.tablecontent.date}>등록일</th>
-                    <th width="120" style="text-align: center;" th:text=#{archive.tablecontent.filesize}>파일 용량</th>
-                    <th width="180" style="text-align: center;" th:text=#{archive.tablecontent.action}>액션</th>
+                    <th width="120" th:text="#{archive.tablecontent.category}">구분</th>
+                    <th th:text="#{archive.tablecontent.title}">자료 제목 및 상세 설명</th>
+                    <th width="180" th:text="#{archive.tablecontent.date}">등록일</th>
+                    <th width="120" style="text-align: center;" th:text="#{archive.tablecontent.filesize}">파일 용량</th>
+                    <th width="180" style="text-align: center;" th:text="#{archive.tablecontent.action}">액션</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:if="${#lists.isEmpty(list)}">
-                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 60px 0;" th:text=#{archive.tablecontent.empty}>
+                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 60px 0;" th:text="#{archive.tablecontent.empty}">
                         조회된 아카이브 자료가 없습니다.
                     </td>
                 </tr>
                 <tr th:each="file : ${list}">
                     <td th:text="${file.archiveId}"></td>
-                    <td><span class="badge-archive" th:text=#{archive.tablecontent.category.archive}>아카이브</span></td>
+                    <td><span class="badge-archive" th:text="#{archive.tablecontent.category.archive}">아카이브</span></td>
                     <td>
                         <div class="archive-title" th:text="${file.archiveTitle}"></div>
                         <div class="archive-desc" th:text="${file.archiveDesc}"></div>
@@ -130,7 +134,7 @@
                                   th:action="@{/archive/delete/{id}(id=${file.archiveId})}" 
                                   method="post" 
                                   th:onsubmit="|return confirm('#{archive.delete.confirm}');|">
-                                <button type="submit" class="btn-delete-sm" th:text=#{archive.delete}>삭제</button>
+                                <button type="submit" class="btn-delete-sm" th:text="#{archive.delete}">삭제</button>
                             </form>
                         </div>
                     </td>
@@ -156,5 +160,13 @@
         </div>
     </main>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const memberId = document.getElementById("memberId")?.value;
+    if (memberId) {
+        initNotification(memberId);
+    }
+});
+</script>
 </body>
 </html>
