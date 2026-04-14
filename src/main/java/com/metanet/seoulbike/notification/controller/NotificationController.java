@@ -28,7 +28,7 @@ public class NotificationController {
                      member.getName(), member.getMemberId());
         }
 
-        model.addAttribute("userName", member != null ? member.getName() : "Unknown");
+        model.addAttribute("userName", member != null ? member.getLoginId() : "Unknown");
         model.addAttribute("memberId", member != null ? member.getMemberId() : null); 
         
         return "notification/notifications";
@@ -44,7 +44,7 @@ public class NotificationController {
         log.info("=> [VIEW GET] /notifications/form 진입 - 관리자: {}", 
                  (member != null ? member.getName() : "Unknown"));
         
-        model.addAttribute("userName", member != null ? member.getName() : "Admin");
+        model.addAttribute("userName", member != null ? member.getLoginId() : "Admin");
         return "notification/notification-form";
     }
 }

@@ -9,11 +9,13 @@
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script src="/js/notification.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" th:href="@{/css/color.css}">
+    <link rel="stylesheet" th:href="@{/css/fonts.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <style>
         /* 사용자님의 소중한 CSS 그대로 유지 */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Pretendard', sans-serif; }
-        body { display: flex; height: 100vh; background-color: #f8fafc; color: #1e293b; overflow: hidden; }
+        body { display: flex; height: 100vh; overflow: hidden; }
         #main-content { flex-grow: 1; display: flex; flex-direction: column; min-width: 0; }
         header { height: 60px; background: white; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); z-index: 10; }
         .container { flex: 1; padding: 40px; overflow-y: auto; }
